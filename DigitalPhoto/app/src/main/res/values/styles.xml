@@ -12,6 +12,11 @@
         <item name="android:listDivider">@drawable/view_division</item>
     </style>
 
+    <!-- 主页面书架、书城、书单菜单样式 -->
+    <style name="MainToolbarTheme" parent="@style/BaseToolbarTheme">
+        <item name="android:width">60dip</item>
+    </style>
+
     <!-- 其他页面菜单样式 -->
     <style name="ToolbarTheme" parent="@style/BaseToolbarTheme">
     </style>

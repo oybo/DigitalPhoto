@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto" >
+
+    <item android:id="@+id/menu_local_file_look"
+          android:orderInCategory="100"
+          android:title="浏览模式"
+          app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/menu_local_file_choose"
+        android:orderInCategory="100"
+        android:title="格式选择"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/menu_local_file_upload_download"
+        android:orderInCategory="100"
+        android:title="上传下载"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/menu_local_file_image_switch"
+        android:orderInCategory="100"
+        android:title="图片格式转换"
+        app:showAsAction="always"/>
+
+</menu>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="90dip"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="2dip"
+        android:layout_marginRight="5dip"
+        android:background="@drawable/sj_ham"
+        android:orientation="vertical"
+        android:paddingTop="10dip">
+
+        <TextView
+            android:id="@+id/view_choose_mode_catalog"
+            android:layout_width="match_parent"
+            android:layout_height="45dip"
+            android:background="@drawable/simple_bg_selector"
+            android:gravity="center"
+            android:text="目录模式"
+            android:textColor="#333333"
+            android:textSize="14sp"/>
+
+        <View style="@style/view_line"/>
+
+        <TextView
+            android:id="@+id/view_choose_mode_dir"
+            android:layout_width="match_parent"
+            android:layout_height="45dip"
+            android:background="@drawable/simple_bg_selector"
+            android:gravity="center"
+            android:text="浏览模式"
+            android:textColor="#333333"
+            android:textSize="14sp"/>
+    </LinearLayout>
+
+</LinearLayout>
