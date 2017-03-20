@@ -25,7 +25,7 @@ public class ChooseImagePresenter {
         mModel = new ChooseImageModel();
     }
 
-    public void getImages() {
+    public void loadImages() {
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             ToastUtil.showToast(mView._getActivity(), "暂无外部存储");
             return;
@@ -42,7 +42,6 @@ public class ChooseImagePresenter {
                 mView.callbackImages(result);
             }
         }.execute();
-
     }
 
     public List<ImageBean> subGroupOfImage(HashMap<String, List<String>> images) {

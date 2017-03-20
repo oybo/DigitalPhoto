@@ -30,7 +30,7 @@ public class WelcomeActivity extends Activity {
     }
 
     private void goMain() {
-        startActivity(new Intent(this, MainActivity.class));
+        startActivity(new Intent(this, ConnectWifiActivity.class));
         finish();
     }
 

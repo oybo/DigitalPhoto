@@ -71,7 +71,7 @@ public class LocalFileFragment extends Fragment implements Toolbar.OnMenuItemCli
         mAdapter = new ChooseImageAdapter(getActivity());
         mRecyclerView.setAdapter(mAdapter);
         mPresenter = new ChooseImagePresenter(this);
-        mPresenter.getImages();
+        mPresenter.loadImages();
 
         mAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
