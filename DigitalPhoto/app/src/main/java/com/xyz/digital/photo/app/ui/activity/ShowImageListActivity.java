@@ -11,6 +11,7 @@ import android.view.View;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.ChildImageAdapter;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
+import com.xyz.digital.photo.app.bean.MediaFileBean;
 import com.xyz.digital.photo.app.ui.BaseActivity;
 
 import java.io.Serializable;
@@ -40,7 +41,7 @@ public class ShowImageListActivity extends BaseActivity {
     }
 
     private void initData() {
-        final List<String> images = getIntent().getStringArrayListExtra("data");
+        final List<MediaFileBean> images = (List<MediaFileBean>) getIntent().getSerializableExtra("data");
 
         mAdapter = new ChildImageAdapter(this);
         mAdapter.appendToList(images);

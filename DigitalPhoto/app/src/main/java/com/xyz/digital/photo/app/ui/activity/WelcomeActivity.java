@@ -3,8 +3,8 @@ package com.xyz.digital.photo.app.ui.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.view.View;
 
 import com.xyz.digital.photo.app.R;
 
@@ -12,26 +12,19 @@ import com.xyz.digital.photo.app.R;
  * Created by O on 2017/3/18.
  */
 
-public class WelcomeActivity extends Activity {
-
-    private static Handler mHandler = new Handler();
+public class WelcomeActivity extends Activity implements View.OnClickListener {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
 
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                goMain();
-            }
-        }, 1000);
+        findViewById(R.id.welcome_begin_employ_bt).setOnClickListener(this);
     }
 
-    private void goMain() {
-        startActivity(new Intent(this, ConnectWifiActivity.class));
+    @Override
+    public void onClick(View view) {
+        startActivity(new Intent(this, LoginActivity.class));
         finish();
     }
-
 }

@@ -3,7 +3,8 @@ package com.xyz.digital.photo.app.mvp.presenter;
 import android.os.AsyncTask;
 import android.os.Environment;
 
-import com.xyz.digital.photo.app.bean.ImageBean;
+import com.xyz.digital.photo.app.bean.FolderBean;
+import com.xyz.digital.photo.app.bean.MediaFileBean;
 import com.xyz.digital.photo.app.mvp.model.ChooseImageModel;
 import com.xyz.digital.photo.app.mvp.view.ChooseImageView;
 import com.xyz.digital.photo.app.util.ToastUtil;
@@ -25,27 +26,27 @@ public class ChooseImagePresenter {
         mModel = new ChooseImageModel();
     }
 
-    public void loadImages() {
+    public void loadMediaFiles() {
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             ToastUtil.showToast(mView._getActivity(), "暂无外部存储");
             return;
         }
-        new AsyncTask<Void, Void, HashMap<String, List<String>>>() {
+        new AsyncTask<Void, Void, HashMap<String, List<MediaFileBean>>>() {
             @Override
-            protected HashMap<String, List<String>> doInBackground(Void... voids) {
-                return mModel.getImages(mView._getActivity());
+            protected HashMap<String, List<MediaFileBean>> doInBackground(Void... voids) {
+                return mModel.getAllMediaFiles(mView._getActivity());
             }
 
             @Override
-            protected void onPostExecute(HashMap<String, List<String>> result) {
+            protected void onPostExecute(HashMap<String, List<MediaFileBean>> result) {
                 super.onPostExecute(result);
-                mView.callbackImages(result);
+                mView.callbackMedias(result);
             }
         }.execute();
     }
 
-    public List<ImageBean> subGroupOfImage(HashMap<String, List<String>> images) {
-        return mModel.subGroupOfImage(images);
+    public List<FolderBean> subGroupOfMedia(HashMap<String, List<MediaFileBean>> images) {
+        return mModel.subGroupOfMedia(images);
     }
 
 }

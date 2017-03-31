@@ -10,115 +10,133 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.ui.BaseActivity;
-import com.xyz.digital.photo.app.ui.fragment.LocalFileFragment;
-import com.xyz.digital.photo.app.ui.fragment.PhotoFileFragment;
-import com.xyz.digital.photo.app.ui.fragment.PhotoSetFragment;
-import com.xyz.digital.photo.app.ui.fragment.RemoteControlFragment;
+import com.xyz.digital.photo.app.ui.fragment.DeviceFragment;
+import com.xyz.digital.photo.app.ui.fragment.PhotoFragment;
+import com.xyz.digital.photo.app.ui.fragment.SetFragment;
 import butterknife.Bind;
+import butterknife.ButterKnife;
 
 public class MainActivity extends BaseActivity {
 
-    private static final String TAG_INDEX = "index";
+    private static final String TAB_INDEX = "tab_index";
+    private static final String FRAGMENT_INDEX = "fragment_index";
 
     @Bind(R.id.fragment_container) RelativeLayout fragmentContainer;
-    @Bind(R.id.main_local_file_bt) Button mainLocalFileBt;
-    @Bind(R.id.main_digital_file_bt) Button mainDigitalFileBt;
-    @Bind(R.id.main_digital_set_bt) Button mainDigitalSetBt;
-    @Bind(R.id.main_remote_control_bt) Button mainRemoteControlBt;
+    @Bind(R.id.main_device_bt) Button mainDeviceBt;
+    @Bind(R.id.main_photo_bt) Button mainPhotoBt;
+    @Bind(R.id.main_scan_bt) Button mainScanBt;
+    @Bind(R.id.main_telecontrol_bt) Button mainTelecontrolBt;
+    @Bind(R.id.main_set_bt) Button mainSetBt;
 
-    private int index = -1, currentTabIndex = -1;
+    private int oldTabIndex = -1, oldFragmentIndex = -1;
     private Button[] mTabs;
     private Fragment[] fragments;
-    private LocalFileFragment mLocalFileFragment;
-    private PhotoFileFragment mPhotoFileFragment;
-    private PhotoSetFragment mPhotoSetFragment;
-    private RemoteControlFragment mRemoteControlFragment;
+    /**    设备      */
+    private DeviceFragment mDeviceFragment;
+    /**    相册      */
+    private PhotoFragment mPhotoFragment;
+    /**    设置      */
+    private SetFragment mSetFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
         initView();
         initFragment(savedInstanceState);
     }
 
     private void initView() {
-        mTabs = new Button[] { mainLocalFileBt, mainDigitalFileBt, mainDigitalSetBt, mainRemoteControlBt };
+        mTabs = new Button[]{ mainDeviceBt, mainPhotoBt, mainScanBt, mainTelecontrolBt, mainSetBt };
     }
 
     private void initFragment(Bundle savedInstanceState) {
+        int tab_index = 0;
+        int fgrament_index = 0;
         if (savedInstanceState != null) {
             FragmentManager fm = getSupportFragmentManager();
-            mLocalFileFragment = (LocalFileFragment) fm.findFragmentByTag("LocalFileFragment");
-            mPhotoFileFragment = (PhotoFileFragment) fm.findFragmentByTag("PhotoFileFragment");
-            mPhotoSetFragment = (PhotoSetFragment) fm.findFragmentByTag("PhotoSetFragment");
-            mRemoteControlFragment = (RemoteControlFragment) fm.findFragmentByTag("RemoteControlFragment");
+            mDeviceFragment = (DeviceFragment) fm.findFragmentByTag(DeviceFragment.class.getName());
+            mPhotoFragment = (PhotoFragment) fm.findFragmentByTag(PhotoFragment.class.getName());
+            mSetFragment = (SetFragment) fm.findFragmentByTag(SetFragment.class.getName());
 
-            index = savedInstanceState.getInt(TAG_INDEX);
+            tab_index = savedInstanceState.getInt(TAB_INDEX, 0);
+            fgrament_index = savedInstanceState.getInt(FRAGMENT_INDEX, 0);
         }
-        if (mLocalFileFragment == null) {
-            mLocalFileFragment = new LocalFileFragment();
+        if (mDeviceFragment == null) {
+            mDeviceFragment = new DeviceFragment();
         }
-        if (mPhotoFileFragment == null) {
-            mPhotoFileFragment = new PhotoFileFragment();
+        if (mPhotoFragment == null) {
+            mPhotoFragment = new PhotoFragment();
         }
-        if (mPhotoSetFragment == null) {
-            mPhotoSetFragment = new PhotoSetFragment();
-        }
-        if (mRemoteControlFragment == null) {
-            mRemoteControlFragment = new RemoteControlFragment();
+        if (mSetFragment == null) {
+            mSetFragment = new SetFragment();
         }
 
-        fragments = new Fragment[]{mLocalFileFragment, mPhotoFileFragment, mPhotoSetFragment, mRemoteControlFragment};
+        fragments = new Fragment[]{ mDeviceFragment, mPhotoFragment, mSetFragment };
 
-        if (index == -1) {
-            index = 0;
-        }
-        currentTab();
+        currentTab(tab_index);
+        currentFragment(fgrament_index);
     }
 
     public void onTabClicked(View view) {
-        mTabs = new Button[] { mainLocalFileBt, mainDigitalFileBt, mainDigitalSetBt, mainRemoteControlBt };
-        if (view == mainLocalFileBt) {
-            index = 0;
-        } else if (view== mainDigitalFileBt) {
-            index = 1;
-        } else if (view == mainDigitalSetBt) {
-            index = 2;
-        } else if (view == mainRemoteControlBt) {
-            index = 3;
+        if (view == mainDeviceBt) {
+            // 设备
+            currentTab(0);
+            currentFragment(0);
+        } else if (view == mainPhotoBt) {
+            // 相册
+            currentTab(1);
+            currentFragment(1);
+        } else if (view == mainScanBt) {
+            // 扫描
+            currentTab(2);
+        } else if (view == mainTelecontrolBt) {
+            // 遥控
+            currentTab(3);
+        } else if (view == mainSetBt) {
+            // 设置
+            currentTab(4);
+            currentFragment(2);
         }
-        currentTab();
     }
 
     /**
-     * 初始化Fragment切换
+     * Tab按钮切换
      */
-    private void currentTab() {
-        if (currentTabIndex != index) {
-            FragmentTransaction trx = getSupportFragmentManager().beginTransaction();
-            if (currentTabIndex >= 0) {
-                trx.hide(fragments[currentTabIndex]);
-            }
-            if (!fragments[index].isAdded()) {
-                trx.add(R.id.fragment_container, fragments[index]);
-            }
-            trx.show(fragments[index]).commit();
-        }
-        if (currentTabIndex >= 0) {
-            mTabs[currentTabIndex].setSelected(false);
+    private void currentTab(int index) {
+        if (oldTabIndex >= 0) {
+            mTabs[oldTabIndex].setSelected(false);
         }
         // 把当前tab设为选中状态
         mTabs[index].setSelected(true);
-        currentTabIndex = index;
+        oldTabIndex = index;
+    }
+
+    /**
+     * Fragment切换
+     */
+    private void currentFragment(int index) {
+        if (oldFragmentIndex != index) {
+            FragmentTransaction trx = getSupportFragmentManager().beginTransaction();
+            if (oldFragmentIndex >= 0) {
+                trx.hide(fragments[oldFragmentIndex]);
+            }
+            if (!fragments[index].isAdded()) {
+                trx.add(R.id.fragment_container, fragments[index], fragments[index].getClass().getName());
+            }
+            trx.show(fragments[index]).commit();
+        }
+        oldFragmentIndex = index;
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
 //		super.onSaveInstanceState(outState);
         // 存储下标
-        outState.putInt(TAG_INDEX, index);
+        outState.putInt(TAB_INDEX, oldTabIndex);
+        outState.putInt(FRAGMENT_INDEX, oldFragmentIndex);
     }
 
     @Override

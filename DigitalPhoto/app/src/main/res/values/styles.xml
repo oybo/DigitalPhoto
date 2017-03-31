@@ -44,7 +44,7 @@
 
     <style name="WelcomeTheme" parent="@android:style/Theme.Light.NoTitleBar.Fullscreen">
         <!-- 将splash图片设置在这，这样这张图片取代白屏 -->
-        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowBackground">@color/welcome_bg_color</item>
         <item name="android:windowFullscreen">true</item>
     </style>
 

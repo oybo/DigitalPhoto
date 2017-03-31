@@ -17,8 +17,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.actions.actcommunication.AcEventListener;
+import com.actions.actcommunication.ActCommunication;
 import com.xyz.digital.photo.app.R;
-import com.xyz.digital.photo.app.adapter.WifiDirectAdapter;
+import com.xyz.digital.photo.app.adapter.WifiDeviceAdapter;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.receiver.WifiDirectBroadcastReceiver;
 import com.xyz.digital.photo.app.ui.BaseActivity;
@@ -46,7 +48,7 @@ public class ConnectWifiActivity extends BaseActivity {
     private WifiP2pInfo info;
 
     private List peers = new ArrayList();
-    private WifiDirectAdapter mAdapter;
+    private WifiDeviceAdapter mAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -62,7 +64,7 @@ public class ConnectWifiActivity extends BaseActivity {
     private void initView() {
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new WifiDirectAdapter(this);
+        mAdapter = new WifiDeviceAdapter(this);
         mRecyclerView.setAdapter(mAdapter);
 
         mAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
@@ -129,6 +131,61 @@ public class ConnectWifiActivity extends BaseActivity {
 
         // 初始化peers并开始搜索
         discoverPeers();
+
+        new Thread(){
+            @Override
+            public void run() {
+                super.run();
+                String ip = "192.168.1.1";
+//               int value = ActCommunication.getInstance().connect(ip);
+                int value = ActCommunication.getInstance().sendKeyUp();
+                String ss = "";
+            }
+        }.start();
+
+        ActCommunication.getInstance().setEventListener(new AcEventListener() {
+            @Override
+            public void onDeviceConnected() {
+
+            }
+
+            @Override
+            public void onDeviceDisconnect() {
+
+            }
+
+            @Override
+            public void onRecvVolume(int volume) {
+
+            }
+
+            @Override
+            public void onRecvTotalTime(int timeMs) {
+
+            }
+
+            @Override
+            public void onRecvCurrentTime(int timeMs) {
+
+            }
+
+            @Override
+            public void onRecvPlayerStatus(int status) {
+
+            }
+
+            @Override
+            public void onRecvPlaySequence(int seq) {
+
+            }
+
+            @Override
+            public void onRecvThumbnail(String url, byte[] data) {
+
+            }
+        });
+
+
     }
 
     /**

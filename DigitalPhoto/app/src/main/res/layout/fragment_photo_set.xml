@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.Toolbar
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/fragment_localfile_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        app:contentInsetLeft="0dp"
+        app:contentInsetStart="0dp"
+        app:theme="@style/ToolbarTheme"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1">
+
+        <TextView
+            android:layout_width="200dip"
+            android:layout_height="80dip"
+            android:layout_centerInParent="true"
+            android:background="@drawable/view_layout_bg"
+            android:gravity="center"
+            android:text="广告播放设置"
+            android:textColor="#000000"
+            android:textSize="20sp"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1">
+
+        <TextView
+            android:layout_width="200dip"
+            android:layout_height="80dip"
+            android:layout_centerInParent="true"
+            android:background="@drawable/view_layout_bg"
+            android:gravity="center"
+            android:text="系统参数设置"
+            android:textColor="#000000"
+            android:textSize="20sp"/>
+
+    </RelativeLayout>
+
+</LinearLayout>

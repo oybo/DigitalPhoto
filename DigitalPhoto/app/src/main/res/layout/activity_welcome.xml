@@ -2,12 +2,17 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/welcome_bg_color">
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <Button
+        android:id="@+id/welcome_begin_employ_bt"
+        android:layout_width="160dip"
+        android:layout_height="45dip"
         android:layout_centerInParent="true"
-        android:src="@mipmap/ic_launcher"/>
+        android:background="@drawable/select_welcom_begin_view"
+        android:text="立即使用"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"/>
 
 </RelativeLayout>

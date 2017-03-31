@@ -30,7 +30,7 @@
             android:paddingTop="2dip">
 
             <Button
-                android:id="@+id/main_local_file_bt"
+                android:id="@+id/main_device_bt"
                 android:layout_width="0dip"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -40,12 +40,27 @@
                 android:gravity="center"
                 android:onClick="onTabClicked"
                 android:paddingBottom="3dip"
-                android:text="本地文件"
+                android:text="设备"
                 android:textColor="@drawable/actionbar_txt_selector"
                 android:textSize="12sp"/>
 
             <Button
-                android:id="@+id/main_digital_file_bt"
+                android:id="@+id/main_photo_bt"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_weight="1"
+                android:background="@null"
+                android:clickable="true"
+                android:gravity="center"
+                android:onClick="onTabClicked"
+                android:paddingBottom="3dip"
+                android:text="相册"
+                android:textColor="@drawable/actionbar_txt_selector"
+                android:textSize="12sp"/>
+
+            <Button
+                android:id="@+id/main_scan_bt"
                 android:layout_width="0dip"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -54,12 +69,12 @@
                 android:gravity="center"
                 android:onClick="onTabClicked"
                 android:paddingBottom="3dip"
-                android:text="相框文件"
+                android:text="扫描"
                 android:textColor="@drawable/actionbar_txt_selector"
                 android:textSize="12sp"/>
 
             <Button
-                android:id="@+id/main_digital_set_bt"
+                android:id="@+id/main_telecontrol_bt"
                 android:layout_width="0dip"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -68,12 +83,12 @@
                 android:gravity="center"
                 android:onClick="onTabClicked"
                 android:paddingBottom="3dip"
-                android:text="相框设置"
+                android:text="遥控"
                 android:textColor="@drawable/actionbar_txt_selector"
                 android:textSize="12sp"/>
 
             <Button
-                android:id="@+id/main_remote_control_bt"
+                android:id="@+id/main_set_bt"
                 android:layout_width="0dip"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -82,7 +97,7 @@
                 android:gravity="center"
                 android:onClick="onTabClicked"
                 android:paddingBottom="3dip"
-                android:text="遥控器"
+                android:text="设置"
                 android:textColor="@drawable/actionbar_txt_selector"
                 android:textSize="12sp"/>
         </LinearLayout>

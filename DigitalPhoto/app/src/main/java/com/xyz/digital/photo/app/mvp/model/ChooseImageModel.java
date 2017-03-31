@@ -2,8 +2,9 @@ package com.xyz.digital.photo.app.mvp.model;
 
 import android.content.Context;
 
-import com.xyz.digital.photo.app.bean.ImageBean;
-import com.xyz.digital.photo.app.manager.ImageUtils;
+import com.xyz.digital.photo.app.bean.FolderBean;
+import com.xyz.digital.photo.app.bean.MediaFileBean;
+import com.xyz.digital.photo.app.manager.MultiMediaUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,8 +19,8 @@ public class ChooseImageModel {
 
     }
 
-    public HashMap<String, List<String>> getImages(Context context) {
-        return ImageUtils.getAllImages(context);
+    public HashMap<String, List<MediaFileBean>> getAllMediaFiles(Context context) {
+        return MultiMediaUtils.getAllMediaFiles(context);
     }
 
     /**
@@ -29,8 +30,8 @@ public class ChooseImageModel {
      * @param mGruopMap
      * @return
      */
-    public List<ImageBean> subGroupOfImage(HashMap<String, List<String>> mGruopMap){
-        return ImageUtils.subGroupOfImage(mGruopMap);
+    public List<FolderBean> subGroupOfMedia(HashMap<String, List<MediaFileBean>> mGruopMap){
+        return MultiMediaUtils.subGroupOfMedia(mGruopMap);
     }
 
 }
