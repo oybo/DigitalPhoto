@@ -1,5 +1,7 @@
 package com.xyz.digital.photo.app.bean;
 
+import com.xyz.digital.photo.app.mvp.Photo.PhotoContract;
+
 /**
  * GridView的每个item的数据对象
  *
@@ -20,7 +22,7 @@ public class FolderBean {
     private int imageCounts;
 
     // 类型
-    private Media_FILE_TYPE fileType;
+    private PhotoContract.MEDIA_FILE_TYPE fileType;
 
     public String getTopImagePath() {
         return topImagePath;
@@ -46,11 +48,11 @@ public class FolderBean {
         this.imageCounts = imageCounts;
     }
 
-    public Media_FILE_TYPE getFileType() {
+    public PhotoContract.MEDIA_FILE_TYPE getFileType() {
         return fileType;
     }
 
-    public void setFileType(Media_FILE_TYPE fileType) {
+    public void setFileType(PhotoContract.MEDIA_FILE_TYPE fileType) {
         this.fileType = fileType;
     }
 }

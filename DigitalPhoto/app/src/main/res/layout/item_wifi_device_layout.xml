@@ -5,13 +5,33 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/item_wifi_device_title_txt"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="50dip"
-        android:gravity="center"
-        android:text="a"
-        android:textColor="#000000"
-        android:textSize="16sp"/>
+        android:paddingLeft="10dip"
+        android:paddingRight="10dip">
+
+        <TextView
+            android:id="@+id/item_wifi_device_name_txt"
+            android:layout_width="100dip"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:singleLine="true"
+            android:text="一号机"
+            android:textColor="#666666"
+            android:textSize="14sp"/>
+
+        <TextView
+            android:id="@+id/item_wifi_device_address_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dip"
+            android:layout_toRightOf="@id/item_wifi_device_name_txt"
+            android:text="一号机"
+            android:textColor="#666666"
+            android:textSize="14sp"/>
+
+    </RelativeLayout>
 
 </LinearLayout>

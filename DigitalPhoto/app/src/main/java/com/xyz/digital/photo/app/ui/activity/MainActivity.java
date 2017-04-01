@@ -153,4 +153,10 @@ public class MainActivity extends BaseActivity {
     protected void onItemMenuSelected(MenuItem item) {
 
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        System.exit(0);
+    }
 }

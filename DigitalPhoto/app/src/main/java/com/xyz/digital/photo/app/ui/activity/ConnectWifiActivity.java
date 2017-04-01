@@ -1,9 +1,6 @@
 package com.xyz.digital.photo.app.ui.activity;
 
 import android.content.IntentFilter;
-import android.net.wifi.WpsInfo;
-import android.net.wifi.p2p.WifiP2pConfig;
-import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
@@ -15,20 +12,14 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
-
-import com.actions.actcommunication.AcEventListener;
-import com.actions.actcommunication.ActCommunication;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.WifiDeviceAdapter;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.receiver.WifiDirectBroadcastReceiver;
 import com.xyz.digital.photo.app.ui.BaseActivity;
-
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
@@ -131,61 +122,6 @@ public class ConnectWifiActivity extends BaseActivity {
 
         // 初始化peers并开始搜索
         discoverPeers();
-
-        new Thread(){
-            @Override
-            public void run() {
-                super.run();
-                String ip = "192.168.1.1";
-//               int value = ActCommunication.getInstance().connect(ip);
-                int value = ActCommunication.getInstance().sendKeyUp();
-                String ss = "";
-            }
-        }.start();
-
-        ActCommunication.getInstance().setEventListener(new AcEventListener() {
-            @Override
-            public void onDeviceConnected() {
-
-            }
-
-            @Override
-            public void onDeviceDisconnect() {
-
-            }
-
-            @Override
-            public void onRecvVolume(int volume) {
-
-            }
-
-            @Override
-            public void onRecvTotalTime(int timeMs) {
-
-            }
-
-            @Override
-            public void onRecvCurrentTime(int timeMs) {
-
-            }
-
-            @Override
-            public void onRecvPlayerStatus(int status) {
-
-            }
-
-            @Override
-            public void onRecvPlaySequence(int seq) {
-
-            }
-
-            @Override
-            public void onRecvThumbnail(String url, byte[] data) {
-
-            }
-        });
-
-
     }
 
     /**
@@ -204,24 +140,24 @@ public class ConnectWifiActivity extends BaseActivity {
     }
 
     private void connect(int pos) {
-        final WifiP2pDevice device = mAdapter.getItem(pos); //从peers列表中获取发现来的第一个设备
-        WifiP2pConfig config = new WifiP2pConfig();
-        config.deviceAddress = device.deviceAddress;
-        config.wps.setup = WpsInfo.PBC;
-
-        mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
-            @Override
-            public void onSuccess() {
-                // 连接成功
-                Toast.makeText(getApplicationContext(), "与设备" + device.deviceName + "连接成功", Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onFailure(int arg0) {
-                // 连接失败
-                Toast.makeText(getApplicationContext(), "与设备" + device.deviceName + "连接失败", Toast.LENGTH_LONG).show();
-            }
-        });
+//        final WifiP2pDevice device = mAdapter.getItem(pos); //从peers列表中获取发现来的第一个设备
+//        WifiP2pConfig config = new WifiP2pConfig();
+//        config.deviceAddress = device.deviceAddress;
+//        config.wps.setup = WpsInfo.PBC;
+//
+//        mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
+//            @Override
+//            public void onSuccess() {
+//                // 连接成功
+//                Toast.makeText(getApplicationContext(), "与设备" + device.deviceName + "连接成功", Toast.LENGTH_LONG).show();
+//            }
+//
+//            @Override
+//            public void onFailure(int arg0) {
+//                // 连接失败
+//                Toast.makeText(getApplicationContext(), "与设备" + device.deviceName + "连接失败", Toast.LENGTH_LONG).show();
+//            }
+//        });
     }
 
     /**    停止扫描      */

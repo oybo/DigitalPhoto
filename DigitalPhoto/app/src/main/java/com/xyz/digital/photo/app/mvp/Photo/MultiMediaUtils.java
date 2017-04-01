@@ -1,4 +1,4 @@
-package com.xyz.digital.photo.app.manager;
+package com.xyz.digital.photo.app.mvp.Photo;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -6,13 +6,10 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
-import android.os.Environment;
 import android.provider.MediaStore;
 
 import com.xyz.digital.photo.app.bean.FolderBean;
 import com.xyz.digital.photo.app.bean.MediaFileBean;
-import com.xyz.digital.photo.app.bean.Media_FILE_TYPE;
-import com.xyz.digital.photo.app.util.ToastUtil;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -28,33 +25,11 @@ import java.util.Map;
 public class MultiMediaUtils {
 
     /**
-     * 查询手机所有多媒体文件
-     * @param context
-     */
-    public static HashMap<String, List<MediaFileBean>> getAllMediaFiles(Context context) {
-        HashMap<String, List<MediaFileBean>> mGruopMap = new HashMap<String, List<MediaFileBean>>();
-
-        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            ToastUtil.showToast(context, "未发现外部存储设备");
-            return mGruopMap;
-        }
-
-        // 查询所有图片文件
-        getAllImages(context, mGruopMap);
-        // 查询所有音频文件
-        getAllAudios(context, mGruopMap);
-        // 查询所有视频文件
-        getAllVideos(context, mGruopMap);
-
-        return mGruopMap;
-    }
-
-    /**
      * 获取sd卡所有的图片文件
      * @param context
      * @return
      */
-    private static void getAllImages(Context context, HashMap<String, List<MediaFileBean>> mGruopMap) {
+    public static void getAllImages(Context context, HashMap<String, List<MediaFileBean>> mGruopMap) {
         Cursor mCursor = null;
         try {
             Uri mImageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
@@ -77,7 +52,7 @@ public class MultiMediaUtils {
                 MediaFileBean mediaFileBean = new MediaFileBean();
                 mediaFileBean.setFilePath(path);
                 mediaFileBean.setFileName(fileName);
-                mediaFileBean.setFileType(Media_FILE_TYPE.IMAGE);
+                mediaFileBean.setFileType(PhotoContract.MEDIA_FILE_TYPE.IMAGE);
 
                 //根据父路径名将图片放入到mGruopMap中
                 if (!mGruopMap.containsKey(parentName)) {
@@ -123,7 +98,7 @@ public class MultiMediaUtils {
                 MediaFileBean mediaFileBean = new MediaFileBean();
                 mediaFileBean.setFilePath(path);
                 mediaFileBean.setFileName(fileName);
-                mediaFileBean.setFileType(Media_FILE_TYPE.AUDIO);
+                mediaFileBean.setFileType(PhotoContract.MEDIA_FILE_TYPE.AUDIO);
 
                 //根据父路径名将图片放入到mGruopMap中
                 if (!mGruopMap.containsKey(parentName)) {
@@ -173,7 +148,7 @@ public class MultiMediaUtils {
                 MediaFileBean mediaFileBean = new MediaFileBean();
                 mediaFileBean.setFilePath(path);
                 mediaFileBean.setFileName(fileName);
-                mediaFileBean.setFileType(Media_FILE_TYPE.VIDEO);
+                mediaFileBean.setFileType(PhotoContract.MEDIA_FILE_TYPE.VIDEO);
 
                 //根据父路径名将图片放入到mGruopMap中
                 if (!mGruopMap.containsKey(parentName)) {

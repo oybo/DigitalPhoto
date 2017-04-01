@@ -15,24 +15,24 @@
         android:paddingTop="10dip">
 
         <TextView
-            android:id="@+id/view_choose_mode_catalog"
+            android:id="@+id/view_chart_mode"
             android:layout_width="match_parent"
             android:layout_height="45dip"
             android:background="@drawable/simple_bg_selector"
             android:gravity="center"
-            android:text="目录模式"
+            android:text="图表模式"
             android:textColor="#333333"
             android:textSize="14sp"/>
 
         <View style="@style/view_line"/>
 
         <TextView
-            android:id="@+id/view_choose_mode_dir"
+            android:id="@+id/view_list_mode"
             android:layout_width="match_parent"
             android:layout_height="45dip"
             android:background="@drawable/simple_bg_selector"
             android:gravity="center"
-            android:text="浏览模式"
+            android:text="列表模式"
             android:textColor="#333333"
             android:textSize="14sp"/>
     </LinearLayout>

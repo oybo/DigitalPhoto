@@ -2,27 +2,27 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto" >
 
-    <item android:id="@+id/menu_local_file_look"
+    <item android:id="@+id/menu_image"
           android:orderInCategory="100"
-          android:title="浏览模式"
+          android:title="图片"
           app:showAsAction="always"/>
 
     <item
-        android:id="@+id/menu_local_file_choose"
+        android:id="@+id/menu_video"
         android:orderInCategory="100"
-        android:title="格式选择"
+        android:title="视频"
         app:showAsAction="always"/>
 
     <item
-        android:id="@+id/menu_local_file_upload_download"
+        android:id="@+id/menu_audio"
         android:orderInCategory="100"
-        android:title="上传下载"
+        android:title="音乐"
         app:showAsAction="always"/>
 
     <item
-        android:id="@+id/menu_local_file_image_switch"
+        android:id="@+id/menu_choose"
         android:orderInCategory="100"
-        android:title="图片格式转换"
+        android:title="选择"
         app:showAsAction="always"/>
 
 </menu>

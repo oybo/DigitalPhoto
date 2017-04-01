@@ -1,14 +1,13 @@
 package com.xyz.digital.photo.app.mvp.device;
 
+import android.app.Activity;
 import android.content.IntentFilter;
+import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Looper;
 
-import com.actions.actcommunication.AcEventListener;
-import com.actions.actcommunication.ActCommunication;
-import com.xyz.digital.photo.app.AppContext;
 import com.xyz.digital.photo.app.receiver.WifiDirectBroadcastReceiver;
 
 import java.net.InetAddress;
@@ -16,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.Context.WIFI_P2P_SERVICE;
-import static com.xyz.digital.photo.app.R.id.info;
 
 /**
  * Created by O on 2017/3/31.
@@ -30,15 +28,14 @@ public class DeviceModel {
     private WifiDirectBroadcastReceiver mReceiver;
     private WifiP2pInfo info;
 
-    private List peers = new ArrayList();
+    private List<WifiP2pDevice> mWifiP2pDevices = new ArrayList();
 
     public DeviceModel() {
         initIntentFilter();
-        initReceiver();
     }
 
-    public void loadWifiDevice() {
-
+    public void loadWifiDevice(Activity activity, DeviceContract.OnScanDeviceListener onScanDeviceListener) {
+        initReceiver(activity, onScanDeviceListener);
     }
 
     private void initIntentFilter() {
@@ -50,25 +47,29 @@ public class DeviceModel {
         mFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
     }
 
-    private void initReceiver() {
-        mManager = (WifiP2pManager) AppContext.getInstance().getSystemService(WIFI_P2P_SERVICE);
-        mChannel = mManager.initialize(AppContext.getInstance(), Looper.myLooper(), null);
+    private void initReceiver(final Activity activity, final DeviceContract.OnScanDeviceListener onScanDeviceListener) {
+        mManager = (WifiP2pManager) activity.getApplicationContext().getSystemService(WIFI_P2P_SERVICE);
+        mChannel = mManager.initialize(activity.getApplicationContext(), Looper.myLooper(), null);
 
         /**     设备扫描监听       */
         WifiP2pManager.PeerListListener mPeerListListerner = new WifiP2pManager.PeerListListener() {
             @Override
             public void onPeersAvailable(WifiP2pDeviceList peersList) {
-                peers.clear();
-                peers.addAll(peersList.getDeviceList());
+                try {
+                    mWifiP2pDevices.clear();
+                    mWifiP2pDevices.addAll(peersList.getDeviceList());
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mAdapter.clear();
-                        mAdapter.appendToList(peers);
-                        mAdapter.notifyDataSetChanged();
+                    if(null != activity) {
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                onScanDeviceListener.onDevice(mWifiP2pDevices);
+                            }
+                        });
                     }
-                });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         };
 
@@ -90,8 +91,8 @@ public class DeviceModel {
             }
         };
 
-        mReceiver = new WifiDirectBroadcastReceiver(mManager, mChannel, this, mPeerListListerner, mInfoListener);
-        registerReceiver(mReceiver, mFilter);
+        mReceiver = new WifiDirectBroadcastReceiver(mManager, mChannel, activity, mPeerListListerner, mInfoListener);
+        activity.registerReceiver(mReceiver, mFilter);
 
         // 初始化peers并开始搜索
         discoverPeers();

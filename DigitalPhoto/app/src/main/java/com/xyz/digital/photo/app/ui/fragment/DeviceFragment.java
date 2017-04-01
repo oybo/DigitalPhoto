@@ -1,9 +1,12 @@
 package com.xyz.digital.photo.app.ui.fragment;
 
-import android.content.Context;
+import android.app.Activity;
+import android.net.wifi.p2p.WifiP2pDevice;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -15,6 +18,8 @@ import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.WifiDeviceAdapter;
 import com.xyz.digital.photo.app.mvp.device.DeviceContract;
 import com.xyz.digital.photo.app.mvp.device.DevicePresenter;
+
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -29,15 +34,7 @@ public class DeviceFragment extends Fragment implements Toolbar.OnMenuItemClickL
     @Bind(R.id.fragment_device_recyclerview) RecyclerView fragmentDeviceRecyclerview;
 
     private DeviceContract.Presenter mPresenter;
-
     private WifiDeviceAdapter mAdapter;
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        mAdapter = new WifiDeviceAdapter(getActivity());
-    }
 
     @Nullable
     @Override
@@ -59,10 +56,16 @@ public class DeviceFragment extends Fragment implements Toolbar.OnMenuItemClickL
         fragmentDeviceToolbar.setTitle("");
         fragmentDeviceToolbar.inflateMenu(R.menu.menu_device_view);
         fragmentDeviceToolbar.setOnMenuItemClickListener(this);
+
+        fragmentDeviceRecyclerview.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
+        fragmentDeviceRecyclerview.setLayoutManager(new LinearLayoutManager(getActivity()));
     }
 
     private void initData() {
         new DevicePresenter(this);
+        mAdapter = new WifiDeviceAdapter(getActivity());
+        fragmentDeviceRecyclerview.setAdapter(mAdapter);
+
         mPresenter.scanWifiDevice();
     }
 
@@ -76,8 +79,17 @@ public class DeviceFragment extends Fragment implements Toolbar.OnMenuItemClickL
     }
 
     @Override
-    public Context _getContext() {
+    public Activity _getActivity() {
         return getActivity();
+    }
+
+    @Override
+    public void onCallbackDevice(List<WifiP2pDevice> wifiP2pDevices) {
+        if(wifiP2pDevices != null && wifiP2pDevices.size() > 0) {
+            mAdapter.clear();
+            mAdapter.appendToList(wifiP2pDevices);
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override

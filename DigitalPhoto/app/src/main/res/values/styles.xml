@@ -14,7 +14,7 @@
 
     <!-- 主页面书架、书城、书单菜单样式 -->
     <style name="MainToolbarTheme" parent="@style/BaseToolbarTheme">
-        <item name="android:width">60dip</item>
+        <item name="android:width">50dip</item>
     </style>
 
     <!-- 其他页面菜单样式 -->
@@ -37,7 +37,9 @@
         <!-- 设置弹出菜单文字颜色 -->
         <item name="android:textColor">#FFFFFF</item>
         <item name="actionMenuTextColor">#FFFFFF</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">14sp</item>
+        <!-- 标题文字颜色 -->
+        <item name="android:textColorPrimary">#FFFFFF</item>
         <item name="android:height">@dimen/main_actionbar_height</item>
         <item name="android:gravity">center</item>
     </style>

@@ -29,9 +29,9 @@ public class ChooseModePopView extends PopupWindow implements View.OnClickListen
         this.setBackgroundDrawable(new ColorDrawable(50000000));
 
         // 目录模式
-        contentView.findViewById(R.id.view_choose_mode_catalog).setOnClickListener(this);
+        contentView.findViewById(R.id.view_chart_mode).setOnClickListener(this);
         // 浏览模式
-        contentView.findViewById(R.id.view_choose_mode_dir).setOnClickListener(this);
+        contentView.findViewById(R.id.view_list_mode).setOnClickListener(this);
 
         // 设置背景颜色变暗
         WindowManager.LayoutParams lp = activity.getWindow().getAttributes();
@@ -51,12 +51,12 @@ public class ChooseModePopView extends PopupWindow implements View.OnClickListen
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.view_choose_mode_catalog:
-                // 目录模式
+            case R.id.view_chart_mode:
+                // 图表模式
                 mMoreCallBack.onClick(v);
                 break;
-            case R.id.view_choose_mode_dir:
-                // 浏览模式
+            case R.id.view_list_mode:
+                // 列表模式
                 mMoreCallBack.onClick(v);
                 break;
         }
