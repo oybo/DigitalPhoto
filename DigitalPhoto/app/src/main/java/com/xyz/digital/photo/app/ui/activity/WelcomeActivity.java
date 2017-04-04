@@ -24,7 +24,7 @@ public class WelcomeActivity extends Activity implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
-        startActivity(new Intent(this, LoginActivity.class));
+        startActivity(new Intent(this, ScanActivity.class));
         finish();
     }
 }

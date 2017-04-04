@@ -46,7 +46,7 @@
 
     <style name="WelcomeTheme" parent="@android:style/Theme.Light.NoTitleBar.Fullscreen">
         <!-- 将splash图片设置在这，这样这张图片取代白屏 -->
-        <item name="android:windowBackground">@color/welcome_bg_color</item>
+        <item name="android:windowBackground">@drawable/welcome_bg</item>
         <item name="android:windowFullscreen">true</item>
     </style>
 
@@ -70,7 +70,7 @@
 
     <!-- 分割线 -->
     <style name="view_line">
-        <item name="android:background">#10000000</item>
+        <item name="android:background">#888888</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">0.5dip</item>
     </style>

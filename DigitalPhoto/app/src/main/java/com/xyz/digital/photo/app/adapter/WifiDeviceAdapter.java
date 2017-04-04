@@ -25,9 +25,13 @@ public class WifiDeviceAdapter extends BaseRecyclerAdapter<WifiP2pDevice> {
     @Override
     public void bindData(RecyclerViewHolder holder, int position, WifiP2pDevice item) {
 
-        holder.setText(R.id.item_wifi_device_name_txt, item.deviceName);
+        holder.setText(R.id.item_wifi_device_position_txt, String.valueOf(position + 1));
 
-        holder.setText(R.id.item_wifi_device_address_txt, item.deviceAddress);
+        holder.setImageResouce(R.id.item_wifi_device_status_txt, R.drawable.green_icon);
+
+//        holder.setText(R.id.item_wifi_device_name_txt, item.deviceName);
+//
+//        holder.setText(R.id.item_wifi_device_address_txt, item.deviceAddress);
 
     }
 }

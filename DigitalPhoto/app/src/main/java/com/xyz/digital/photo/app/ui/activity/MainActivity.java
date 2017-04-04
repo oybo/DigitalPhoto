@@ -6,13 +6,16 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.ui.BaseActivity;
 import com.xyz.digital.photo.app.ui.fragment.DeviceFragment;
 import com.xyz.digital.photo.app.ui.fragment.PhotoFragment;
+import com.xyz.digital.photo.app.ui.fragment.RemoteControlFragment;
 import com.xyz.digital.photo.app.ui.fragment.SetFragment;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
@@ -22,19 +25,20 @@ public class MainActivity extends BaseActivity {
     private static final String FRAGMENT_INDEX = "fragment_index";
 
     @Bind(R.id.fragment_container) RelativeLayout fragmentContainer;
-    @Bind(R.id.main_device_bt) Button mainDeviceBt;
-    @Bind(R.id.main_photo_bt) Button mainPhotoBt;
-    @Bind(R.id.main_scan_bt) Button mainScanBt;
-    @Bind(R.id.main_telecontrol_bt) Button mainTelecontrolBt;
-    @Bind(R.id.main_set_bt) Button mainSetBt;
+    @Bind(R.id.main_device_bt) TextView mainDeviceBt;
+    @Bind(R.id.main_photo_bt) TextView mainPhotoBt;
+    @Bind(R.id.main_telecontrol_bt) TextView mainTelecontrolBt;
+    @Bind(R.id.main_set_bt) TextView mainSetBt;
 
     private int oldTabIndex = -1, oldFragmentIndex = -1;
-    private Button[] mTabs;
+    private TextView[] mTabs;
     private Fragment[] fragments;
     /**    设备      */
     private DeviceFragment mDeviceFragment;
     /**    相册      */
     private PhotoFragment mPhotoFragment;
+    /**    遥控器      */
+    private RemoteControlFragment mRemoteControlFragment;
     /**    设置      */
     private SetFragment mSetFragment;
 
@@ -49,7 +53,7 @@ public class MainActivity extends BaseActivity {
     }
 
     private void initView() {
-        mTabs = new Button[]{ mainDeviceBt, mainPhotoBt, mainScanBt, mainTelecontrolBt, mainSetBt };
+        mTabs = new TextView[]{ mainDeviceBt, mainPhotoBt, mainTelecontrolBt, mainSetBt };
     }
 
     private void initFragment(Bundle savedInstanceState) {
@@ -70,36 +74,41 @@ public class MainActivity extends BaseActivity {
         if (mPhotoFragment == null) {
             mPhotoFragment = new PhotoFragment();
         }
+        if (mRemoteControlFragment == null) {
+            mRemoteControlFragment = new RemoteControlFragment();
+        }
         if (mSetFragment == null) {
             mSetFragment = new SetFragment();
         }
 
-        fragments = new Fragment[]{ mDeviceFragment, mPhotoFragment, mSetFragment };
+        fragments = new Fragment[]{ mDeviceFragment, mPhotoFragment, mRemoteControlFragment, mSetFragment };
 
         currentTab(tab_index);
         currentFragment(fgrament_index);
     }
 
     public void onTabClicked(View view) {
+        int tabIndex = 0;
+        int fragmentIndex = 0;
         if (view == mainDeviceBt) {
             // 设备
-            currentTab(0);
-            currentFragment(0);
+            tabIndex = 0;
+            fragmentIndex = 0;
         } else if (view == mainPhotoBt) {
             // 相册
-            currentTab(1);
-            currentFragment(1);
-        } else if (view == mainScanBt) {
-            // 扫描
-            currentTab(2);
+            tabIndex = 1;
+            fragmentIndex = 1;
         } else if (view == mainTelecontrolBt) {
             // 遥控
-            currentTab(3);
+            tabIndex = 2;
+            fragmentIndex = 2;
         } else if (view == mainSetBt) {
             // 设置
-            currentTab(4);
-            currentFragment(2);
+            tabIndex = 3;
+            fragmentIndex = 3;
         }
+        currentTab(tabIndex);
+        currentFragment(fragmentIndex);
     }
 
     /**
@@ -157,6 +166,5 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        System.exit(0);
     }
 }

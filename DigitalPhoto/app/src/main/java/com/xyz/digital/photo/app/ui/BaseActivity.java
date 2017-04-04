@@ -120,7 +120,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         if(headerView != null) {
             headerView.setTitile(title);
             headerView.getToolbar().setTitle("");
-            headerView.getToolbar().setNavigationIcon(R.drawable.kd_back_white);
+            headerView.getToolbar().setNavigationIcon(R.drawable.finish_icon);
             setSupportActionBar(headerView.getToolbar());
         }
     }

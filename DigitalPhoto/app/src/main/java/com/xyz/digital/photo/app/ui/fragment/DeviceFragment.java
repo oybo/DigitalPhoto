@@ -1,6 +1,7 @@
 package com.xyz.digital.photo.app.ui.fragment;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -8,17 +9,19 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.WifiDeviceAdapter;
+import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.mvp.device.DeviceContract;
 import com.xyz.digital.photo.app.mvp.device.DevicePresenter;
+import com.xyz.digital.photo.app.ui.activity.LoginActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
@@ -28,9 +31,8 @@ import butterknife.ButterKnife;
  * Created by O on 2017/3/31.
  */
 
-public class DeviceFragment extends Fragment implements Toolbar.OnMenuItemClickListener, DeviceContract.View {
+public class DeviceFragment extends Fragment implements DeviceContract.View, View.OnClickListener {
 
-    @Bind(R.id.fragment_device_toolbar) Toolbar fragmentDeviceToolbar;
     @Bind(R.id.fragment_device_recyclerview) RecyclerView fragmentDeviceRecyclerview;
 
     private DeviceContract.Presenter mPresenter;
@@ -53,12 +55,10 @@ public class DeviceFragment extends Fragment implements Toolbar.OnMenuItemClickL
     }
 
     private void initView() {
-        fragmentDeviceToolbar.setTitle("");
-        fragmentDeviceToolbar.inflateMenu(R.menu.menu_device_view);
-        fragmentDeviceToolbar.setOnMenuItemClickListener(this);
-
         fragmentDeviceRecyclerview.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
         fragmentDeviceRecyclerview.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        getView().findViewById(R.id.fragment_device_resetscan_txt).setOnClickListener(this);
     }
 
     private void initData() {
@@ -66,16 +66,16 @@ public class DeviceFragment extends Fragment implements Toolbar.OnMenuItemClickL
         mAdapter = new WifiDeviceAdapter(getActivity());
         fragmentDeviceRecyclerview.setAdapter(mAdapter);
 
+        testData();
         mPresenter.scanWifiDevice();
-    }
 
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        if(item.getItemId() == R.id.menu_device_telnet) {
-            // 远程登录
-
-        }
-        return false;
+        mAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View itemView, int pos) {
+                // 去连接登录
+                startActivity(new Intent(getActivity(), LoginActivity.class));
+            }
+        });
     }
 
     @Override
@@ -90,6 +90,19 @@ public class DeviceFragment extends Fragment implements Toolbar.OnMenuItemClickL
             mAdapter.appendToList(wifiP2pDevices);
             mAdapter.notifyDataSetChanged();
         }
+
+        testData();
+    }
+
+    private void testData() {
+        List<WifiP2pDevice> wifiP2pDevices = new ArrayList<>();
+        wifiP2pDevices.add(null);
+        wifiP2pDevices.add(null);
+        wifiP2pDevices.add(null);
+        wifiP2pDevices.add(null);
+        wifiP2pDevices.add(null);
+        mAdapter.appendToList(wifiP2pDevices);
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -105,6 +118,11 @@ public class DeviceFragment extends Fragment implements Toolbar.OnMenuItemClickL
     @Override
     public void hideLoading() {
 
+    }
+
+    @Override
+    public void onClick(View view) {
+        Toast.makeText(getActivity(), "重新扫描", Toast.LENGTH_SHORT).show();
     }
 
     @Override

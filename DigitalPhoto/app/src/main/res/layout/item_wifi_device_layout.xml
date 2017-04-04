@@ -1,36 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="50dip"
-        android:paddingLeft="10dip"
-        android:paddingRight="10dip">
+        android:paddingLeft="15dip"
+        android:paddingRight="15dip">
+
+        <TextView
+            android:id="@+id/item_wifi_device_position_txt"
+            android:layout_width="15dip"
+            android:layout_height="15dip"
+            android:layout_centerVertical="true"
+            android:background="@drawable/circle_view"
+            android:gravity="center"
+            android:text="1"
+            android:textColor="#666666"
+            android:textSize="10sp" />
 
         <TextView
             android:id="@+id/item_wifi_device_name_txt"
-            android:layout_width="100dip"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:singleLine="true"
-            android:text="一号机"
-            android:textColor="#666666"
-            android:textSize="14sp"/>
-
-        <TextView
-            android:id="@+id/item_wifi_device_address_txt"
-            android:layout_width="wrap_content"
+            android:layout_width="80dip"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginLeft="10dip"
-            android:layout_toRightOf="@id/item_wifi_device_name_txt"
+            android:layout_toRightOf="@id/item_wifi_device_position_txt"
+            android:singleLine="true"
             android:text="一号机"
             android:textColor="#666666"
-            android:textSize="14sp"/>
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/item_wifi_device_status_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/selector_device_status" />
+
+        <TextView
+            android:id="@+id/item_wifi_device_address_txt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dip"
+            android:layout_marginRight="10dip"
+            android:layout_toLeftOf="@id/item_wifi_device_status_txt"
+            android:layout_toRightOf="@id/item_wifi_device_name_txt"
+            android:singleLine="true"
+            android:text="深圳南山区科技园联想大厦"
+            android:textColor="#666666"
+            android:textSize="14sp" />
 
     </RelativeLayout>
 
