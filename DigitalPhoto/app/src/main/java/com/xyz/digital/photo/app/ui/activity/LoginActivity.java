@@ -46,12 +46,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                     ObjectAnimator anim1, anim2;
                     if(h < oldh) {
                         // 关闭软键盘, mLogoImage大小还原
-                        anim1 = ObjectAnimator.ofFloat(mLogoImage, "scaleX", 1f, 0.6f);
-                        anim2 = ObjectAnimator.ofFloat(mLogoImage, "scaleY", 1f, 0.6f);
+                        anim1 = ObjectAnimator.ofFloat(mLogoImage, "scaleX", 1f, 0.8f);
+                        anim2 = ObjectAnimator.ofFloat(mLogoImage, "scaleY", 1f, 0.8f);
                     } else {
                         // 弹出软键盘, mLogoImage大小缩小一倍
-                        anim1 = ObjectAnimator.ofFloat(mLogoImage, "scaleX", 0.6f, 1f);
-                        anim2 = ObjectAnimator.ofFloat(mLogoImage, "scaleY", 0.6f, 1f);
+                        anim1 = ObjectAnimator.ofFloat(mLogoImage, "scaleX", 0.8f, 1f);
+                        anim2 = ObjectAnimator.ofFloat(mLogoImage, "scaleY", 0.8f, 1f);
                     }
                     AnimatorSet animSet = new AnimatorSet();
                     animSet.play(anim1).with(anim2);

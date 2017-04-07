@@ -414,6 +414,8 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
         // 全部上传完成
         isUpload = false;
         mChartAdapter.clearUpload();
+        mSelectNumTxt.setText("已选择0项");
+        ToastUtil.showToast(getActivity(), "上传完成");
     }
 
     private class MyUploadListener extends UploadListener<String> {

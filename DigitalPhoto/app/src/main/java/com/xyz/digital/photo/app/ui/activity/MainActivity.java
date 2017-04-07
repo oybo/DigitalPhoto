@@ -15,6 +15,7 @@ import com.xyz.digital.photo.app.ui.fragment.DeviceFragment;
 import com.xyz.digital.photo.app.ui.fragment.PhotoFragment;
 import com.xyz.digital.photo.app.ui.fragment.RemoteControlFragment;
 import com.xyz.digital.photo.app.ui.fragment.SetFragment;
+import com.xyz.digital.photo.app.util.ToastUtil;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -165,11 +166,24 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
+        back();
+    }
+
+    private long mExitTime;
+
+    private void back() {
         if(mPhotoFragment.isShowSelect()) {
             mPhotoFragment.closeSelect();
             return;
         }
-        super.onBackPressed();
+
+        if ((System.currentTimeMillis() - mExitTime) > 2000) {
+            ToastUtil.showToast(this, "再按一次退出程序");
+            mExitTime = System.currentTimeMillis();
+        } else {
+            super.onBackPressed();
+            System.exit(0);
+        }
     }
 
     @Override

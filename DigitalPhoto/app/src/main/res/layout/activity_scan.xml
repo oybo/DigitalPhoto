@@ -1,33 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_horizontal">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
 
-    <include layout="@layout/include_header_layout"/>
+    <View android:layout_width="match_parent"
+          android:layout_height="@dimen/main_actionbar_height"
+          android:background="@color/colorPrimary"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <ImageView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:gravity="center"
-        android:orientation="vertical">
+        android:layout_margin="10dip"
+        android:src="@drawable/scan_device_icon"/>
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/scan_device_icon"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="您还未添加任何设备?"
+        android:textColor="#62B0F8"
+        android:textSize="12sp"/>
 
-        <Button
-            android:id="@+id/login_scanning_device_bt"
-            android:layout_width="300dip"
-            android:layout_height="45dip"
-            android:layout_marginTop="50dip"
-            android:background="@drawable/selector_blue_bt_layout"
-            android:text="扫描设备"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"/>
+    <Button
+        android:id="@+id/login_scanning_device_bt"
+        android:layout_width="300dip"
+        android:layout_height="50dip"
+        android:layout_marginTop="60dip"
+        android:background="@drawable/selector_blue_bt_layout"
+        android:text="扫描设备"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"/>
 
-    </LinearLayout>
-
-</RelativeLayout>
+</LinearLayout>
