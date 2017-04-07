@@ -3,9 +3,10 @@
     package="com.xyz.digital.photo.app">
 
     <!--  基本权限 网络与SD卡读写  -->
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
 
     <!--  WiFi直连需要的权限  -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -51,9 +52,18 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:windowSoftInputMode="adjustResize|stateHidden" />
 
+        <!--  设备详情页面   -->
+        <activity android:name=".ui.activity.DeviceDetailActivity" />
+
+        <!--  设备管理页面   -->
+        <activity android:name=".ui.activity.DeviceManagerActivity" />
+
         <activity android:name=".ui.activity.ShowImageListActivity" />
 
         <activity android:name=".ui.activity.PhotoViewActivity" />
+
+        <!--  okGo   -->
+        <service android:name="com.lzy.okserver.download.DownloadService"/>
 
     </application>
 

@@ -5,8 +5,6 @@ import android.content.Intent;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -19,7 +17,9 @@ import com.xyz.digital.photo.app.adapter.WifiDeviceAdapter;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.mvp.device.DeviceContract;
 import com.xyz.digital.photo.app.mvp.device.DevicePresenter;
+import com.xyz.digital.photo.app.ui.BaseFragment;
 import com.xyz.digital.photo.app.ui.activity.LoginActivity;
+import com.xyz.digital.photo.app.view.SimpleDividerItemDecoration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,7 @@ import butterknife.ButterKnife;
  * Created by O on 2017/3/31.
  */
 
-public class DeviceFragment extends Fragment implements DeviceContract.View, View.OnClickListener {
+public class DeviceFragment extends BaseFragment implements DeviceContract.View, View.OnClickListener {
 
     @Bind(R.id.fragment_device_recyclerview) RecyclerView fragmentDeviceRecyclerview;
 
@@ -55,7 +55,7 @@ public class DeviceFragment extends Fragment implements DeviceContract.View, Vie
     }
 
     private void initView() {
-        fragmentDeviceRecyclerview.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
+        fragmentDeviceRecyclerview.addItemDecoration(new SimpleDividerItemDecoration(getActivity()));
         fragmentDeviceRecyclerview.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         getView().findViewById(R.id.fragment_device_resetscan_txt).setOnClickListener(this);
@@ -129,6 +129,7 @@ public class DeviceFragment extends Fragment implements DeviceContract.View, Vie
     public void onDestroyView() {
         super.onDestroyView();
         ButterKnife.unbind(this);
+        mPresenter.unregisterReceiver();
     }
 
 }

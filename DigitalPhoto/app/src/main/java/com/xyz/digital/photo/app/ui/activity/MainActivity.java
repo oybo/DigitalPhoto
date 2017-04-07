@@ -164,6 +164,15 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        if(mPhotoFragment.isShowSelect()) {
+            mPhotoFragment.closeSelect();
+            return;
+        }
+        super.onBackPressed();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
     }

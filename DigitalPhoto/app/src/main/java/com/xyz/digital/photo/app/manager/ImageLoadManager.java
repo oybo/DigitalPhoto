@@ -27,7 +27,7 @@ import com.xyz.digital.photo.app.R;
 public class ImageLoadManager {
 
     public static void setImage(Context context, String url, ImageView imageView) {
-        setImage(context, url, imageView, R.mipmap.ic_launcher);
+        setImage(context, url, imageView, R.drawable.defult_audio_icon);
     }
 
     public static void setImage(Context context, String url, ImageView imageView, int errorResouceId) {
@@ -37,7 +37,7 @@ public class ImageLoadManager {
     }
 
     public static void setImage(Context context, int souceId, ImageView imageView) {
-        setImage(context, souceId, imageView, R.mipmap.ic_launcher);
+        setImage(context, souceId, imageView, R.drawable.defult_audio_icon);
     }
 
     public static void setImage(Context context, int souceId, ImageView imageView, int errorResouceId) {

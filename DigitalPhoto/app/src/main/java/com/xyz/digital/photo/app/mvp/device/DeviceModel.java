@@ -98,6 +98,10 @@ public class DeviceModel {
         discoverPeers();
     }
 
+    public void unregisterReceiver(Activity activity) {
+        activity.unregisterReceiver(mReceiver);
+    }
+
     /**
      * 初始化peers
      */

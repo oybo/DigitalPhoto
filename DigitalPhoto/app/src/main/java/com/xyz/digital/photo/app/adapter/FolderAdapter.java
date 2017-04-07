@@ -28,12 +28,12 @@ public class FolderAdapter extends BaseRecyclerAdapter<FolderBean> {
         holder.setText(R.id.group_title, item.getFolderName());
         holder.setText(R.id.group_count, String.valueOf(item.getImageCounts()));
 
-        if(item.getFileType() == PhotoContract.MEDIA_FILE_TYPE.IMAGE) {
+        if(item.getFileType() == PhotoContract.MEDIA_FILE_TYPE.AUDIO) {
 
-            ImageLoadManager.setImage(mContext, item.getTopImagePath(), holder.getImageView(R.id.group_image));
+            holder.getImageView(R.id.group_image).setImageResource(R.drawable.defult_audio_icon);
         } else {
 
-            holder.getImageView(R.id.group_image).setImageResource(R.drawable.folder);
+            ImageLoadManager.setImage(mContext, item.getTopImagePath(), holder.getImageView(R.id.group_image));
         }
     }
 }

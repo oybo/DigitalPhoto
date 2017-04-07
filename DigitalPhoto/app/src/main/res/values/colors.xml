@@ -7,5 +7,6 @@
     <color name="welcome_bg_color">#FF9999</color>
 
     <color name="layout_bg_normal">#30000000</color>
+    <color name="color_e7e7e7">#e7e7e7</color>
 
 </resources>

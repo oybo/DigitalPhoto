@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -12,7 +12,7 @@
         <TextView
             android:id="@+id/fragment_device_resetscan_txt"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="50dip"
             android:layout_centerVertical="true"
             android:layout_marginLeft="10dip"
             android:drawableLeft="@drawable/scan_icon"
@@ -20,7 +20,7 @@
             android:gravity="center"
             android:text="重新登录"
             android:textColor="#FFFFFF"
-            android:textSize="15sp" />
+            android:textSize="15sp"/>
 
     </RelativeLayout>
 
@@ -28,6 +28,6 @@
         android:id="@+id/fragment_device_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scrollbars="none" />
+        android:scrollbars="none"/>
 
 </LinearLayout>

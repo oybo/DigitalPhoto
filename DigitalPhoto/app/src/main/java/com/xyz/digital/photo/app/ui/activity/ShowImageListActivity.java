@@ -1,6 +1,7 @@
 package com.xyz.digital.photo.app.ui.activity;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
@@ -12,9 +13,9 @@ import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.ChildImageAdapter;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.bean.MediaFileBean;
+import com.xyz.digital.photo.app.mvp.Photo.PhotoContract;
 import com.xyz.digital.photo.app.ui.BaseActivity;
 
-import java.io.Serializable;
 import java.util.List;
 
 import butterknife.Bind;
@@ -50,10 +51,24 @@ public class ShowImageListActivity extends BaseActivity {
         mAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int pos) {
-                Intent intent = new Intent(ShowImageListActivity.this, PhotoViewActivity.class);
-                intent.putExtra("paths", (Serializable) images);
-                intent.putExtra("curIndex", pos);
-                startActivity(intent);
+                MediaFileBean mediaFileBean = images.get(pos);
+                if(mediaFileBean.getFileType() == PhotoContract.MEDIA_FILE_TYPE.IMAGE) {
+                    Intent intent = new Intent(ShowImageListActivity.this, PhotoViewActivity.class);
+                    intent.putExtra("path", mediaFileBean.getFilePath());
+                    intent.putExtra("title", mediaFileBean.getFileName());
+                    intent.putExtra("date", mediaFileBean.getDate());
+                    intent.putExtra("size", mediaFileBean.getSize());
+                    startActivity(intent);
+                } else {
+                    String type = "audio/*";
+                    if(mediaFileBean.getFileType() == PhotoContract.MEDIA_FILE_TYPE.VIDEO) {
+                        type = "video/*";
+                    }
+
+                    Intent it = new Intent(Intent.ACTION_VIEW);
+                    it.setDataAndType(Uri.parse("file://" + mediaFileBean.getFilePath()), type);
+                    startActivity(it);
+                }
             }
         });
     }

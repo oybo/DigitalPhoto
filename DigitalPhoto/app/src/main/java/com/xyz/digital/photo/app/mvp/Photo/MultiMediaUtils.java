@@ -10,6 +10,8 @@ import android.provider.MediaStore;
 
 import com.xyz.digital.photo.app.bean.FolderBean;
 import com.xyz.digital.photo.app.bean.MediaFileBean;
+import com.xyz.digital.photo.app.util.PubUtils;
+import com.xyz.digital.photo.app.util.TimeUtil;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -46,12 +48,30 @@ public class MultiMediaUtils {
                 String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DATA));
                 //获取名称
                 String fileName = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.TITLE));
+                try {
+                    fileName = path.substring(path.lastIndexOf("/") + 1, path.length());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                File file = new File(path);
+                if(!file.exists()) {
+                    continue;
+                }
                 //获取父路径名
-                String parentName = new File(path).getParentFile().getName();
+                String parentName = file.getParentFile().getName();
+                String size = PubUtils.formatFileLen(file.length());
+                long data = file.lastModified();
+                try {
+                    data = mCursor.getLong(mCursor.getColumnIndex(MediaStore.Images.Media.DATE_MODIFIED));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
                 MediaFileBean mediaFileBean = new MediaFileBean();
                 mediaFileBean.setFilePath(path);
                 mediaFileBean.setFileName(fileName);
+                mediaFileBean.setSize(size);
+                mediaFileBean.setDate(TimeUtil.getFormattedDateString(data, TimeUtil.FORMAT_OTHER_YEAR));
                 mediaFileBean.setFileType(PhotoContract.MEDIA_FILE_TYPE.IMAGE);
 
                 //根据父路径名将图片放入到mGruopMap中
@@ -92,12 +112,30 @@ public class MultiMediaUtils {
                 String path = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
                 //获取名称
                 String fileName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
+                try {
+                    fileName = path.substring(path.lastIndexOf("/") + 1, path.length());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                File file = new File(path);
+                if(!file.exists()) {
+                    continue;
+                }
                 //获取父路径名
-                String parentName = new File(path).getParentFile().getName();
+                String parentName = file.getParentFile().getName();
+                String size = PubUtils.formatFileLen(file.length());
+                long data = file.lastModified();
+                try {
+                    data = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.DATE_MODIFIED));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
                 MediaFileBean mediaFileBean = new MediaFileBean();
                 mediaFileBean.setFilePath(path);
                 mediaFileBean.setFileName(fileName);
+                mediaFileBean.setSize(size);
+                mediaFileBean.setDate(TimeUtil.getFormattedDateString(data, TimeUtil.FORMAT_OTHER_YEAR));
                 mediaFileBean.setFileType(PhotoContract.MEDIA_FILE_TYPE.AUDIO);
 
                 //根据父路径名将图片放入到mGruopMap中
@@ -142,12 +180,30 @@ public class MultiMediaUtils {
                 String path = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA));
                 //获取名称
                 String fileName = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.TITLE));
+                try {
+                    fileName = path.substring(path.lastIndexOf("/") + 1, path.length());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                File file = new File(path);
+                if(!file.exists()) {
+                    continue;
+                }
                 //获取父路径名
-                String parentName = new File(path).getParentFile().getName();
+                String parentName = file.getParentFile().getName();
+                String size = PubUtils.formatFileLen(file.length());
+                long data = file.lastModified();
+                try {
+                    data = cursor.getLong(cursor.getColumnIndex(MediaStore.Video.Media.DATE_MODIFIED));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
                 MediaFileBean mediaFileBean = new MediaFileBean();
                 mediaFileBean.setFilePath(path);
                 mediaFileBean.setFileName(fileName);
+                mediaFileBean.setSize(size);
+                mediaFileBean.setDate(TimeUtil.getFormattedDateString(data / 1000, TimeUtil.FORMAT_OTHER_YEAR));
                 mediaFileBean.setFileType(PhotoContract.MEDIA_FILE_TYPE.VIDEO);
 
                 //根据父路径名将图片放入到mGruopMap中

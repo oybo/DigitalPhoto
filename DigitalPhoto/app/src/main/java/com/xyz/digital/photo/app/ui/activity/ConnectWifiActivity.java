@@ -7,7 +7,6 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
@@ -53,7 +52,6 @@ public class ConnectWifiActivity extends BaseActivity {
     }
 
     private void initView() {
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mAdapter = new WifiDeviceAdapter(this);
         mRecyclerView.setAdapter(mAdapter);

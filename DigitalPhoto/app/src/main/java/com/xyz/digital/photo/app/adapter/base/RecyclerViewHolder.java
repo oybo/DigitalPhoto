@@ -21,6 +21,7 @@ public class RecyclerViewHolder extends RecyclerView.ViewHolder {
 
     public RecyclerViewHolder(Context ctx, View itemView) {
         super(itemView);
+        itemView.setTag(this);
         mContext = ctx;
         mViews = new SparseArray<View>();
     }

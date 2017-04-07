@@ -28,4 +28,9 @@ public class DevicePresenter implements DeviceContract.Presenter {
             }
         });
     }
+
+    @Override
+    public void unregisterReceiver() {
+        mModel.unregisterReceiver(mView._getActivity());
+    }
 }

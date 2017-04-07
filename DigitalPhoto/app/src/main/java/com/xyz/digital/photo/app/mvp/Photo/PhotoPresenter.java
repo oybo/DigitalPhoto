@@ -1,5 +1,6 @@
 package com.xyz.digital.photo.app.mvp.Photo;
 
+import android.os.AsyncTask;
 import android.os.Environment;
 
 import com.xyz.digital.photo.app.bean.FolderBean;
@@ -33,37 +34,48 @@ public class PhotoPresenter implements PhotoContract.Presenter {
     }
 
     @Override
-    public void showMediaFiles(PhotoContract.MEDIA_FILE_TYPE type) {
+    public void showMediaFiles(final PhotoContract.MEDIA_FILE_TYPE type) {
 
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             ToastUtil.showToast(mView._getActivity(), "暂无外部存储");
             return;
         }
 
-        HashMap<String, List<MediaFileBean>> mGruopMap = new HashMap<>();
+        new AsyncTask<Void, Void, HashMap<String, List<MediaFileBean>>>() {
+            @Override
+            protected HashMap<String, List<MediaFileBean>> doInBackground(Void... voids) {
+                HashMap<String, List<MediaFileBean>> mGruopMap = new HashMap<>();
 
-        if(type == PhotoContract.MEDIA_FILE_TYPE.IMAGE) {
-            // 图片
-            MultiMediaUtils.getAllImages(mView._getActivity(), mGruopMap);
-        } else if(type == PhotoContract.MEDIA_FILE_TYPE.AUDIO) {
-            // 音乐
-            MultiMediaUtils.getAllAudios(mView._getActivity(), mGruopMap);
-        } else {
-            // 视频
-            MultiMediaUtils.getAllVideos(mView._getActivity(), mGruopMap);
-        }
+                if(type == PhotoContract.MEDIA_FILE_TYPE.IMAGE) {
+                    // 图片
+                    MultiMediaUtils.getAllImages(mView._getActivity(), mGruopMap);
+                } else if(type == PhotoContract.MEDIA_FILE_TYPE.AUDIO) {
+                    // 音乐
+                    MultiMediaUtils.getAllAudios(mView._getActivity(), mGruopMap);
+                } else {
+                    // 视频
+                    MultiMediaUtils.getAllVideos(mView._getActivity(), mGruopMap);
+                }
 
-        if(mShowType == PhotoContract.MEDIA_SHOW_TYPE.LIST) {
-            // 列表模式
-            mView.onCallbackMediasByList(mGruopMap);
-        } else {
-            // 图表模式
-            List<MediaFileBean> files = new ArrayList<MediaFileBean>();
-            for(Map.Entry<String, List<MediaFileBean>> entry :  mGruopMap.entrySet()) {
-                files.addAll(entry.getValue());
+                return mGruopMap;
             }
-            mView.onCallbackMediasByChart(files);
-        }
+
+            @Override
+            protected void onPostExecute(HashMap<String, List<MediaFileBean>> mGruopMap) {
+                super.onPostExecute(mGruopMap);
+                if(mShowType == PhotoContract.MEDIA_SHOW_TYPE.LIST) {
+                    // 列表模式
+                    mView.onCallbackMediasByList(mGruopMap);
+                } else {
+                    // 图表模式
+                    List<MediaFileBean> files = new ArrayList<MediaFileBean>();
+                    for(Map.Entry<String, List<MediaFileBean>> entry :  mGruopMap.entrySet()) {
+                        files.addAll(entry.getValue());
+                    }
+                    mView.onCallbackMediasByChart(files);
+                }
+            }
+        }.execute();
 
     }
 
