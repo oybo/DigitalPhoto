@@ -9,8 +9,8 @@ import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.adapter.base.RecyclerViewHolder;
 import com.xyz.digital.photo.app.bean.MediaFileBean;
+import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 import com.xyz.digital.photo.app.manager.ImageLoadManager;
-import com.xyz.digital.photo.app.mvp.Photo.PhotoContract;
 import com.xyz.digital.photo.app.view.ProgressPieView;
 
 import java.util.ArrayList;
@@ -22,9 +22,9 @@ import java.util.Map;
  * Created by O on 2017/3/18.
  */
 
-public class ChildImageAdapter extends BaseRecyclerAdapter<MediaFileBean> {
+public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
 
-    public ChildImageAdapter(Context ctx) {
+    public LocalMediaAdapter(Context ctx) {
         super(ctx);
     }
 
@@ -45,10 +45,10 @@ public class ChildImageAdapter extends BaseRecyclerAdapter<MediaFileBean> {
         ImageView imageView = holder.getImageView(R.id.item_child_image);
 
         // 图片
-        if(item.getFileType() == PhotoContract.MEDIA_FILE_TYPE.AUDIO) {
+        if(item.getFileType() == MEDIA_FILE_TYPE.AUDIO) {
             imageView.setImageResource(R.drawable.defult_audio_icon);
         } else {
-            ImageLoadManager.setImage(mContext, item.getFilePath(), imageView);
+            ImageLoadManager.setImage(item.getFilePath(), imageView, R.drawable.defult_audio_icon);
         }
 
         // 判断是否选中

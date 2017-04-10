@@ -1,6 +1,6 @@
 package com.xyz.digital.photo.app.bean;
 
-import com.xyz.digital.photo.app.mvp.Photo.PhotoContract;
+import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 
 import java.io.Serializable;
 
@@ -17,7 +17,7 @@ public class MediaFileBean implements Serializable {
     private String size;
     private String date;
     // 类型
-    private PhotoContract.MEDIA_FILE_TYPE fileType;
+    private MEDIA_FILE_TYPE fileType;
     private int position;
 
     public String getFileName() {
@@ -60,11 +60,11 @@ public class MediaFileBean implements Serializable {
         this.position = position;
     }
 
-    public PhotoContract.MEDIA_FILE_TYPE getFileType() {
+    public MEDIA_FILE_TYPE getFileType() {
         return fileType;
     }
 
-    public void setFileType(PhotoContract.MEDIA_FILE_TYPE fileType) {
+    public void setFileType(MEDIA_FILE_TYPE fileType) {
         this.fileType = fileType;
     }
 }

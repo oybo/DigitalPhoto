@@ -1,10 +1,8 @@
 package com.xyz.digital.photo.app.manager;
 
-import android.content.Context;
-import android.text.TextUtils;
 import android.widget.ImageView;
+
 import com.bumptech.glide.Glide;
-import com.xyz.digital.photo.app.R;
 
 /**
  * 图片加载类
@@ -26,24 +24,29 @@ import com.xyz.digital.photo.app.R;
 
 public class ImageLoadManager {
 
-    public static void setImage(Context context, String url, ImageView imageView) {
-        setImage(context, url, imageView, R.drawable.defult_audio_icon);
-    }
+    public static void setImage(String url, final ImageView imageView) {
 
-    public static void setImage(Context context, String url, ImageView imageView, int errorResouceId) {
-        if(!TextUtils.isEmpty(url) && null != imageView) {
-            Glide.with(context).load(url).error(errorResouceId).into(imageView);
+        try {
+            Glide.with(imageView.getContext())
+                    .load(url)
+                    .into(imageView);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
     }
 
-    public static void setImage(Context context, int souceId, ImageView imageView) {
-        setImage(context, souceId, imageView, R.drawable.defult_audio_icon);
-    }
+    public static void setImage(String url, final ImageView imageView, int errorId) {
 
-    public static void setImage(Context context, int souceId, ImageView imageView, int errorResouceId) {
-        if(null != imageView) {
-            Glide.with(context).load(souceId).error(errorResouceId).into(imageView);
+        try {
+            Glide.with(imageView.getContext())
+                    .load(url)
+                    .error(errorId)
+                    .into(imageView);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
     }
 
 }

@@ -40,7 +40,7 @@
                 android:gravity="center"
                 android:onClick="onTabClicked"
                 android:text="设备"
-                android:textColor="@drawable/actionbar_txt_selector"
+                android:textColor="@drawable/selector_actionbar_txt"
                 android:textSize="12sp"/>
 
             <TextView
@@ -55,7 +55,7 @@
                 android:onClick="onTabClicked"
                 android:paddingBottom="3dip"
                 android:text="相册"
-                android:textColor="@drawable/actionbar_txt_selector"
+                android:textColor="@drawable/selector_actionbar_txt"
                 android:textSize="12sp"/>
 
             <TextView
@@ -69,7 +69,7 @@
                 android:onClick="onTabClicked"
                 android:paddingBottom="3dip"
                 android:text="遥控"
-                android:textColor="@drawable/actionbar_txt_selector"
+                android:textColor="@drawable/selector_actionbar_txt"
                 android:textSize="12sp"/>
 
             <TextView
@@ -83,7 +83,7 @@
                 android:onClick="onTabClicked"
                 android:paddingBottom="3dip"
                 android:text="设置"
-                android:textColor="@drawable/actionbar_txt_selector"
+                android:textColor="@drawable/selector_actionbar_txt"
                 android:textSize="12sp"/>
         </LinearLayout>
     </LinearLayout>

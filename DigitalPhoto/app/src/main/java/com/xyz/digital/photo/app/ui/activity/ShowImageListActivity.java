@@ -10,10 +10,10 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.xyz.digital.photo.app.R;
-import com.xyz.digital.photo.app.adapter.ChildImageAdapter;
+import com.xyz.digital.photo.app.adapter.LocalMediaAdapter;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.bean.MediaFileBean;
-import com.xyz.digital.photo.app.mvp.Photo.PhotoContract;
+import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 import com.xyz.digital.photo.app.ui.BaseActivity;
 
 import java.util.List;
@@ -29,7 +29,7 @@ public class ShowImageListActivity extends BaseActivity {
 
     @Bind(R.id.show_imagelist_recyclerview) RecyclerView mRecyclerView;
 
-    private ChildImageAdapter mAdapter;
+    private LocalMediaAdapter mAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -44,7 +44,7 @@ public class ShowImageListActivity extends BaseActivity {
     private void initData() {
         final List<MediaFileBean> images = (List<MediaFileBean>) getIntent().getSerializableExtra("data");
 
-        mAdapter = new ChildImageAdapter(this);
+        mAdapter = new LocalMediaAdapter(this);
         mAdapter.appendToList(images);
 
         mRecyclerView.setAdapter(mAdapter);
@@ -52,7 +52,7 @@ public class ShowImageListActivity extends BaseActivity {
             @Override
             public void onItemClick(View itemView, int pos) {
                 MediaFileBean mediaFileBean = images.get(pos);
-                if(mediaFileBean.getFileType() == PhotoContract.MEDIA_FILE_TYPE.IMAGE) {
+                if(mediaFileBean.getFileType() == MEDIA_FILE_TYPE.IMAGE) {
                     Intent intent = new Intent(ShowImageListActivity.this, PhotoViewActivity.class);
                     intent.putExtra("path", mediaFileBean.getFilePath());
                     intent.putExtra("title", mediaFileBean.getFileName());
@@ -61,7 +61,7 @@ public class ShowImageListActivity extends BaseActivity {
                     startActivity(intent);
                 } else {
                     String type = "audio/*";
-                    if(mediaFileBean.getFileType() == PhotoContract.MEDIA_FILE_TYPE.VIDEO) {
+                    if(mediaFileBean.getFileType() == MEDIA_FILE_TYPE.VIDEO) {
                         type = "video/*";
                     }
 

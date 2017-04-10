@@ -59,7 +59,7 @@ public class PhotoViewActivity extends BaseActivity implements OnClickListener {
 
     private void initData() {
         String path = getIntent().getStringExtra("path");
-        ImageLoadManager.setImage(this, path, mImageView);
+        ImageLoadManager.setImage(path, mImageView);
 
         photoviewTitleTxt.setText(getIntent().getStringExtra("title"));
         photoviewDateTxt.setText(getIntent().getStringExtra("date"));

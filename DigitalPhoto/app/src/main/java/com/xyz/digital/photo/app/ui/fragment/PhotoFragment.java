@@ -26,10 +26,12 @@ import com.lzy.okserver.task.ExecutorWithListener;
 import com.lzy.okserver.upload.UploadInfo;
 import com.lzy.okserver.upload.UploadManager;
 import com.xyz.digital.photo.app.R;
-import com.xyz.digital.photo.app.adapter.ChildImageAdapter;
+import com.xyz.digital.photo.app.adapter.LocalMediaAdapter;
 import com.xyz.digital.photo.app.adapter.FolderAdapter;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.bean.MediaFileBean;
+import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
+import com.xyz.digital.photo.app.bean.e.MEDIA_SHOW_TYPE;
 import com.xyz.digital.photo.app.mvp.Photo.PhotoContract;
 import com.xyz.digital.photo.app.mvp.Photo.PhotoPresenter;
 import com.xyz.digital.photo.app.ui.BaseFragment;
@@ -40,6 +42,7 @@ import com.xyz.digital.photo.app.util.FileUtil;
 import com.xyz.digital.photo.app.util.ToastUtil;
 import com.xyz.digital.photo.app.view.ChooseModePopView;
 import com.xyz.digital.photo.app.view.DialogTips;
+import com.xyz.digital.photo.app.view.LoadingView;
 import com.xyz.digital.photo.app.view.PhotoUploadPopView;
 import com.xyz.digital.photo.app.view.ProgressPieView;
 
@@ -68,11 +71,13 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
     @Bind(R.id.fragment_photo_select_layout) RelativeLayout mSelectLayout;
     @Bind(R.id.fragment_photo_select_num_txt) TextView mSelectNumTxt;
     @Bind(R.id.fragment_photo_select_all_txt) TextView mSelectAllTxt;
+    @Bind(R.id.view_loading) LoadingView mLoadingView;
     private PhotoUploadPopView mPhotoUploadPopView;
 
     private PhotoContract.Presenter mPresenter;
 
-    private ChildImageAdapter mChartAdapter;
+    private LocalMediaAdapter mChartAdapter;
+    private HashMap<String, List<MediaFileBean>> mListImages;
     private FolderAdapter mListAdapter;
 
     /**     上传管理      */
@@ -104,17 +109,17 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                     case 0:
                         // 图片
                         tab.select();
-                        mPresenter.showMediaFiles(PhotoContract.MEDIA_FILE_TYPE.IMAGE);
+                        mPresenter.showMediaFiles(MEDIA_FILE_TYPE.IMAGE);
                         break;
                     case 1:
                         // 视频
                         tab.select();
-                        mPresenter.showMediaFiles(PhotoContract.MEDIA_FILE_TYPE.VIDEO);
+                        mPresenter.showMediaFiles(MEDIA_FILE_TYPE.VIDEO);
                         break;
                     case 2:
                         // 音乐
                         tab.select();
-                        mPresenter.showMediaFiles(PhotoContract.MEDIA_FILE_TYPE.AUDIO);
+                        mPresenter.showMediaFiles(MEDIA_FILE_TYPE.AUDIO);
                         break;
                 }
             }
@@ -139,15 +144,87 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
     }
 
     private void initData() {
+        mChartAdapter = new LocalMediaAdapter(_getActivity());
+        mChartRecyclerView.setAdapter(mChartAdapter);
+
+        mListAdapter = new FolderAdapter(getActivity());
+        mListRecyclerView.setAdapter(mListAdapter);
+
         mPhotoUploadPopView = new PhotoUploadPopView(getActivity(), this);
         mPresenter = new PhotoPresenter(this);
         // 默认图表模式
-        mPresenter.showType(PhotoContract.MEDIA_SHOW_TYPE.CHART);
+        mPresenter.showType(MEDIA_SHOW_TYPE.CHART);
 
         // 上传管理
         uploadManager = UploadManager.getInstance();
         uploadManager.getThreadPool().setCorePoolSize(1);
         uploadManager.getThreadPool().getExecutor().addOnAllTaskEndListener(this);
+
+        // 图表模式
+        mChartAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View itemView, int pos) {
+                if(isUpload) {
+                    ToastUtil.showToast(getActivity(), "正在上传,请稍后");
+                    return;
+                }
+                if(mSelectLayout.getVisibility() == View.VISIBLE) {
+                    // 选择模式
+                    mSelectNumTxt.setText("已选择" + mChartAdapter.select(pos) + "项");
+                    checkSelectAll();
+                } else {
+                    MediaFileBean mediaFileBean = mChartAdapter.getItem(pos);
+                    if(mediaFileBean.getFileType() == MEDIA_FILE_TYPE.IMAGE) {
+                        // 图片
+                        Intent intent = new Intent(getActivity(), PhotoViewActivity.class);
+                        intent.putExtra("path", mediaFileBean.getFilePath());
+                        intent.putExtra("title", mediaFileBean.getFileName());
+                        intent.putExtra("date", mediaFileBean.getDate());
+                        intent.putExtra("size", mediaFileBean.getSize());
+                        startActivity(intent);
+                    } else {
+                        String type = "audio/*";
+                        if(mediaFileBean.getFileType() == MEDIA_FILE_TYPE.VIDEO) {
+                            type = "video/*";
+                        }
+
+                        Intent it = new Intent(Intent.ACTION_VIEW);
+                        it.setDataAndType(Uri.parse("file://" + mediaFileBean.getFilePath()), type);
+                        startActivity(it);
+                    }
+                }
+            }
+        });
+        mChartAdapter.setOnInViewClickListener(R.id.item_child_upload_cancel, new BaseRecyclerAdapter.onInternalClickListener() {
+            @Override
+            public void OnClickListener(View parentV, View v, Integer position) {
+                // 停止上传任务
+                try {
+                    String path = mChartAdapter.getItem(position).getFilePath();
+                    for (UploadInfo uploadInfo : uploadManager.getAllTask()) {
+                        if(path.equals(uploadInfo.getTaskKey())) {
+                            uploadManager.getAllTask().remove(uploadInfo);
+                            return;
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        // 列表模式
+        mListAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View itemView, int pos) {
+                String folderName = mListAdapter.getItem(pos).getFolderName();
+                List<MediaFileBean> childList = mListImages.get(folderName);
+
+                Intent intent = new Intent(getActivity(), ShowImageListActivity.class);
+                intent.putExtra("title", folderName);
+                intent.putExtra("data", (Serializable) childList);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -156,98 +233,48 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
     }
 
     @Override
-    public void onCallbackMediasByList(final HashMap<String, List<MediaFileBean>> images) {
+    public void onCallbackMediasByList(final boolean isRefreshModel, final HashMap<String, List<MediaFileBean>> images) {
         // 列表模式
-        mChartRecyclerView.setVisibility(View.GONE);
-        mListRecyclerView.setVisibility(View.VISIBLE);
-        mModelTypeImage.setImageResource(R.drawable.mode_list_icon);
-
-        if(mListAdapter == null) {
-            mListAdapter = new FolderAdapter(getActivity());
-            mListRecyclerView.setAdapter(mListAdapter);
-            mListAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
+        try {
+            mListImages = images;
+            mListAdapter.clear();
+            mListAdapter.appendToList(mPresenter.subGroupOfMedia(images));
+            getActivity().runOnUiThread(new Runnable() {
                 @Override
-                public void onItemClick(View itemView, int pos) {
-                    String folderName = mListAdapter.getItem(pos).getFolderName();
-                    List<MediaFileBean> childList = images.get(folderName);
-
-                    Intent intent = new Intent(getActivity(), ShowImageListActivity.class);
-                    intent.putExtra("title", folderName);
-                    intent.putExtra("data", (Serializable) childList);
-                    startActivity(intent);
+                public void run() {
+                    mListAdapter.notifyDataSetChanged();
+                    if(isRefreshModel) {
+                        mChartRecyclerView.setVisibility(View.GONE);
+                        mListRecyclerView.setVisibility(View.VISIBLE);
+                        mModelTypeImage.setImageResource(R.drawable.mode_list_icon);
+                    }
                 }
             });
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        mListAdapter.clear();
-        mListAdapter.appendToList(mPresenter.subGroupOfMedia(images));
-        mListAdapter.notifyDataSetChanged();
     }
 
     @Override
-    public void onCallbackMediasByChart(List<MediaFileBean> files) {
+    public void onCallbackMediasByChart(final boolean isRefreshModel, List<MediaFileBean> files) {
         // 图表模式
-        mListRecyclerView.setVisibility(View.GONE);
-        mChartRecyclerView.setVisibility(View.VISIBLE);
-        mModelTypeImage.setImageResource(R.drawable.mode_chrat_icon);
-
-        if(mChartAdapter == null) {
-            mChartAdapter = new ChildImageAdapter(_getActivity());
-            mChartRecyclerView.setAdapter(mChartAdapter);
-            mChartAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
+        try {
+            mChartAdapter.clear();
+            mChartAdapter.appendToList(files);
+            getActivity().runOnUiThread(new Runnable() {
                 @Override
-                public void onItemClick(View itemView, int pos) {
-                    if(isUpload) {
-                        ToastUtil.showToast(getActivity(), "正在上传,请稍后");
-                        return;
-                    }
-                    if(mSelectLayout.getVisibility() == View.VISIBLE) {
-                        // 选择模式
-                        mSelectNumTxt.setText("已选择" + mChartAdapter.select(pos) + "项");
-                        checkSelectAll();
-                    } else {
-                        MediaFileBean mediaFileBean = mChartAdapter.getItem(pos);
-                        if(mediaFileBean.getFileType() == PhotoContract.MEDIA_FILE_TYPE.IMAGE) {
-                            // 图片
-                            Intent intent = new Intent(getActivity(), PhotoViewActivity.class);
-                            intent.putExtra("path", mediaFileBean.getFilePath());
-                            intent.putExtra("title", mediaFileBean.getFileName());
-                            intent.putExtra("date", mediaFileBean.getDate());
-                            intent.putExtra("size", mediaFileBean.getSize());
-                            startActivity(intent);
-                        } else {
-                            String type = "audio/*";
-                            if(mediaFileBean.getFileType() == PhotoContract.MEDIA_FILE_TYPE.VIDEO) {
-                                type = "video/*";
-                            }
-
-                            Intent it = new Intent(Intent.ACTION_VIEW);
-                            it.setDataAndType(Uri.parse("file://" + mediaFileBean.getFilePath()), type);
-                            startActivity(it);
-                        }
+                public void run() {
+                    mChartAdapter.notifyDataSetChanged();
+                    if(isRefreshModel) {
+                        mListRecyclerView.setVisibility(View.GONE);
+                        mChartRecyclerView.setVisibility(View.VISIBLE);
+                        mModelTypeImage.setImageResource(R.drawable.mode_chrat_icon);
                     }
                 }
             });
-            mChartAdapter.setOnInViewClickListener(R.id.item_child_upload_cancel, new BaseRecyclerAdapter.onInternalClickListener() {
-                @Override
-                public void OnClickListener(View parentV, View v, Integer position) {
-                    // 停止上传任务
-                    try {
-                        String path = mChartAdapter.getItem(position).getFilePath();
-                        for (UploadInfo uploadInfo : uploadManager.getAllTask()) {
-                            if(path.equals(uploadInfo.getTaskKey())) {
-                                uploadManager.getAllTask().remove(uploadInfo);
-                                return;
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        mChartAdapter.clear();
-        mChartAdapter.appendToList(files);
-        mChartAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -257,12 +284,12 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
 
     @Override
     public void showLoading() {
-
+        mLoadingView.show();
     }
 
     @Override
     public void hideLoading() {
-
+        mLoadingView.hide();
     }
 
     @Override
@@ -299,11 +326,11 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                 break;
             case R.id.view_chart_mode:
                 // 图表模式
-                mPresenter.showType(PhotoContract.MEDIA_SHOW_TYPE.CHART);
+                mPresenter.showType(MEDIA_SHOW_TYPE.CHART);
                 break;
             case R.id.view_list_mode:
                 // 列表模式
-                mPresenter.showType(PhotoContract.MEDIA_SHOW_TYPE.LIST);
+                mPresenter.showType(MEDIA_SHOW_TYPE.LIST);
                 break;
             case R.id.pop_upload_to_device_bt:
                 // 上传到设备
@@ -356,15 +383,15 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                         switch (mTabLayout.getSelectedTabPosition()) {
                             case 0:
                                 // 图片
-                                mPresenter.showMediaFiles(PhotoContract.MEDIA_FILE_TYPE.IMAGE);
+                                mPresenter.showMediaFiles(MEDIA_FILE_TYPE.IMAGE);
                                 break;
                             case 1:
                                 // 视频
-                                mPresenter.showMediaFiles(PhotoContract.MEDIA_FILE_TYPE.VIDEO);
+                                mPresenter.showMediaFiles(MEDIA_FILE_TYPE.VIDEO);
                                 break;
                             case 2:
                                 // 音乐
-                                mPresenter.showMediaFiles(PhotoContract.MEDIA_FILE_TYPE.AUDIO);
+                                mPresenter.showMediaFiles(MEDIA_FILE_TYPE.AUDIO);
                                 break;
                         }
                         hideLoading();

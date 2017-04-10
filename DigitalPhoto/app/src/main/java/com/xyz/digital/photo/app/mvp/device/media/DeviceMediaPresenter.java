@@ -1,4 +1,4 @@
-package com.xyz.digital.photo.app.mvp.Photo;
+package com.xyz.digital.photo.app.mvp.device.media;
 
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -7,6 +7,7 @@ import com.xyz.digital.photo.app.bean.FolderBean;
 import com.xyz.digital.photo.app.bean.MediaFileBean;
 import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 import com.xyz.digital.photo.app.bean.e.MEDIA_SHOW_TYPE;
+import com.xyz.digital.photo.app.mvp.Photo.MultiMediaUtils;
 import com.xyz.digital.photo.app.util.ToastUtil;
 
 import java.util.ArrayList;
@@ -18,13 +19,14 @@ import java.util.Map;
  * Created by O on 2017/4/1.
  */
 
-public class PhotoPresenter implements PhotoContract.Presenter {
+public class DeviceMediaPresenter implements DeviceMediaContract.Presenter {
 
-    private PhotoContract.View mView;
+    private DeviceMediaContract.View mView;
+    private DeviceMediaModel mModel;
 
     private MEDIA_SHOW_TYPE mShowType;
 
-    public PhotoPresenter(PhotoContract.View view) {
+    public DeviceMediaPresenter(DeviceMediaContract.View view) {
         mView = view;
         mView.setPresenter(this);
     }

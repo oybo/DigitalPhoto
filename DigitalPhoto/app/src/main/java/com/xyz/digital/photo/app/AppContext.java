@@ -1,7 +1,6 @@
 package com.xyz.digital.photo.app;
 
 import android.app.Application;
-
 import com.lzy.okgo.OkGo;
 
 /**
@@ -19,7 +18,7 @@ public class AppContext extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        mInstance = this;
+        mInstance =this;
 
         //必须调用初始化
         OkGo.init(this);

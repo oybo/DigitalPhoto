@@ -1,4 +1,4 @@
-package com.xyz.digital.photo.app.mvp.Photo;
+package com.xyz.digital.photo.app.mvp.device.media;
 
 import android.app.Activity;
 
@@ -16,7 +16,7 @@ import java.util.List;
  * Created by O on 2017/4/1.
  */
 
-public interface PhotoContract {
+public interface DeviceMediaContract {
 
     interface View extends BaseView<Presenter> {
         Activity _getActivity();

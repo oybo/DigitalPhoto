@@ -10,6 +10,7 @@ import android.provider.MediaStore;
 
 import com.xyz.digital.photo.app.bean.FolderBean;
 import com.xyz.digital.photo.app.bean.MediaFileBean;
+import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 import com.xyz.digital.photo.app.util.PubUtils;
 import com.xyz.digital.photo.app.util.TimeUtil;
 
@@ -72,7 +73,7 @@ public class MultiMediaUtils {
                 mediaFileBean.setFileName(fileName);
                 mediaFileBean.setSize(size);
                 mediaFileBean.setDate(TimeUtil.getFormattedDateString(data, TimeUtil.FORMAT_OTHER_YEAR));
-                mediaFileBean.setFileType(PhotoContract.MEDIA_FILE_TYPE.IMAGE);
+                mediaFileBean.setFileType(MEDIA_FILE_TYPE.IMAGE);
 
                 //根据父路径名将图片放入到mGruopMap中
                 if (!mGruopMap.containsKey(parentName)) {
@@ -136,7 +137,7 @@ public class MultiMediaUtils {
                 mediaFileBean.setFileName(fileName);
                 mediaFileBean.setSize(size);
                 mediaFileBean.setDate(TimeUtil.getFormattedDateString(data, TimeUtil.FORMAT_OTHER_YEAR));
-                mediaFileBean.setFileType(PhotoContract.MEDIA_FILE_TYPE.AUDIO);
+                mediaFileBean.setFileType(MEDIA_FILE_TYPE.AUDIO);
 
                 //根据父路径名将图片放入到mGruopMap中
                 if (!mGruopMap.containsKey(parentName)) {
@@ -204,7 +205,7 @@ public class MultiMediaUtils {
                 mediaFileBean.setFileName(fileName);
                 mediaFileBean.setSize(size);
                 mediaFileBean.setDate(TimeUtil.getFormattedDateString(data / 1000, TimeUtil.FORMAT_OTHER_YEAR));
-                mediaFileBean.setFileType(PhotoContract.MEDIA_FILE_TYPE.VIDEO);
+                mediaFileBean.setFileType(MEDIA_FILE_TYPE.VIDEO);
 
                 //根据父路径名将图片放入到mGruopMap中
                 if (!mGruopMap.containsKey(parentName)) {
