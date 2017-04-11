@@ -33,8 +33,7 @@ public class FolderAdapter extends BaseRecyclerAdapter<FolderBean> {
 
             holder.getImageView(R.id.group_image).setImageResource(R.drawable.defult_audio_icon);
         } else {
-            ImageLoadManager.setImage(item.getTopImagePath(), holder.getImageView(R.id.group_image),
-                    R.drawable.defult_audio_icon);
+            ImageLoadManager.setImage(item.getTopImagePath(), holder.getImageView(R.id.group_image));
         }
     }
 }

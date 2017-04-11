@@ -44,7 +44,8 @@
         <activity android:name=".ui.activity.ConnectWifiActivity" />
 
         <!--  主页面   -->
-        <activity android:name=".ui.activity.MainActivity" />
+        <activity android:name=".ui.activity.MainActivity"
+                  android:launchMode="singleTask"/>
 
         <!--  设备连接登录页面   -->
         <activity

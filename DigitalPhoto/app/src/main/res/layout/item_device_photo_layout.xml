@@ -5,11 +5,14 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <ImageView
+    <com.xyz.digital.photo.app.view.RoundAngleImageView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/item_device_photo_image"
         android:layout_width="120dip"
         android:layout_height="80dip"
-        android:layout_margin="2dip"
-        android:scaleType="centerCrop"/>
+        android:layout_marginRight="5dip"
+        android:scaleType="centerCrop"
+        app:roundHeight="5dip"
+        app:roundWidth="5dip"/>
 
 </LinearLayout>

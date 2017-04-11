@@ -24,8 +24,7 @@ public class DeviceImageAdapter extends BaseRecyclerAdapter<String> {
     @Override
     public void bindData(RecyclerViewHolder holder, int position, String item) {
 
-        ImageLoadManager.setImage(item, holder.getImageView(R.id.item_device_photo_image),
-                R.drawable.defult_audio_icon);
+        ImageLoadManager.setImage(item, holder.getImageView(R.id.item_device_photo_image));
 
     }
 

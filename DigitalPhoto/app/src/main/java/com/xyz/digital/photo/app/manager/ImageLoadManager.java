@@ -3,6 +3,7 @@ package com.xyz.digital.photo.app.manager;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.xyz.digital.photo.app.R;
 
 /**
  * 图片加载类
@@ -26,13 +27,7 @@ public class ImageLoadManager {
 
     public static void setImage(String url, final ImageView imageView) {
 
-        try {
-            Glide.with(imageView.getContext())
-                    .load(url)
-                    .into(imageView);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        setImage(url, imageView, R.drawable.defult_audio_icon);
 
     }
 

@@ -6,17 +6,19 @@
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:orientation="vertical"
-    android:padding="2dip">
+    android:padding="6dip">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="120dip"
         android:layout_centerInParent="true">
 
-        <ImageView
+        <com.xyz.digital.photo.app.view.RoundAngleImageView
             android:id="@+id/item_child_image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            app:roundWidth="5dip"
+            app:roundHeight="5dip"
             android:scaleType="centerCrop"/>
 
         <ImageView
@@ -74,8 +76,6 @@
             android:id="@+id/item_child_date_txt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_margin="2dip"
             android:singleLine="true"
             android:text="2016-1-2"
             android:textColor="#666666"
@@ -85,9 +85,7 @@
             android:id="@+id/item_child_size_txt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_margin="2dip"
-            android:layout_marginLeft="20dip"
+            android:layout_marginLeft="10dip"
             android:singleLine="true"
             android:text="120KB"
             android:textColor="#666666"

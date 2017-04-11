@@ -40,7 +40,7 @@ public class DeviceMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
         if(item.getFileType() == MEDIA_FILE_TYPE.AUDIO) {
             imageView.setImageResource(R.drawable.defult_audio_icon);
         } else {
-            ImageLoadManager.setImage(item.getFilePath(), imageView, R.drawable.defult_audio_icon);
+            ImageLoadManager.setImage(item.getFilePath(), imageView);
         }
 
     }

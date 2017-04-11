@@ -12,11 +12,6 @@
         <item name="android:listDivider">@drawable/view_division</item>
     </style>
 
-    <!-- 主页面书架、书城、书单菜单样式 -->
-    <style name="MainToolbarTheme" parent="@style/BaseToolbarTheme">
-        <item name="android:width">50dip</item>
-    </style>
-
     <!-- 其他页面菜单样式 -->
     <style name="ToolbarTheme" parent="@style/BaseToolbarTheme">
     </style>
@@ -70,7 +65,7 @@
 
     <!-- 分割线 -->
     <style name="view_line">
-        <item name="android:background">#888888</item>
+        <item name="android:background">#E2E2E2</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">0.5dip</item>
     </style>

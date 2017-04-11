@@ -23,8 +23,6 @@ import butterknife.ButterKnife;
 
 public class DeviceDetailActivity extends BaseActivity implements View.OnClickListener {
 
-    @Bind(R.id.device_detail_name_txt) TextView deviceDetailNameTxt;
-    @Bind(R.id.device_detail_address_txt) TextView deviceDetailAddressTxt;
     @Bind(R.id.device_detail_image_count_txt) TextView deviceDetailImageCountTxt;
     @Bind(R.id.device_detail_photo_rview) RecyclerView deviceDetailPhotoRview;
     @Bind(R.id.device_detail_status_txt) TextView deviceDetailStatusTxt;

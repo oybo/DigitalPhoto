@@ -17,7 +17,7 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="10dip"
             android:drawableLeft="@drawable/scan_icon"
-            android:drawablePadding="5dip"
+            android:drawablePadding="10dip"
             android:gravity="center"
             android:text="扫描设备"
             android:textColor="#FFFFFF"
@@ -29,7 +29,6 @@
         android:id="@+id/fragment_device_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#F2F2F2"
         android:scrollbars="none"/>
 
 </LinearLayout>

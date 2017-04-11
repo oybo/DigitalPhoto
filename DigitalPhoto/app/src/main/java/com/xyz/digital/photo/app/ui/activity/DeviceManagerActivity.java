@@ -1,6 +1,7 @@
 package com.xyz.digital.photo.app.ui.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -101,6 +102,8 @@ public class DeviceManagerActivity extends BaseActivity implements View.OnClickL
         mChartRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mChartRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
         mListRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+
+        findViewById(R.id.device_photo_choose_tab).setOnClickListener(this);
     }
 
     private void initData() {
@@ -132,6 +135,11 @@ public class DeviceManagerActivity extends BaseActivity implements View.OnClickL
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
+            case R.id.device_photo_choose_tab:
+                // 切换设备
+                startActivity(new Intent(DeviceManagerActivity.this, MainActivity.class));
+                finish();
+                break;
             case R.id.device_photo_model_type:
                 // 点击切换浏览模式
                 new ChooseModePopView(DeviceManagerActivity.this, this).showAsDropDown(view, 0, 0);

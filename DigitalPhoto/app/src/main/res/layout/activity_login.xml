@@ -1,85 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.xyz.digital.photo.app.view.ChangeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/activity_login_changeview"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <include layout="@layout/include_header_layout" />
+    <include layout="@layout/include_header_layout"/>
 
-    <ImageView
-        android:id="@+id/login_logo_icon_image"
-        android:layout_width="160dip"
-        android:layout_height="160dip"
-        android:layout_gravity="center_horizontal"
-        android:scaleType="center"
-        android:src="@drawable/login_icon" />
-
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20dip"
-        android:layout_marginRight="20dip"
-        android:gravity="center"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <EditText
+        <LinearLayout
+            android:id="@+id/login_input_layout"
             android:layout_width="match_parent"
-            android:layout_height="50dip"
-            android:background="@null"
-            android:drawableLeft="@drawable/login_device_icon"
-            android:drawablePadding="10dip"
-            android:gravity="center_vertical"
-            android:hint="请输入您的设备号"
-            android:inputType="textVisiblePassword"
-            android:singleLine="true"
-            android:textColor="#666666"
-            android:textSize="14sp" />
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginLeft="40dip"
+            android:layout_marginRight="40dip"
+            android:gravity="center"
+            android:orientation="vertical">
 
-        <View
-            style="@style/view_line"
-            android:layout_width="match_parent" />
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="60dip"
+                android:background="@null"
+                android:drawableLeft="@drawable/login_device_icon"
+                android:drawablePadding="12dip"
+                android:gravity="center_vertical"
+                android:hint="请输入您的设备号"
+                android:inputType="textVisiblePassword"
+                android:singleLine="true"
+                android:textColor="#666666"
+                android:textColorHint="#999999"
+                android:textSize="14sp"/>
 
-        <EditText
+            <View
+                style="@style/view_line"
+                android:layout_width="match_parent"/>
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="60dip"
+                android:background="@null"
+                android:drawableLeft="@drawable/login_pwd_icon"
+                android:drawablePadding="12dip"
+                android:gravity="center_vertical"
+                android:hint="请输入您的密码"
+                android:inputType="textPassword"
+                android:singleLine="true"
+                android:textColor="#666666"
+                android:textColorHint="#999999"
+                android:textSize="14sp"/>
+
+            <View
+                style="@style/view_line"
+                android:layout_width="match_parent"/>
+
+        </LinearLayout>
+
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="50dip"
-            android:background="@null"
-            android:drawableLeft="@drawable/login_pwd_icon"
-            android:drawablePadding="10dip"
-            android:gravity="center_vertical"
-            android:hint="请输入您的密码"
-            android:inputType="textPassword"
-            android:singleLine="true"
-            android:textColor="#666666"
-            android:textSize="14sp" />
+            android:layout_height="match_parent"
+            android:layout_above="@id/login_input_layout">
 
-        <View
-            style="@style/view_line"
-            android:layout_width="match_parent" />
+            <ImageView
+                android:id="@+id/login_logo_icon_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:src="@drawable/login_icon"/>
 
-    </LinearLayout>
+        </RelativeLayout>
 
-    <Button
-        android:id="@+id/login_login_bt"
-        android:layout_width="match_parent"
-        android:layout_height="50dip"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginLeft="20dip"
-        android:layout_marginRight="20dip"
-        android:layout_marginTop="30dip"
-        android:background="@drawable/selector_blue_bt_layout"
-        android:text="登录"
-        android:textColor="#FFFFFF"
-        android:textSize="14sp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/login_input_layout"
+            android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/login_forget_password_bt"
-        android:layout_width="100dip"
-        android:layout_height="50dip"
-        android:layout_gravity="center_horizontal"
-        android:gravity="center"
-        android:text="忘记密码?"
-        android:textColor="#666666"
-        android:textSize="14sp" />
+            <Button
+                android:id="@+id/login_login_bt"
+                android:layout_width="match_parent"
+                android:layout_height="45dip"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginLeft="40dip"
+                android:layout_marginRight="40dip"
+                android:layout_marginTop="30dip"
+                android:background="@drawable/selector_blue_bt_layout"
+                android:text="登录"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"/>
 
-</com.xyz.digital.photo.app.view.ChangeLayout>
+            <TextView
+                android:id="@+id/login_forget_password_bt"
+                android:layout_width="100dip"
+                android:layout_height="50dip"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="10dip"
+                android:gravity="center"
+                android:text="忘记密码?"
+                android:textColor="#8C8C8C"
+                android:textSize="14sp"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</LinearLayout>
