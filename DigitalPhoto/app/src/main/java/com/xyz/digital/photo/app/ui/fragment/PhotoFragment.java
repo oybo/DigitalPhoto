@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TabLayout;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
@@ -26,8 +25,8 @@ import com.lzy.okserver.task.ExecutorWithListener;
 import com.lzy.okserver.upload.UploadInfo;
 import com.lzy.okserver.upload.UploadManager;
 import com.xyz.digital.photo.app.R;
-import com.xyz.digital.photo.app.adapter.LocalMediaAdapter;
 import com.xyz.digital.photo.app.adapter.FolderAdapter;
+import com.xyz.digital.photo.app.adapter.LocalMediaAdapter;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.bean.MediaFileBean;
 import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
@@ -39,6 +38,7 @@ import com.xyz.digital.photo.app.ui.activity.PhotoViewActivity;
 import com.xyz.digital.photo.app.ui.activity.ShowImageListActivity;
 import com.xyz.digital.photo.app.util.Constants;
 import com.xyz.digital.photo.app.util.FileUtil;
+import com.xyz.digital.photo.app.util.PreferenceUtils;
 import com.xyz.digital.photo.app.util.ToastUtil;
 import com.xyz.digital.photo.app.view.ChooseModePopView;
 import com.xyz.digital.photo.app.view.DialogTips;
@@ -64,7 +64,6 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
         .OnAllTaskEndListener {
 
     @Bind(R.id.fragment_photo_model_type) ImageView mModelTypeImage;
-    @Bind(R.id.fragment_photo_tablayout) TabLayout mTabLayout;
     @Bind(R.id.fragment_media_chart_recyclerview) RecyclerView mChartRecyclerView;
     @Bind(R.id.fragment_media_list_recyclerview) RecyclerView mListRecyclerView;
     @Bind(R.id.fragment_photo_tab_layout) RelativeLayout mTabBarLayout;
@@ -72,15 +71,19 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
     @Bind(R.id.fragment_photo_select_num_txt) TextView mSelectNumTxt;
     @Bind(R.id.fragment_photo_select_all_txt) TextView mSelectAllTxt;
     @Bind(R.id.view_loading) LoadingView mLoadingView;
+    @Bind(R.id.fragment_photo_image_tab) TextView fragmentPhotoImageTab;
+    @Bind(R.id.fragment_photo_video_tab) TextView fragmentPhotoVideoTab;
+    @Bind(R.id.fragment_photo_audio_tab) TextView fragmentPhotoAudioTab;
+
     private PhotoUploadPopView mPhotoUploadPopView;
-
     private PhotoContract.Presenter mPresenter;
-
     private LocalMediaAdapter mChartAdapter;
     private HashMap<String, List<MediaFileBean>> mListImages;
     private FolderAdapter mListAdapter;
 
-    /**     上传管理      */
+    /**
+     * 上传管理
+     */
     private UploadManager uploadManager;
     private boolean isUpload;
 
@@ -100,44 +103,13 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
     }
 
     private void initView() {
-        mModelTypeImage.setOnClickListener(this);
-        mTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                int pos = tab.getPosition();
-                switch (pos) {
-                    case 0:
-                        // 图片
-                        tab.select();
-                        mPresenter.showMediaFiles(MEDIA_FILE_TYPE.IMAGE);
-                        break;
-                    case 1:
-                        // 视频
-                        tab.select();
-                        mPresenter.showMediaFiles(MEDIA_FILE_TYPE.VIDEO);
-                        break;
-                    case 2:
-                        // 音乐
-                        tab.select();
-                        mPresenter.showMediaFiles(MEDIA_FILE_TYPE.AUDIO);
-                        break;
-                }
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
-            }
-        });
-
         mChartRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         mListRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
 
+        mModelTypeImage.setOnClickListener(this);
+        fragmentPhotoImageTab.setOnClickListener(this);
+        fragmentPhotoVideoTab.setOnClickListener(this);
+        fragmentPhotoAudioTab.setOnClickListener(this);
         getView().findViewById(R.id.fragment_photo_choose_tab).setOnClickListener(this);
         getView().findViewById(R.id.fragment_photo_select_cancel_txt).setOnClickListener(this);
         mSelectAllTxt.setOnClickListener(this);
@@ -164,17 +136,17 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
         mChartAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int pos) {
-                if(isUpload) {
+                if (isUpload) {
                     ToastUtil.showToast(getActivity(), "正在上传,请稍后");
                     return;
                 }
-                if(mSelectLayout.getVisibility() == View.VISIBLE) {
+                if (mSelectLayout.getVisibility() == View.VISIBLE) {
                     // 选择模式
                     mSelectNumTxt.setText("已选择" + mChartAdapter.select(pos) + "项");
                     checkSelectAll();
                 } else {
                     MediaFileBean mediaFileBean = mChartAdapter.getItem(pos);
-                    if(mediaFileBean.getFileType() == MEDIA_FILE_TYPE.IMAGE) {
+                    if (mediaFileBean.getFileType() == MEDIA_FILE_TYPE.IMAGE) {
                         // 图片
                         Intent intent = new Intent(getActivity(), PhotoViewActivity.class);
                         intent.putExtra("path", mediaFileBean.getFilePath());
@@ -184,7 +156,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                         startActivity(intent);
                     } else {
                         String type = "audio/*";
-                        if(mediaFileBean.getFileType() == MEDIA_FILE_TYPE.VIDEO) {
+                        if (mediaFileBean.getFileType() == MEDIA_FILE_TYPE.VIDEO) {
                             type = "video/*";
                         }
 
@@ -202,7 +174,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                 try {
                     String path = mChartAdapter.getItem(position).getFilePath();
                     for (UploadInfo uploadInfo : uploadManager.getAllTask()) {
-                        if(path.equals(uploadInfo.getTaskKey())) {
+                        if (path.equals(uploadInfo.getTaskKey())) {
                             uploadManager.getAllTask().remove(uploadInfo);
                             return;
                         }
@@ -243,7 +215,8 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                 @Override
                 public void run() {
                     mListAdapter.notifyDataSetChanged();
-                    if(isRefreshModel) {
+                    if (isRefreshModel) {
+                        setSelectTab(1);
                         mChartRecyclerView.setVisibility(View.GONE);
                         mListRecyclerView.setVisibility(View.VISIBLE);
                         mModelTypeImage.setImageResource(R.drawable.mode_list_icon);
@@ -265,7 +238,8 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                 @Override
                 public void run() {
                     mChartAdapter.notifyDataSetChanged();
-                    if(isRefreshModel) {
+                    if (isRefreshModel) {
+                        setSelectTab(1);
                         mListRecyclerView.setVisibility(View.GONE);
                         mChartRecyclerView.setVisibility(View.VISIBLE);
                         mModelTypeImage.setImageResource(R.drawable.mode_chrat_icon);
@@ -294,7 +268,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
 
     @Override
     public void onClick(View view) {
-        if(isUpload) {
+        if (isUpload) {
             ToastUtil.showToast(getActivity(), "正在上传,请稍后");
             return;
         }
@@ -305,10 +279,34 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                 break;
             case R.id.fragment_photo_choose_tab:
                 // 点击选择
-                if(mChartRecyclerView.getVisibility() == View.VISIBLE) {
+                if (mChartRecyclerView.getVisibility() == View.VISIBLE) {
                     // 图表模式
                     showSelect();
                 }
+                break;
+            case R.id.fragment_photo_image_tab:
+                // 图片
+                if(fragmentPhotoImageTab.isSelected()) {
+                    return;
+                }
+                mPresenter.showMediaFiles(MEDIA_FILE_TYPE.IMAGE);
+                setSelectTab(1);
+                break;
+            case R.id.fragment_photo_video_tab:
+                // 视频
+                if(fragmentPhotoVideoTab.isSelected()) {
+                    return;
+                }
+                mPresenter.showMediaFiles(MEDIA_FILE_TYPE.VIDEO);
+                setSelectTab(2);
+                break;
+            case R.id.fragment_photo_audio_tab:
+                // 音乐
+                if(fragmentPhotoAudioTab.isSelected()) {
+                    return;
+                }
+                mPresenter.showMediaFiles(MEDIA_FILE_TYPE.AUDIO);
+                setSelectTab(3);
                 break;
             case R.id.fragment_photo_select_cancel_txt:
                 // 取消
@@ -316,7 +314,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                 break;
             case R.id.fragment_photo_select_all_txt:
                 // 全选
-                if(isSelectAll()) {
+                if (isSelectAll()) {
                     // 取消全选
                     mSelectNumTxt.setText("已选择" + mChartAdapter.clearSelect() + "项");
                 } else {
@@ -343,18 +341,35 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
         }
     }
 
+    private void setSelectTab(int id) {
+        fragmentPhotoImageTab.setSelected(false);
+        fragmentPhotoVideoTab.setSelected(false);
+        fragmentPhotoAudioTab.setSelected(false);
+        switch (id) {
+            case 1:
+                fragmentPhotoImageTab.setSelected(true);
+                break;
+            case 2:
+                fragmentPhotoVideoTab.setSelected(true);
+                break;
+            case 3:
+                fragmentPhotoAudioTab.setSelected(true);
+                break;
+        }
+    }
+
     private void uploadFiles() {
         isUpload = true;
-         for(MediaFileBean bean : mChartAdapter.getSelectFiles()) {
-             MyUploadListener listener = new MyUploadListener();
-             listener.setUserTag(mChartRecyclerView.getChildAt(bean.getPosition()));
+        for (MediaFileBean bean : mChartAdapter.getSelectFiles()) {
+            MyUploadListener listener = new MyUploadListener();
+            listener.setUserTag(mChartRecyclerView.getChildAt(bean.getPosition()));
 
-             PostRequest postRequest = OkGo.post(Constants.URL_FORM_UPLOAD);
-             postRequest.params("fileKey" + bean.getPosition(), new File(bean.getFilePath()));
-             uploadManager.addTask(bean.getFilePath(), postRequest, listener);
+            PostRequest postRequest = OkGo.post(Constants.URL_FORM_UPLOAD);
+            postRequest.params("fileKey" + bean.getPosition(), new File(bean.getFilePath()));
+            uploadManager.addTask(bean.getFilePath(), postRequest, listener);
 
-             mChartAdapter.addUpload(bean.getPosition());
-         }
+            mChartAdapter.addUpload(bean.getPosition());
+        }
     }
 
     private void deleteFiles() {
@@ -370,7 +385,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
 
                     @Override
                     protected Void doInBackground(Void... voids) {
-                        for(MediaFileBean file : mChartAdapter.getSelectFiles()) {
+                        for (MediaFileBean file : mChartAdapter.getSelectFiles()) {
                             FileUtil.deleteFile(file.getFilePath());
                         }
                         return null;
@@ -380,19 +395,15 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                     protected void onPostExecute(Void aVoid) {
                         super.onPostExecute(aVoid);
                         mSelectNumTxt.setText("已选择" + mChartAdapter.clearSelect() + "项");
-                        switch (mTabLayout.getSelectedTabPosition()) {
-                            case 0:
-                                // 图片
-                                mPresenter.showMediaFiles(MEDIA_FILE_TYPE.IMAGE);
-                                break;
-                            case 1:
-                                // 视频
-                                mPresenter.showMediaFiles(MEDIA_FILE_TYPE.VIDEO);
-                                break;
-                            case 2:
-                                // 音乐
-                                mPresenter.showMediaFiles(MEDIA_FILE_TYPE.AUDIO);
-                                break;
+                        if(fragmentPhotoImageTab.isSelected()) {
+                            // 图片
+                            mPresenter.showMediaFiles(MEDIA_FILE_TYPE.IMAGE);
+                        } else if(fragmentPhotoVideoTab.isSelected()) {
+                            // 视频
+                            mPresenter.showMediaFiles(MEDIA_FILE_TYPE.VIDEO);
+                        } else if(fragmentPhotoAudioTab.isSelected()) {
+                            // 音乐
+                            mPresenter.showMediaFiles(MEDIA_FILE_TYPE.AUDIO);
                         }
                         hideLoading();
                     }
@@ -429,7 +440,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
     }
 
     private void checkSelectAll() {
-        if(isSelectAll()) {
+        if (isSelectAll()) {
             mSelectAllTxt.setText("取消全选");
         } else {
             mSelectAllTxt.setText("全选");
@@ -449,7 +460,8 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
 
         @Override
         public void onProgress(UploadInfo uploadInfo) {
-            Log.e("MyUploadListener", "onProgress:" + uploadInfo.getTotalLength() + " " + uploadInfo.getUploadLength() + " " + uploadInfo.getProgress());
+            Log.e("MyUploadListener", "onProgress:" + uploadInfo.getTotalLength() + " " + uploadInfo.getUploadLength() + " " + uploadInfo
+                    .getProgress());
 
             refresh(uploadInfo);
         }
@@ -471,7 +483,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
 
         private void refresh(UploadInfo uploadInfo) {
             ProgressPieView pieView = (ProgressPieView) mChartRecyclerView.findViewWithTag("ProgressPieView" + uploadInfo.getTaskKey());
-            if(pieView != null) {
+            if (pieView != null) {
                 if (uploadInfo.getState() == DownloadManager.NONE) {
                     pieView.setText("准备");
                 } else if (uploadInfo.getState() == UploadManager.WAITING) {
@@ -483,6 +495,13 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                     pieView.setText("错误");
                 } else if (uploadInfo.getState() == UploadManager.FINISH) {
                     pieView.setText("成功");
+                    for(MediaFileBean mediaFileBean : mChartAdapter.getList()) {
+                        if(mediaFileBean.getFilePath().equals(uploadInfo.getTaskKey())) {
+                            PreferenceUtils.getInstance().putBoolen(mediaFileBean.getFilePath(), true);
+                            mChartAdapter.notifyItemChanged(mediaFileBean.getPosition());
+                            return;
+                        }
+                    }
                 }
             }
         }

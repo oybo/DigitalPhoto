@@ -16,6 +16,8 @@ public class MediaFileBean implements Serializable {
     private String filePath;
     private String size;
     private String date;
+    // 时长
+    private String duration;
     // 类型
     private MEDIA_FILE_TYPE fileType;
     private int position;
@@ -50,6 +52,14 @@ public class MediaFileBean implements Serializable {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public String getDuration() {
+        return duration;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
     }
 
     public int getPosition() {

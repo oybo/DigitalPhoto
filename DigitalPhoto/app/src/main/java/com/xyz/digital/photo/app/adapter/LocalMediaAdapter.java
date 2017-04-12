@@ -2,8 +2,10 @@ package com.xyz.digital.photo.app.adapter;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.view.View;
-import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
@@ -11,7 +13,9 @@ import com.xyz.digital.photo.app.adapter.base.RecyclerViewHolder;
 import com.xyz.digital.photo.app.bean.MediaFileBean;
 import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 import com.xyz.digital.photo.app.manager.ImageLoadManager;
+import com.xyz.digital.photo.app.util.PreferenceUtils;
 import com.xyz.digital.photo.app.view.ProgressPieView;
+import com.xyz.digital.photo.app.view.RoundAngleImageView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,13 +46,24 @@ public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
 
         holder.setText(R.id.item_child_size_txt, item.getSize());
 
-        ImageView imageView = holder.getImageView(R.id.item_child_image);
+        RoundAngleImageView imageView = (RoundAngleImageView) holder.getView(R.id.item_child_image);
 
-        // 图片
+        TextView durationTxt = holder.getTextView(R.id.item_child_upload_duration_txt);
+        durationTxt.setVisibility(!TextUtils.isEmpty(item.getDuration()) ? View.VISIBLE : View.GONE);
+        durationTxt.setText(item.getDuration());
+
         if(item.getFileType() == MEDIA_FILE_TYPE.AUDIO) {
             imageView.setImageResource(R.drawable.defult_audio_icon);
+            Drawable isNewIcon = mContext.getResources().getDrawable(R.drawable.audio_time_icon);
+            isNewIcon.setBounds(0, 0, isNewIcon.getMinimumWidth(), isNewIcon.getMinimumHeight());
+            durationTxt.setCompoundDrawables(isNewIcon, null, null, null);
         } else {
             ImageLoadManager.setImage(item.getFilePath(), imageView);
+            if(item.getFileType() == MEDIA_FILE_TYPE.VIDEO) {
+                Drawable isNewIcon = mContext.getResources().getDrawable(R.drawable.video_time_icon);
+                isNewIcon.setBounds(0, 0, isNewIcon.getMinimumWidth(), isNewIcon.getMinimumHeight());
+                durationTxt.setCompoundDrawables(isNewIcon, null, null, null);
+            }
         }
 
         // 判断是否选中
@@ -70,6 +85,9 @@ public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
             holder.getView(R.id.item_child_upload_cancel).setVisibility(View.GONE);
             pieView.setVisibility(View.GONE);
         }
+
+        boolean isUpload = PreferenceUtils.getInstance().getBoolean(item.getFilePath(), false);
+        holder.getView(R.id.item_child_isupload_txt).setVisibility(isUpload ? View.VISIBLE : View.GONE);
 
     }
 

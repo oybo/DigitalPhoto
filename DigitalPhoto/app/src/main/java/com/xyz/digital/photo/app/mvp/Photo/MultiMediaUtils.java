@@ -131,11 +131,13 @@ public class MultiMediaUtils {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                long duration = cursor.getLong(cursor.getColumnIndex(MediaStore.Video.Media.DURATION));
 
                 MediaFileBean mediaFileBean = new MediaFileBean();
                 mediaFileBean.setFilePath(path);
                 mediaFileBean.setFileName(fileName);
                 mediaFileBean.setSize(size);
+                mediaFileBean.setDuration(TimeUtil.getFormattedDateString(duration / 1000, TimeUtil.FORMAT_H_M));
                 mediaFileBean.setDate(TimeUtil.getFormattedDateString(data, TimeUtil.FORMAT_OTHER_YEAR));
                 mediaFileBean.setFileType(MEDIA_FILE_TYPE.AUDIO);
 
@@ -167,13 +169,7 @@ public class MultiMediaUtils {
         Cursor cursor = null;
         try {
             cursor = context.getContentResolver().query(
-                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                    new String[]{
-                            MediaStore.Video.Media._ID,
-                            MediaStore.Video.Media.DATA,
-                            MediaStore.Video.Media.TITLE,
-                            MediaStore.Video.Media.MIME_TYPE
-                    },
+                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI, null,
                     null, null, null);
 
             while (cursor.moveToNext()) {
@@ -199,11 +195,13 @@ public class MultiMediaUtils {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                long duration = cursor.getLong(cursor.getColumnIndex(MediaStore.Video.Media.DURATION));
 
                 MediaFileBean mediaFileBean = new MediaFileBean();
                 mediaFileBean.setFilePath(path);
                 mediaFileBean.setFileName(fileName);
                 mediaFileBean.setSize(size);
+                mediaFileBean.setDuration(TimeUtil.getFormattedDateString(duration / 1000, TimeUtil.FORMAT_H_M));
                 mediaFileBean.setDate(TimeUtil.getFormattedDateString(data / 1000, TimeUtil.FORMAT_OTHER_YEAR));
                 mediaFileBean.setFileType(MEDIA_FILE_TYPE.VIDEO);
 

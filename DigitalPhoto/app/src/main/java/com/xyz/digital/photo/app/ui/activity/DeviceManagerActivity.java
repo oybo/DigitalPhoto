@@ -4,13 +4,13 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TabLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.DeviceMediaAdapter;
@@ -31,18 +31,23 @@ import java.util.HashMap;
 import java.util.List;
 
 import butterknife.Bind;
+import butterknife.ButterKnife;
 
 /**
  * Created by O on 2017/4/5.
  */
 
-public class DeviceManagerActivity extends BaseActivity implements View.OnClickListener, DeviceMediaContract.View, BaseRecyclerAdapter.onInternalClickListener {
+public class DeviceManagerActivity extends BaseActivity implements View.OnClickListener, DeviceMediaContract.View, BaseRecyclerAdapter
+        .onInternalClickListener {
 
     @Bind(R.id.device_photo_model_type) ImageView mModelTypeImage;
-    @Bind(R.id.device_photo_tablayout) TabLayout mTabLayout;
     @Bind(R.id.device_media_chart_recyclerview) RecyclerView mChartRecyclerView;
     @Bind(R.id.device_media_list_recyclerview) RecyclerView mListRecyclerView;
     @Bind(R.id.view_loading) LoadingView mLoadingView;
+    @Bind(R.id.fragment_photo_image_tab) TextView fragmentPhotoImageTab;
+    @Bind(R.id.fragment_photo_video_tab) TextView fragmentPhotoVideoTab;
+    @Bind(R.id.fragment_photo_audio_tab) TextView fragmentPhotoAudioTab;
+    @Bind(R.id.fragment_photo_play_tab) TextView fragmentPhotoPlayTab;
 
     private DeviceMediaContract.Presenter mPresenter;
 
@@ -53,56 +58,22 @@ public class DeviceManagerActivity extends BaseActivity implements View.OnClickL
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_manager);
+        ButterKnife.bind(this);
 
         initView();
         initData();
     }
 
     private void initView() {
-        mModelTypeImage.setOnClickListener(this);
-        mTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                int pos = tab.getPosition();
-                switch (pos) {
-                    case 0:
-                        // 图片
-                        tab.select();
-                        mPresenter.showMediaFiles(MEDIA_FILE_TYPE.IMAGE);
-                        break;
-                    case 1:
-                        // 视频
-                        tab.select();
-                        mPresenter.showMediaFiles(MEDIA_FILE_TYPE.VIDEO);
-                        break;
-                    case 2:
-                        // 音乐
-                        tab.select();
-                        mPresenter.showMediaFiles(MEDIA_FILE_TYPE.AUDIO);
-                        break;
-                    case 3:
-                        // 播放中
-                        tab.select();
-                        mPresenter.showMediaFiles(MEDIA_FILE_TYPE.PLAY);
-                        break;
-                }
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
-            }
-        });
-
         mChartRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mChartRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
         mListRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
 
+        mModelTypeImage.setOnClickListener(this);
+        fragmentPhotoImageTab.setOnClickListener(this);
+        fragmentPhotoVideoTab.setOnClickListener(this);
+        fragmentPhotoAudioTab.setOnClickListener(this);
+        fragmentPhotoPlayTab.setOnClickListener(this);
         findViewById(R.id.device_photo_choose_tab).setOnClickListener(this);
     }
 
@@ -135,6 +106,38 @@ public class DeviceManagerActivity extends BaseActivity implements View.OnClickL
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
+            case R.id.fragment_photo_image_tab:
+                // 图片
+                if(fragmentPhotoImageTab.isSelected()) {
+                   return;
+                }
+                mPresenter.showMediaFiles(MEDIA_FILE_TYPE.IMAGE);
+                setSelectTab(1);
+                break;
+            case R.id.fragment_photo_video_tab:
+                // 视频
+                if(fragmentPhotoVideoTab.isSelected()) {
+                    return;
+                }
+                mPresenter.showMediaFiles(MEDIA_FILE_TYPE.VIDEO);
+                setSelectTab(2);
+                break;
+            case R.id.fragment_photo_audio_tab:
+                // 音乐
+                if(fragmentPhotoAudioTab.isSelected()) {
+                    return;
+                }
+                mPresenter.showMediaFiles(MEDIA_FILE_TYPE.AUDIO);
+                setSelectTab(3);
+                break;
+            case R.id.fragment_photo_play_tab:
+                // 播放中
+                if(fragmentPhotoPlayTab.isSelected()) {
+                    return;
+                }
+                mPresenter.showMediaFiles(MEDIA_FILE_TYPE.PLAY);
+                setSelectTab(4);
+                break;
             case R.id.device_photo_choose_tab:
                 // 切换设备
                 startActivity(new Intent(DeviceManagerActivity.this, MainActivity.class));
@@ -151,6 +154,27 @@ public class DeviceManagerActivity extends BaseActivity implements View.OnClickL
             case R.id.view_list_mode:
                 // 列表模式
                 mPresenter.showType(MEDIA_SHOW_TYPE.LIST);
+                break;
+        }
+    }
+
+    private void setSelectTab(int id) {
+        fragmentPhotoImageTab.setSelected(false);
+        fragmentPhotoVideoTab.setSelected(false);
+        fragmentPhotoAudioTab.setSelected(false);
+        fragmentPhotoPlayTab.setSelected(false);
+        switch (id) {
+            case 1:
+                fragmentPhotoImageTab.setSelected(true);
+                break;
+            case 2:
+                fragmentPhotoVideoTab.setSelected(true);
+                break;
+            case 3:
+                fragmentPhotoAudioTab.setSelected(true);
+                break;
+            case 4:
+                fragmentPhotoPlayTab.setSelected(true);
                 break;
         }
     }
@@ -189,7 +213,8 @@ public class DeviceManagerActivity extends BaseActivity implements View.OnClickL
                 @Override
                 public void run() {
                     mListAdapter.notifyDataSetChanged();
-                    if(isRefreshModel) {
+                    if (isRefreshModel) {
+                        setSelectTab(1);
                         mChartRecyclerView.setVisibility(View.GONE);
                         mListRecyclerView.setVisibility(View.VISIBLE);
                         mModelTypeImage.setImageResource(R.drawable.mode_list_icon);
@@ -211,7 +236,8 @@ public class DeviceManagerActivity extends BaseActivity implements View.OnClickL
                 @Override
                 public void run() {
                     mChartAdapter.notifyDataSetChanged();
-                    if(isRefreshModel) {
+                    if (isRefreshModel) {
+                        setSelectTab(1);
                         mListRecyclerView.setVisibility(View.GONE);
                         mChartRecyclerView.setVisibility(View.VISIBLE);
                         mModelTypeImage.setImageResource(R.drawable.mode_chrat_icon);

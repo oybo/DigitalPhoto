@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
-        android:background="#F8F8F8">
+        android:background="#F2F2F2">
     </RelativeLayout>
 
     <LinearLayout
@@ -31,12 +31,12 @@
 
             <TextView
                 android:id="@+id/main_device_bt"
-                android:drawableTop="@drawable/tab_device_selector"
                 android:layout_width="0dip"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_weight="1"
                 android:clickable="true"
+                android:drawableTop="@drawable/tab_device_selector"
                 android:gravity="center"
                 android:onClick="onTabClicked"
                 android:text="设备"
@@ -46,11 +46,11 @@
             <TextView
                 android:id="@+id/main_photo_bt"
                 android:layout_width="0dip"
-                android:drawableTop="@drawable/tab_photo_selector"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_weight="1"
                 android:clickable="true"
+                android:drawableTop="@drawable/tab_photo_selector"
                 android:gravity="center"
                 android:onClick="onTabClicked"
                 android:paddingBottom="3dip"

@@ -5,14 +5,10 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="8dip"
-        android:background="#F2F2F2"/>
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="60dip"
+        android:layout_marginTop="8dip"
         android:background="#FFFFFF"
         android:paddingLeft="15dip"
         android:paddingRight="15dip">
@@ -37,9 +33,8 @@
             android:layout_toRightOf="@id/item_wifi_device_position_txt"
             android:singleLine="true"
             android:text="一号机"
-            android:textColor="#666666"
-            android:textSize="14sp"
-            android:textStyle="bold"/>
+            android:textColor="#000000"
+            android:textSize="15sp"/>
 
         <ImageView
             android:id="@+id/item_wifi_device_status_txt"
@@ -59,7 +54,7 @@
             android:layout_toLeftOf="@id/item_wifi_device_status_txt"
             android:layout_toRightOf="@id/item_wifi_device_name_txt"
             android:text="深圳南山区科技园联想大厦"
-            android:textColor="#666666"
+            android:textColor="#767676"
             android:textSize="14sp"/>
 
     </RelativeLayout>

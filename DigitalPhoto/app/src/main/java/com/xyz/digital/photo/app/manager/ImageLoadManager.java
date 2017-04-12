@@ -27,7 +27,7 @@ public class ImageLoadManager {
 
     public static void setImage(String url, final ImageView imageView) {
 
-        setImage(url, imageView, R.drawable.defult_audio_icon);
+        setImage(url, imageView, R.drawable.defult_video_icon);
 
     }
 

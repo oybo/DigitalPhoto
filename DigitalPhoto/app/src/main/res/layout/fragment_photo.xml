@@ -25,46 +25,65 @@
                 android:scaleType="center"
                 android:src="@drawable/mode_chrat_icon"/>
 
-            <TextView
-                android:id="@+id/fragment_photo_choose_tab"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:gravity="center"
-                android:paddingLeft="10dip"
-                android:paddingRight="10dip"
-                android:text="选择"
-                android:textColor="#FFFFFF"
-                android:textSize="14sp"/>
+                android:orientation="horizontal">
 
-            <android.support.design.widget.TabLayout
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                android:id="@+id/fragment_photo_tablayout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_toLeftOf="@id/fragment_photo_choose_tab"
-                app:tabGravity="center"
-                app:tabSelectedTextColor="#EBDF33"
-                app:tabTextColor="#FFFFFF">
-
-                <android.support.design.widget.TabItem
+                <TextView
+                    android:id="@+id/fragment_photo_image_tab"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="图片"/>
+                    android:layout_height="match_parent"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:gravity="center"
+                    android:paddingLeft="7dip"
+                    android:paddingRight="7dip"
+                    android:text="图片"
+                    android:textColor="@drawable/selector_txt_tab"
+                    android:textSize="14sp"/>
 
-                <android.support.design.widget.TabItem
+                <TextView
+                    android:id="@+id/fragment_photo_video_tab"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="视频"/>
+                    android:layout_height="match_parent"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:gravity="center"
+                    android:paddingLeft="7dip"
+                    android:paddingRight="7dip"
+                    android:text="视频"
+                    android:textColor="@drawable/selector_txt_tab"
+                    android:textSize="14sp"/>
 
-                <android.support.design.widget.TabItem
+                <TextView
+                    android:id="@+id/fragment_photo_audio_tab"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="音乐"/>
+                    android:layout_height="match_parent"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:gravity="center"
+                    android:paddingLeft="7dip"
+                    android:paddingRight="7dip"
+                    android:text="音乐"
+                    android:textColor="@drawable/selector_txt_tab"
+                    android:textSize="14sp"/>
 
-            </android.support.design.widget.TabLayout>
+                <TextView
+                    android:id="@+id/fragment_photo_choose_tab"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:gravity="center"
+                    android:paddingLeft="7dip"
+                    android:paddingRight="7dip"
+                    android:text="选择"
+                    android:textColor="@drawable/selector_txt_tab"
+                    android:textSize="14sp"/>
+
+            </LinearLayout>
 
         </RelativeLayout>
 
