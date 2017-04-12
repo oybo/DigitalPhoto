@@ -1,5 +1,6 @@
 package com.xyz.digital.photo.app.ui.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -12,9 +13,11 @@ import android.widget.TextView;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.ui.BaseActivity;
 import com.xyz.digital.photo.app.ui.fragment.DeviceFragment;
+import com.xyz.digital.photo.app.ui.fragment.DevicePhotoFragment;
 import com.xyz.digital.photo.app.ui.fragment.PhotoFragment;
 import com.xyz.digital.photo.app.ui.fragment.RemoteControlFragment;
 import com.xyz.digital.photo.app.ui.fragment.SetFragment;
+import com.xyz.digital.photo.app.util.Constants;
 import com.xyz.digital.photo.app.util.ToastUtil;
 
 import butterknife.Bind;
@@ -36,12 +39,16 @@ public class MainActivity extends BaseActivity {
     private Fragment[] fragments;
     /**    设备      */
     private DeviceFragment mDeviceFragment;
+    /**    设备相册管理      */
+    private DevicePhotoFragment mDevicePhotoFragment;
     /**    相册      */
     private PhotoFragment mPhotoFragment;
     /**    遥控器      */
     private RemoteControlFragment mRemoteControlFragment;
     /**    设置      */
     private SetFragment mSetFragment;
+
+    private boolean mLoginMain;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +58,16 @@ public class MainActivity extends BaseActivity {
 
         initView();
         initFragment(savedInstanceState);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        String type = intent.getStringExtra("type");
+        if(Constants.LOGIN_MAIN.equals(type)) {
+            mLoginMain = true;
+            currentFragment(1);
+        }
     }
 
     private void initView() {
@@ -63,6 +80,7 @@ public class MainActivity extends BaseActivity {
         if (savedInstanceState != null) {
             FragmentManager fm = getSupportFragmentManager();
             mDeviceFragment = (DeviceFragment) fm.findFragmentByTag(DeviceFragment.class.getName());
+            mDevicePhotoFragment = (DevicePhotoFragment) fm.findFragmentByTag(DevicePhotoFragment.class.getName());
             mPhotoFragment = (PhotoFragment) fm.findFragmentByTag(PhotoFragment.class.getName());
             mSetFragment = (SetFragment) fm.findFragmentByTag(SetFragment.class.getName());
 
@@ -71,6 +89,9 @@ public class MainActivity extends BaseActivity {
         }
         if (mDeviceFragment == null) {
             mDeviceFragment = new DeviceFragment();
+        }
+        if (mDevicePhotoFragment == null) {
+            mDevicePhotoFragment = new DevicePhotoFragment();
         }
         if (mPhotoFragment == null) {
             mPhotoFragment = new PhotoFragment();
@@ -82,7 +103,7 @@ public class MainActivity extends BaseActivity {
             mSetFragment = new SetFragment();
         }
 
-        fragments = new Fragment[]{ mDeviceFragment, mPhotoFragment, mRemoteControlFragment, mSetFragment };
+        fragments = new Fragment[]{ mDeviceFragment, mPhotoFragment, mRemoteControlFragment, mSetFragment, mDevicePhotoFragment };
 
         currentTab(tab_index);
         currentFragment(fgrament_index);
@@ -95,6 +116,9 @@ public class MainActivity extends BaseActivity {
             // 设备
             tabIndex = 0;
             fragmentIndex = 0;
+            if(mLoginMain) {
+                fragmentIndex = 4;
+            }
         } else if (view == mainPhotoBt) {
             // 相册
             tabIndex = 1;

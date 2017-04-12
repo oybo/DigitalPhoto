@@ -136,10 +136,6 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
         mChartAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int pos) {
-                if (isUpload) {
-                    ToastUtil.showToast(getActivity(), "正在上传,请稍后");
-                    return;
-                }
                 if (mSelectLayout.getVisibility() == View.VISIBLE) {
                     // 选择模式
                     mSelectNumTxt.setText("已选择" + mChartAdapter.select(pos) + "项");
@@ -175,7 +171,9 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                     String path = mChartAdapter.getItem(position).getFilePath();
                     for (UploadInfo uploadInfo : uploadManager.getAllTask()) {
                         if (path.equals(uploadInfo.getTaskKey())) {
+                            uploadInfo.getTask().cancel(true);
                             uploadManager.getAllTask().remove(uploadInfo);
+                            mChartAdapter.addUpload(position);
                             return;
                         }
                     }
@@ -316,7 +314,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                 // 全选
                 if (isSelectAll()) {
                     // 取消全选
-                    mSelectNumTxt.setText("已选择" + mChartAdapter.clearSelect() + "项");
+                    mSelectNumTxt.setText("已选择" + mChartAdapter.clearSelectAll() + "项");
                 } else {
                     mSelectNumTxt.setText("已选择" + mChartAdapter.selectAll() + "项");
                 }
@@ -332,7 +330,12 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                 break;
             case R.id.pop_upload_to_device_bt:
                 // 上传到设备
+                if(mChartAdapter.getSelectFiles().size() == 0) {
+                    ToastUtil.showToast(getActivity(), "请选择要上传的文件");
+                    return;
+                }
                 uploadFiles();
+                closeSelect();
                 break;
             case R.id.pop_delete_bt:
                 // 删除
@@ -360,13 +363,12 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
 
     private void uploadFiles() {
         isUpload = true;
-        for (MediaFileBean bean : mChartAdapter.getSelectFiles()) {
-            MyUploadListener listener = new MyUploadListener();
-            listener.setUserTag(mChartRecyclerView.getChildAt(bean.getPosition()));
-
+        List<MediaFileBean> uploads = mChartAdapter.getSelectFiles();
+        for (int i = 0; i < uploads.size(); i++) {
+            MediaFileBean bean = uploads.get(i);
             PostRequest postRequest = OkGo.post(Constants.URL_FORM_UPLOAD);
-            postRequest.params("fileKey" + bean.getPosition(), new File(bean.getFilePath()));
-            uploadManager.addTask(bean.getFilePath(), postRequest, listener);
+            postRequest.params("fileKey" + i, new File(bean.getFilePath()));
+            uploadManager.addTask(bean.getFilePath(), postRequest, new MyUploadListener());
 
             mChartAdapter.addUpload(bean.getPosition());
         }
@@ -394,7 +396,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                     @Override
                     protected void onPostExecute(Void aVoid) {
                         super.onPostExecute(aVoid);
-                        mSelectNumTxt.setText("已选择" + mChartAdapter.clearSelect() + "项");
+                        // 重新刷新下数据
                         if(fragmentPhotoImageTab.isSelected()) {
                             // 图片
                             mPresenter.showMediaFiles(MEDIA_FILE_TYPE.IMAGE);
@@ -405,7 +407,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                             // 音乐
                             mPresenter.showMediaFiles(MEDIA_FILE_TYPE.AUDIO);
                         }
-                        hideLoading();
+                        mSelectNumTxt.setText("已选择0项");
                     }
                 }.execute();
             }
@@ -416,6 +418,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
         mTabBarLayout.setVisibility(View.GONE);
         mSelectLayout.setVisibility(View.VISIBLE);
 
+        mSelectNumTxt.setText("已选择0项");
         mPhotoUploadPopView.showAtLocation(mTabBarLayout, Gravity.BOTTOM, 0, 0);
     }
 
@@ -424,6 +427,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
         mSelectLayout.setVisibility(View.GONE);
 
         mPhotoUploadPopView.dismiss();
+        mChartAdapter.clearSelect();
     }
 
     public boolean isShowSelect() {
@@ -432,7 +436,6 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
 
     public void closeSelect() {
         hideSelect();
-        mSelectNumTxt.setText("已选择" + mChartAdapter.clearSelect() + "项");
     }
 
     private boolean isSelectAll() {

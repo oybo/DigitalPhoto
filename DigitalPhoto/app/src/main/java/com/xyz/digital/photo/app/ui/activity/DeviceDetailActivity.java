@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.DeviceImageAdapter;
 import com.xyz.digital.photo.app.ui.BaseActivity;
+import com.xyz.digital.photo.app.util.Constants;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -82,7 +83,9 @@ public class DeviceDetailActivity extends BaseActivity implements View.OnClickLi
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.device_detail_manager_bt:
-                startActivity(new Intent(DeviceDetailActivity.this, DeviceManagerActivity.class));
+                Intent intent = new Intent(DeviceDetailActivity.this, MainActivity.class);
+                intent.putExtra("type", Constants.LOGIN_MAIN);
+                startActivity(intent);
                 break;
         }
     }

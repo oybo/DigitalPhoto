@@ -6,7 +6,6 @@ import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
-
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.adapter.base.RecyclerViewHolder;
@@ -16,7 +15,6 @@ import com.xyz.digital.photo.app.manager.ImageLoadManager;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
 import com.xyz.digital.photo.app.view.ProgressPieView;
 import com.xyz.digital.photo.app.view.RoundAngleImageView;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,14 +50,14 @@ public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
         durationTxt.setVisibility(!TextUtils.isEmpty(item.getDuration()) ? View.VISIBLE : View.GONE);
         durationTxt.setText(item.getDuration());
 
-        if(item.getFileType() == MEDIA_FILE_TYPE.AUDIO) {
+        if (item.getFileType() == MEDIA_FILE_TYPE.AUDIO) {
             imageView.setImageResource(R.drawable.defult_audio_icon);
             Drawable isNewIcon = mContext.getResources().getDrawable(R.drawable.audio_time_icon);
             isNewIcon.setBounds(0, 0, isNewIcon.getMinimumWidth(), isNewIcon.getMinimumHeight());
             durationTxt.setCompoundDrawables(isNewIcon, null, null, null);
         } else {
             ImageLoadManager.setImage(item.getFilePath(), imageView);
-            if(item.getFileType() == MEDIA_FILE_TYPE.VIDEO) {
+            if (item.getFileType() == MEDIA_FILE_TYPE.VIDEO) {
                 Drawable isNewIcon = mContext.getResources().getDrawable(R.drawable.video_time_icon);
                 isNewIcon.setBounds(0, 0, isNewIcon.getMinimumWidth(), isNewIcon.getMinimumHeight());
                 durationTxt.setCompoundDrawables(isNewIcon, null, null, null);
@@ -67,7 +65,7 @@ public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
         }
 
         // 判断是否选中
-        if(mSelectMaps.containsKey(item.getFilePath())) {
+        if (mSelectMaps.containsKey(item.getFilePath())) {
             imageView.setColorFilter(Color.parseColor("#77000000"));
             holder.getView(R.id.item_child_select_image).setVisibility(View.VISIBLE);
         } else {
@@ -78,17 +76,26 @@ public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
         // 判断是否上传
         ProgressPieView pieView = (ProgressPieView) holder.getView(R.id.item_child_upload_progress);
         pieView.setTag("ProgressPieView" + item.getFilePath());
-        if(mUploadMaps.containsKey(item.getFilePath())) {
+        if (mUploadMaps.containsKey(item.getFilePath())) {
+            imageView.setColorFilter(Color.parseColor("#77000000"));
             holder.getView(R.id.item_child_upload_cancel).setVisibility(View.VISIBLE);
             pieView.setVisibility(View.VISIBLE);
         } else {
+            imageView.setColorFilter(null);
             holder.getView(R.id.item_child_upload_cancel).setVisibility(View.GONE);
             pieView.setVisibility(View.GONE);
         }
 
         boolean isUpload = PreferenceUtils.getInstance().getBoolean(item.getFilePath(), false);
         holder.getView(R.id.item_child_isupload_txt).setVisibility(isUpload ? View.VISIBLE : View.GONE);
-
+        if (isUpload) {
+            imageView.setColorFilter(null);
+            holder.getView(R.id.item_child_isupload_txt).setVisibility(View.VISIBLE);
+            holder.getView(R.id.item_child_upload_cancel).setVisibility(View.GONE);
+            pieView.setText("成功");
+        } else {
+            holder.getView(R.id.item_child_isupload_txt).setVisibility(View.GONE);
+        }
     }
 
     private HashMap<String, MediaFileBean> mSelectMaps = new HashMap<>();
@@ -96,7 +103,7 @@ public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
     public int select(int pos) {
         MediaFileBean bean = getItem(pos);
         bean.setPosition(pos);
-        if(mSelectMaps.containsKey(bean.getFilePath())) {
+        if (mSelectMaps.containsKey(bean.getFilePath())) {
             mSelectMaps.remove(bean.getFilePath());
         } else {
             mSelectMaps.put(bean.getFilePath(), bean);
@@ -106,23 +113,44 @@ public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
     }
 
     public int selectAll() {
-        for(MediaFileBean bean : getList()) {
+        for (MediaFileBean bean : getList()) {
             mSelectMaps.put(bean.getFilePath(), bean);
         }
         notifyDataSetChanged();
         return mSelectMaps.size();
     }
 
+    public int clearSelectAll() {
+        if(mSelectMaps.size() > 0) {
+            mSelectMaps.clear();
+            notifyDataSetChanged();
+        }
+        return 0;
+    }
+
     public int clearSelect() {
-        mSelectMaps.clear();
-        notifyDataSetChanged();
+        if(mSelectMaps.size() > 0) {
+            for (Map.Entry<String, MediaFileBean> entry : mSelectMaps.entrySet()) {
+                notifyItemChanged(entry.getValue().getPosition());
+            }
+            mSelectMaps.clear();
+        }
         return 0;
     }
 
     public List<MediaFileBean> getSelectFiles() {
         List<MediaFileBean> lists = new ArrayList<>();
-        for(Map.Entry<String, MediaFileBean> entry : mSelectMaps.entrySet()) {
-            lists.add(entry.getValue());
+        if(mSelectMaps.size() > 0) {
+            for (Map.Entry<String, MediaFileBean> entry : mSelectMaps.entrySet()) {
+                lists.add(entry.getValue());
+            }
+            java.util.Collections.sort(lists, new java.util.Comparator() {
+
+                @Override
+                public int compare(Object o, Object t1) {
+                    return new Integer(((MediaFileBean) o).getPosition()).compareTo(new Integer(((MediaFileBean) t1).getPosition()));
+                }
+            });
         }
         return lists;
     }
@@ -131,7 +159,7 @@ public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
 
     public void addUpload(int pos) {
         MediaFileBean bean = getItem(pos);
-        if(mUploadMaps.containsKey(bean.getFilePath())) {
+        if (mUploadMaps.containsKey(bean.getFilePath())) {
             mUploadMaps.remove(bean.getFilePath());
         } else {
             mUploadMaps.put(bean.getFilePath(), bean);
@@ -140,10 +168,12 @@ public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
     }
 
     public void clearUpload() {
-        clearSelect();
-        mUploadMaps.clear();
-        for(Map.Entry<String, MediaFileBean> entry : mUploadMaps.entrySet()) {
-            notifyItemChanged(entry.getValue().getPosition());
+        if(mUploadMaps.size() > 0) {
+            mSelectMaps.clear();
+            mUploadMaps.clear();
+            for (Map.Entry<String, MediaFileBean> entry : mUploadMaps.entrySet()) {
+                notifyItemChanged(entry.getValue().getPosition());
+            }
         }
     }
 
