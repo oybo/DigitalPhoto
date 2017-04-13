@@ -64,9 +64,12 @@ public class MainActivity extends BaseActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         String type = intent.getStringExtra("type");
-        if(Constants.LOGIN_MAIN.equals(type)) {
+        if(Constants.MAIN_DEVICE_POHOTO_MANAGER.equals(type)) {
             mLoginMain = true;
-            currentFragment(1);
+            currentFragment(4);
+        } else if(Constants.MAIN_DEVICE_LIST.equals(type)) {
+            mLoginMain = false;
+            currentFragment(0);
         }
     }
 

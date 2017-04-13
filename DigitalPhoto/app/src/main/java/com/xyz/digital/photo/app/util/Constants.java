@@ -8,6 +8,8 @@ public class Constants {
 
     public static final String URL_FORM_UPLOAD = "http://server.jeasonlzy.com/OkHttpUtils/upload";
 
-    public static final String LOGIN_MAIN = "login_main";
+    public static final String MAIN_DEVICE_POHOTO_MANAGER = "main_device_photo_manager";
+
+    public static final String MAIN_DEVICE_LIST = "main_device_list";
 
 }

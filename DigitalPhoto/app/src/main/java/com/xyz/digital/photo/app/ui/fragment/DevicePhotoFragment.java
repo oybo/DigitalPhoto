@@ -24,6 +24,7 @@ import com.xyz.digital.photo.app.mvp.device.media.DeviceMediaContract;
 import com.xyz.digital.photo.app.mvp.device.media.DeviceMediaPresenter;
 import com.xyz.digital.photo.app.ui.BaseFragment;
 import com.xyz.digital.photo.app.ui.activity.MainActivity;
+import com.xyz.digital.photo.app.util.Constants;
 import com.xyz.digital.photo.app.util.ToastUtil;
 import com.xyz.digital.photo.app.view.ChooseModePopView;
 import com.xyz.digital.photo.app.view.DividerItemDecoration;
@@ -58,7 +59,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.activity_device_manager, container, false);
+        View view = inflater.inflate(R.layout.fragment_device_manager, container, false);
         ButterKnife.bind(this, view);
         return view;
     }
@@ -137,7 +138,9 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 break;
             case R.id.device_photo_choose_tab:
                 // 切换设备
-                startActivity(new Intent(getActivity(), MainActivity.class));
+                Intent intent = new Intent(getActivity(), MainActivity.class);
+                intent.putExtra("type", Constants.MAIN_DEVICE_LIST);
+                startActivity(intent);
                 break;
             case R.id.device_photo_model_type:
                 // 点击切换浏览模式

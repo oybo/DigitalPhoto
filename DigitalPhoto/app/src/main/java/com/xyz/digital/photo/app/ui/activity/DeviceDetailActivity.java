@@ -84,7 +84,7 @@ public class DeviceDetailActivity extends BaseActivity implements View.OnClickLi
         switch (view.getId()) {
             case R.id.device_detail_manager_bt:
                 Intent intent = new Intent(DeviceDetailActivity.this, MainActivity.class);
-                intent.putExtra("type", Constants.LOGIN_MAIN);
+                intent.putExtra("type", Constants.MAIN_DEVICE_POHOTO_MANAGER);
                 startActivity(intent);
                 break;
         }
