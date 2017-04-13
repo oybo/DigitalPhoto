@@ -21,11 +21,9 @@ public interface DeviceContract {
 
     interface Presenter extends BasePresenter {
         void scanWifiDevice();
-        void unregisterReceiver();
-    }
-
-    interface OnScanDeviceListener {
-        void onDevice(List list);
+        void registerReceiver();
+        void unRegisterReceiver();
+        void connect(WifiP2pDevice wifiP2pDevice);
     }
 
 }

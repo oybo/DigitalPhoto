@@ -1,7 +1,6 @@
 package com.xyz.digital.photo.app.ui.fragment;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,7 +9,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.WifiDeviceAdapter;
@@ -18,10 +16,9 @@ import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.mvp.device.DeviceContract;
 import com.xyz.digital.photo.app.mvp.device.DevicePresenter;
 import com.xyz.digital.photo.app.ui.BaseFragment;
-import com.xyz.digital.photo.app.ui.activity.LoginActivity;
+import com.xyz.digital.photo.app.view.LoadingView;
 import com.xyz.digital.photo.app.view.SimpleDividerItemDecoration;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
@@ -34,6 +31,7 @@ import butterknife.ButterKnife;
 public class DeviceFragment extends BaseFragment implements DeviceContract.View, View.OnClickListener {
 
     @Bind(R.id.fragment_device_recyclerview) RecyclerView fragmentDeviceRecyclerview;
+    @Bind(R.id.view_loading) LoadingView mLoadingView;
 
     private DeviceContract.Presenter mPresenter;
     private WifiDeviceAdapter mAdapter;
@@ -66,14 +64,17 @@ public class DeviceFragment extends BaseFragment implements DeviceContract.View,
         mAdapter = new WifiDeviceAdapter(getActivity());
         fragmentDeviceRecyclerview.setAdapter(mAdapter);
 
-        testData();
         mPresenter.scanWifiDevice();
 
         mAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int pos) {
                 // 去连接登录
-                startActivity(new Intent(getActivity(), LoginActivity.class));
+                WifiP2pDevice wifiP2pDevice = mAdapter.getItem(pos);
+                mPresenter.connect(wifiP2pDevice);
+
+
+//                startActivity(new Intent(getActivity(), LoginActivity.class));
             }
         });
     }
@@ -88,21 +89,13 @@ public class DeviceFragment extends BaseFragment implements DeviceContract.View,
         if(wifiP2pDevices != null && wifiP2pDevices.size() > 0) {
             mAdapter.clear();
             mAdapter.appendToList(wifiP2pDevices);
-            mAdapter.notifyDataSetChanged();
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mAdapter.notifyDataSetChanged();
+                }
+            });
         }
-
-        testData();
-    }
-
-    private void testData() {
-        List<WifiP2pDevice> wifiP2pDevices = new ArrayList<>();
-        wifiP2pDevices.add(null);
-        wifiP2pDevices.add(null);
-        wifiP2pDevices.add(null);
-        wifiP2pDevices.add(null);
-        wifiP2pDevices.add(null);
-        mAdapter.appendToList(wifiP2pDevices);
-        mAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -112,24 +105,39 @@ public class DeviceFragment extends BaseFragment implements DeviceContract.View,
 
     @Override
     public void showLoading() {
-
+        mLoadingView.show();
     }
 
     @Override
     public void hideLoading() {
-
+        mLoadingView.hide();
     }
 
     @Override
     public void onClick(View view) {
-        Toast.makeText(getActivity(), "重新扫描", Toast.LENGTH_SHORT).show();
+        switch (view.getId()) {
+            case R.id.fragment_device_resetscan_txt:
+                mPresenter.scanWifiDevice();
+                break;
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mPresenter.registerReceiver();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mPresenter.unRegisterReceiver();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         ButterKnife.unbind(this);
-        mPresenter.unregisterReceiver();
     }
 
 }

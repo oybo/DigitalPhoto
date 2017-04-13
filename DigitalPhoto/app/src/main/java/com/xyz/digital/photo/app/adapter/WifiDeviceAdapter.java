@@ -27,11 +27,15 @@ public class WifiDeviceAdapter extends BaseRecyclerAdapter<WifiP2pDevice> {
 
         holder.setText(R.id.item_wifi_device_position_txt, String.valueOf(position + 1));
 
-        holder.setImageResouce(R.id.item_wifi_device_status_txt, R.drawable.green_icon);
+        if(item.AVAILABLE != 0) {
+            holder.setImageResouce(R.id.item_wifi_device_status_txt, R.drawable.green_icon);
+        } else {
+            holder.setImageResouce(R.id.item_wifi_device_status_txt, R.drawable.read_icon);
+        }
 
-//        holder.setText(R.id.item_wifi_device_name_txt, item.deviceName);
-//
-//        holder.setText(R.id.item_wifi_device_address_txt, item.deviceAddress);
+        holder.setText(R.id.item_wifi_device_name_txt, item.deviceName);
+
+        holder.setText(R.id.item_wifi_device_address_txt, item.deviceAddress);
 
     }
 }
