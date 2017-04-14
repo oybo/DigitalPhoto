@@ -48,6 +48,7 @@ public class DevicePresenter implements DeviceContract.Presenter {
 
     @Override
     public void scanWifiDevice() {
+        // 启动扫描
         discoverDevice();
     }
 
@@ -132,7 +133,6 @@ public class DevicePresenter implements DeviceContract.Presenter {
         @Override
         public void onConnectionInfoAvailable(final WifiP2pInfo minfo) {
             // 这里可以查看变化后的网络信息
-
             // 通过传递进来的WifiP2pInfo参数获取变化后的地址信息
             InetAddress groupOwnerAddress = minfo.groupOwnerAddress;
             // 通过协商，决定一个小组的组长
@@ -158,6 +158,7 @@ public class DevicePresenter implements DeviceContract.Presenter {
                     // WiFi P2P 不可以使用
                 }
             } else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
+                // 去获取设备列表
                 if (mWifiP2pManager != null) {
                     //获取P2P Device信息列表。
                     mWifiP2pManager.requestPeers(mChannel, mPeerListListerner);

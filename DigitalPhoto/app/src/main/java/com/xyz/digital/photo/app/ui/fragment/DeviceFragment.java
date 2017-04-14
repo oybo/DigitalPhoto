@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.WifiDeviceAdapter;
@@ -16,6 +17,7 @@ import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.mvp.device.DeviceContract;
 import com.xyz.digital.photo.app.mvp.device.DevicePresenter;
 import com.xyz.digital.photo.app.ui.BaseFragment;
+import com.xyz.digital.photo.app.util.ToastUtil;
 import com.xyz.digital.photo.app.view.LoadingView;
 import com.xyz.digital.photo.app.view.SimpleDividerItemDecoration;
 
@@ -31,6 +33,7 @@ import butterknife.ButterKnife;
 public class DeviceFragment extends BaseFragment implements DeviceContract.View, View.OnClickListener {
 
     @Bind(R.id.fragment_device_recyclerview) RecyclerView fragmentDeviceRecyclerview;
+    @Bind(R.id.fragment_device_scan_loading) ProgressBar mProgressBar;
     @Bind(R.id.view_loading) LoadingView mLoadingView;
 
     private DeviceContract.Presenter mPresenter;
@@ -71,8 +74,8 @@ public class DeviceFragment extends BaseFragment implements DeviceContract.View,
             public void onItemClick(View itemView, int pos) {
                 // 去连接登录
                 WifiP2pDevice wifiP2pDevice = mAdapter.getItem(pos);
+                ToastUtil.showToast(getActivity(), wifiP2pDevice.status + "");
                 mPresenter.connect(wifiP2pDevice);
-
 
 //                startActivity(new Intent(getActivity(), LoginActivity.class));
             }
@@ -86,7 +89,7 @@ public class DeviceFragment extends BaseFragment implements DeviceContract.View,
 
     @Override
     public void onCallbackDevice(List<WifiP2pDevice> wifiP2pDevices) {
-        if(wifiP2pDevices != null && wifiP2pDevices.size() > 0) {
+        if(wifiP2pDevices != null) {
             mAdapter.clear();
             mAdapter.appendToList(wifiP2pDevices);
             getActivity().runOnUiThread(new Runnable() {
@@ -105,12 +108,12 @@ public class DeviceFragment extends BaseFragment implements DeviceContract.View,
 
     @Override
     public void showLoading() {
-        mLoadingView.show();
+        mProgressBar.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void hideLoading() {
-        mLoadingView.hide();
+        mProgressBar.setVisibility(View.GONE);
     }
 
     @Override
