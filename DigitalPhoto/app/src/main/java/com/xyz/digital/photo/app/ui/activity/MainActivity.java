@@ -17,6 +17,7 @@ import com.xyz.digital.photo.app.ui.fragment.DevicePhotoFragment;
 import com.xyz.digital.photo.app.ui.fragment.PhotoFragment;
 import com.xyz.digital.photo.app.ui.fragment.RemoteControlFragment;
 import com.xyz.digital.photo.app.ui.fragment.SetFragment;
+import com.xyz.digital.photo.app.ui.fragment.WiFiDeviceFragment;
 import com.xyz.digital.photo.app.util.Constants;
 import com.xyz.digital.photo.app.util.ToastUtil;
 
@@ -37,7 +38,9 @@ public class MainActivity extends BaseActivity {
     private int oldTabIndex = -1, oldFragmentIndex = -1;
     private TextView[] mTabs;
     private Fragment[] fragments;
-    /**    设备      */
+    /**    设备 - wifi热点      */
+    private WiFiDeviceFragment mWiFiDeviceFragment;
+    /**    设备 - wifi直连     */
     private DeviceFragment mDeviceFragment;
     /**    设备相册管理      */
     private DevicePhotoFragment mDevicePhotoFragment;
@@ -82,6 +85,7 @@ public class MainActivity extends BaseActivity {
         int fgrament_index = 0;
         if (savedInstanceState != null) {
             FragmentManager fm = getSupportFragmentManager();
+            mWiFiDeviceFragment = (WiFiDeviceFragment) fm.findFragmentByTag(WiFiDeviceFragment.class.getName());
             mDeviceFragment = (DeviceFragment) fm.findFragmentByTag(DeviceFragment.class.getName());
             mDevicePhotoFragment = (DevicePhotoFragment) fm.findFragmentByTag(DevicePhotoFragment.class.getName());
             mPhotoFragment = (PhotoFragment) fm.findFragmentByTag(PhotoFragment.class.getName());
@@ -89,6 +93,9 @@ public class MainActivity extends BaseActivity {
 
             tab_index = savedInstanceState.getInt(TAB_INDEX, 0);
             fgrament_index = savedInstanceState.getInt(FRAGMENT_INDEX, 0);
+        }
+        if (mWiFiDeviceFragment == null) {
+            mWiFiDeviceFragment = new WiFiDeviceFragment();
         }
         if (mDeviceFragment == null) {
             mDeviceFragment = new DeviceFragment();
@@ -106,7 +113,7 @@ public class MainActivity extends BaseActivity {
             mSetFragment = new SetFragment();
         }
 
-        fragments = new Fragment[]{ mDeviceFragment, mPhotoFragment, mRemoteControlFragment, mSetFragment, mDevicePhotoFragment };
+        fragments = new Fragment[]{ mWiFiDeviceFragment, mPhotoFragment, mRemoteControlFragment, mSetFragment, mDevicePhotoFragment };
 
         currentTab(tab_index);
         currentFragment(fgrament_index);
