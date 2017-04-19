@@ -21,6 +21,7 @@ public class MediaFileBean implements Serializable {
     // 类型
     private MEDIA_FILE_TYPE fileType;
     private int position;
+    private String parentPath;
 
     public String getFileName() {
         return fileName;
@@ -68,6 +69,14 @@ public class MediaFileBean implements Serializable {
 
     public void setPosition(int position) {
         this.position = position;
+    }
+
+    public String getParentPath() {
+        return parentPath;
+    }
+
+    public void setParentPath(String parentPath) {
+        this.parentPath = parentPath;
     }
 
     public MEDIA_FILE_TYPE getFileType() {

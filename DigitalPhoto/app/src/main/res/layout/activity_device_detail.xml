@@ -32,18 +32,11 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="相册："
-                        android:textColor="#333333"
-                        android:textSize="14sp"/>
-
-                    <TextView
                         android:id="@+id/device_detail_image_count_txt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="共有10个文件"
-                        android:textColor="#999999"
+                        android:textColor="#000000"
                         android:textSize="14sp"/>
 
                 </LinearLayout>
@@ -61,42 +54,107 @@
 
                 <View style="@style/view_line"/>
 
-                <RelativeLayout
+                <LinearLayout
                     style="@style/style_padding"
                     android:layout_width="match_parent"
-                    android:layout_height="52dip">
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/device_detail_status_title_txt"
+                        android:id="@+id/device_detail_disk_size_txt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="状态："
+                        android:text="本机存储容量："
                         android:textColor="#333333"
                         android:textSize="14sp"/>
 
-                    <TextView
-                        android:id="@+id/device_detail_status_txt"
-                        android:layout_width="wrap_content"
+                    <RelativeLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_toRightOf="@id/device_detail_status_title_txt"
-                        android:drawableLeft="@drawable/selector_device_status"
-                        android:drawablePadding="2dip"
-                        android:text="正常"
-                        android:textColor="@drawable/color_selector_device_status"
-                        android:textSize="14sp"/>
+                        android:layout_marginTop="10dip">
 
-                    <TextView
-                        android:id="@+id/device_detail_play_num_txt"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:text="4个文件正在播放"
-                        android:textColor="#333333"
-                        android:textSize="14sp"/>
+                        <TextView
+                            android:id="@+id/device_detail_disk_used_size_txt"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="已用："
+                            android:textColor="#666666"
+                            android:textSize="14sp"/>
 
-                </RelativeLayout>
+                        <TextView
+                            android:id="@+id/device_detail_disk_usable_size_txt"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentRight="true"
+                            android:text="可用："
+                            android:textColor="#666666"
+                            android:textSize="14sp"/>
+
+                    </RelativeLayout>
+
+                    <ProgressBar
+                        android:id="@+id/device_detail_disk_usable_size_progressbar"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="3.5dip"
+                        android:layout_marginTop="5dip"
+                        android:max="100"
+                        android:progress="70"
+                        android:progressDrawable="@drawable/seekbar_style"/>
+
+                </LinearLayout>
 
                 <View style="@style/view_line"/>
+
+                <LinearLayout
+                    style="@style/style_padding"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/device_u_detail_disk_size_txt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="U存储容量："
+                        android:textColor="#333333"
+                        android:textSize="14sp"/>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dip">
+
+                        <TextView
+                            android:id="@+id/device_detail_u_disk_used_size_txt"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="已用："
+                            android:textColor="#666666"
+                            android:textSize="14sp"/>
+
+                        <TextView
+                            android:id="@+id/device_detail_u_disk_usable_size_txt"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentRight="true"
+                            android:text="可用："
+                            android:textColor="#666666"
+                            android:textSize="14sp"/>
+
+                    </RelativeLayout>
+
+                    <ProgressBar
+                        android:id="@+id/device_detail_u_disk_usable_size_progressbar"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="3.5dip"
+                        android:layout_marginTop="5dip"
+                        android:max="100"
+                        android:progress="70"
+                        android:progressDrawable="@drawable/seekbar_style"/>
+
+                </LinearLayout>
 
             </LinearLayout>
 

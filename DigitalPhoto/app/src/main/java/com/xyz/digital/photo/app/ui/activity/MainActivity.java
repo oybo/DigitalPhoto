@@ -210,6 +210,10 @@ public class MainActivity extends BaseActivity {
             mPhotoFragment.closeSelect();
             return;
         }
+        if(mPhotoFragment.isShowChild()) {
+            mPhotoFragment.closeShowChild();
+            return;
+        }
 
         if ((System.currentTimeMillis() - mExitTime) > 2000) {
             ToastUtil.showToast(this, "再按一次退出程序");

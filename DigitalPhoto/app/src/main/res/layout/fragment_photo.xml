@@ -140,11 +140,28 @@
             android:layout_height="match_parent"
             android:padding="2dip"/>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/fragment_media_list_recyclerview"
+        <LinearLayout
+            android:id="@+id/fragment_media_list_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone"/>
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/fragment_media_list_path_txt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dip"
+                android:text="本地存储设备"
+                android:textColor="#929292"
+                android:textSize="14sp"/>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/fragment_media_list_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+        </LinearLayout>
 
         <com.xyz.digital.photo.app.view.LoadingView
             android:id="@+id/view_loading"

@@ -29,6 +29,7 @@ public class MultiMediaUtils {
 
     /**
      * 获取sd卡所有的图片文件
+     *
      * @param context
      * @return
      */
@@ -55,11 +56,12 @@ public class MultiMediaUtils {
                     e.printStackTrace();
                 }
                 File file = new File(path);
-                if(!file.exists()) {
+                if (!file.exists()) {
                     continue;
                 }
                 //获取父路径名
                 String parentName = file.getParentFile().getName();
+                String parentPath = file.getParentFile().getAbsolutePath();
                 String size = PubUtils.formatFileLen(file.length());
                 long data = file.lastModified();
                 try {
@@ -73,6 +75,7 @@ public class MultiMediaUtils {
                 mediaFileBean.setFileName(fileName);
                 mediaFileBean.setSize(size);
                 mediaFileBean.setDate(TimeUtil.getFormattedDateString(data, TimeUtil.FORMAT_OTHER_YEAR));
+                mediaFileBean.setParentPath(parentPath);
                 mediaFileBean.setFileType(MEDIA_FILE_TYPE.IMAGE);
 
                 //根据父路径名将图片放入到mGruopMap中
@@ -86,7 +89,7 @@ public class MultiMediaUtils {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if(mCursor != null) {
+            if (mCursor != null) {
                 mCursor.close();
             }
         }
@@ -119,11 +122,12 @@ public class MultiMediaUtils {
                     e.printStackTrace();
                 }
                 File file = new File(path);
-                if(!file.exists()) {
+                if (!file.exists()) {
                     continue;
                 }
                 //获取父路径名
                 String parentName = file.getParentFile().getName();
+                String parentPath = file.getParentFile().getAbsolutePath();
                 String size = PubUtils.formatFileLen(file.length());
                 long data = file.lastModified();
                 try {
@@ -139,6 +143,7 @@ public class MultiMediaUtils {
                 mediaFileBean.setSize(size);
                 mediaFileBean.setDuration(TimeUtil.getFormattedDateString(duration / 1000, TimeUtil.FORMAT_H_M));
                 mediaFileBean.setDate(TimeUtil.getFormattedDateString(data, TimeUtil.FORMAT_OTHER_YEAR));
+                mediaFileBean.setParentPath(parentPath);
                 mediaFileBean.setFileType(MEDIA_FILE_TYPE.AUDIO);
 
                 //根据父路径名将图片放入到mGruopMap中
@@ -152,7 +157,7 @@ public class MultiMediaUtils {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if(cursor != null) {
+            if (cursor != null) {
                 cursor.close();
             }
         }
@@ -183,11 +188,12 @@ public class MultiMediaUtils {
                     e.printStackTrace();
                 }
                 File file = new File(path);
-                if(!file.exists()) {
+                if (!file.exists()) {
                     continue;
                 }
                 //获取父路径名
                 String parentName = file.getParentFile().getName();
+                String parentPath = file.getParentFile().getAbsolutePath();
                 String size = PubUtils.formatFileLen(file.length());
                 long data = file.lastModified();
                 try {
@@ -203,6 +209,7 @@ public class MultiMediaUtils {
                 mediaFileBean.setSize(size);
                 mediaFileBean.setDuration(TimeUtil.getFormattedDateString(duration / 1000, TimeUtil.FORMAT_H_M));
                 mediaFileBean.setDate(TimeUtil.getFormattedDateString(data / 1000, TimeUtil.FORMAT_OTHER_YEAR));
+                mediaFileBean.setParentPath(parentPath);
                 mediaFileBean.setFileType(MEDIA_FILE_TYPE.VIDEO);
 
                 //根据父路径名将图片放入到mGruopMap中
@@ -216,7 +223,7 @@ public class MultiMediaUtils {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if(cursor != null) {
+            if (cursor != null) {
                 cursor.close();
             }
         }
@@ -229,8 +236,8 @@ public class MultiMediaUtils {
      * @param mGruopMap
      * @return
      */
-    public static List<FolderBean> subGroupOfMedia(HashMap<String, List<MediaFileBean>> mGruopMap){
-        if(mGruopMap.size() == 0){
+    public static List<FolderBean> subGroupOfMedia(HashMap<String, List<MediaFileBean>> mGruopMap) {
+        if (mGruopMap.size() == 0) {
             return null;
         }
         List<FolderBean> list = new ArrayList<FolderBean>();
@@ -241,10 +248,18 @@ public class MultiMediaUtils {
             FolderBean mImageBean = new FolderBean();
             String key = entry.getKey();
             List<MediaFileBean> value = entry.getValue();
-
+            long allSize = 0;
+            for (MediaFileBean file : value) {
+                allSize += new File(file.getFilePath()).length();
+            }
+            File file = new File(value.get(0).getParentPath());
             mImageBean.setFolderName(key);
             mImageBean.setImageCounts(value.size());
-            mImageBean.setTopImagePath(value.get(0).getFilePath());//获取该组的第一张图片
+            // 获取该组的第一张图片
+            mImageBean.setTopImagePath(value.get(0).getFilePath());
+            mImageBean.setSize(PubUtils.formatFileLen(allSize));
+            mImageBean.setDate(TimeUtil.getFormattedDateString(file.lastModified() / 1000, TimeUtil.FORMAT_OTHER_YEAR));
+            mImageBean.setFolder(true);
             mImageBean.setFileType(value.get(0).getFileType());
 
             list.add(mImageBean);
@@ -257,18 +272,19 @@ public class MultiMediaUtils {
      * 获取视频的缩略图
      * 先通过ThumbnailUtils来创建一个视频的缩略图，然后再利用ThumbnailUtils来生成指定大小的缩略图。
      * 如果想要的缩略图的宽和高都小于MICRO_KIND，则类型要使用MICRO_KIND作为kind的值，这样会节省内存。
+     *
      * @param videoPath 视频的路径
-     * @param width 指定输出视频缩略图的宽度
-     * @param height 指定输出视频缩略图的高度度
-     * @param kind 参照MediaStore.Images(Video).Thumbnails类中的常量MINI_KIND和MICRO_KIND。
-     *            其中，MINI_KIND: 512 x 384，MICRO_KIND: 96 x 96
+     * @param width     指定输出视频缩略图的宽度
+     * @param height    指定输出视频缩略图的高度度
+     * @param kind      参照MediaStore.Images(Video).Thumbnails类中的常量MINI_KIND和MICRO_KIND。
+     *                  其中，MINI_KIND: 512 x 384，MICRO_KIND: 96 x 96
      * @return 指定大小的视频缩略图
      */
     public static Bitmap getVideoThumbnail(String videoPath, int width, int height, int kind) {
         Bitmap bitmap = null;
         // 获取视频的缩略图
         bitmap = ThumbnailUtils.createVideoThumbnail(videoPath, kind);
-        if(bitmap!= null){
+        if (bitmap != null) {
             bitmap = ThumbnailUtils.extractThumbnail(bitmap, width, height, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
         }
         return bitmap;

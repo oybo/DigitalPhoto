@@ -40,6 +40,7 @@
     <declare-styleable name="RoundAngleImageView">
         <attr name="roundWidth" format="dimension" />
         <attr name="roundHeight" format="dimension" />
+        <attr name="roundRatio" format="float" />
     </declare-styleable>
 
 </resources>

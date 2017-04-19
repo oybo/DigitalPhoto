@@ -20,9 +20,13 @@ public class FolderBean {
      * 文件夹中的图片数
      */
     private int imageCounts;
-
+    private String size;
+    private String date;
+    // 类型 是否是文件夹
+    private boolean folder;
     // 类型
     private MEDIA_FILE_TYPE fileType;
+    private int position;
 
     public String getTopImagePath() {
         return topImagePath;
@@ -46,6 +50,38 @@ public class FolderBean {
 
     public void setImageCounts(int imageCounts) {
         this.imageCounts = imageCounts;
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public boolean isFolder() {
+        return folder;
+    }
+
+    public void setFolder(boolean folder) {
+        this.folder = folder;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
     }
 
     public MEDIA_FILE_TYPE getFileType() {

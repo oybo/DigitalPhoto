@@ -1,6 +1,7 @@
 package com.xyz.digital.photo.app.ui.fragment;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,7 +18,7 @@ import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.mvp.device.DeviceContract;
 import com.xyz.digital.photo.app.mvp.device.DevicePresenter;
 import com.xyz.digital.photo.app.ui.BaseFragment;
-import com.xyz.digital.photo.app.util.ToastUtil;
+import com.xyz.digital.photo.app.ui.activity.LoginActivity;
 import com.xyz.digital.photo.app.view.LoadingView;
 import com.xyz.digital.photo.app.view.SimpleDividerItemDecoration;
 
@@ -65,19 +66,22 @@ public class DeviceFragment extends BaseFragment implements DeviceContract.View,
     private void initData() {
         new DevicePresenter(this);
         mAdapter = new WifiDeviceAdapter(getActivity());
+        mAdapter.append(new WifiP2pDevice());
+        mAdapter.append(new WifiP2pDevice());
+        mAdapter.append(new WifiP2pDevice());
         fragmentDeviceRecyclerview.setAdapter(mAdapter);
 
-        mPresenter.scanWifiDevice();
+//        mPresenter.scanWifiDevice();
 
         mAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int pos) {
                 // 去连接登录
-                WifiP2pDevice wifiP2pDevice = mAdapter.getItem(pos);
-                ToastUtil.showToast(getActivity(), wifiP2pDevice.status + "");
-                mPresenter.connect(wifiP2pDevice);
+//                WifiP2pDevice wifiP2pDevice = mAdapter.getItem(pos);
+//                ToastUtil.showToast(getActivity(), wifiP2pDevice.status + "");
+//                mPresenter.connect(wifiP2pDevice);
 
-//                startActivity(new Intent(getActivity(), LoginActivity.class));
+                startActivity(new Intent(getActivity(), LoginActivity.class));
             }
         });
     }

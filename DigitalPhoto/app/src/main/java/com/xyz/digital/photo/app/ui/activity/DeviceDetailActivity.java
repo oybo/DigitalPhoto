@@ -26,8 +26,6 @@ public class DeviceDetailActivity extends BaseActivity implements View.OnClickLi
 
     @Bind(R.id.device_detail_image_count_txt) TextView deviceDetailImageCountTxt;
     @Bind(R.id.device_detail_photo_rview) RecyclerView deviceDetailPhotoRview;
-    @Bind(R.id.device_detail_status_txt) TextView deviceDetailStatusTxt;
-    @Bind(R.id.device_detail_play_num_txt) TextView deviceDetailPlayNumTxt;
 
     private DeviceImageAdapter mAdapter;
 
@@ -51,13 +49,8 @@ public class DeviceDetailActivity extends BaseActivity implements View.OnClickLi
     }
 
     private void initData() {
-        String imangeCount = "共有<font color=\"#12B7F5\">10</font>个文件";
+        String imangeCount = "共有<font color=\"#12B7F5\">10</font>个媒体文件";
         deviceDetailImageCountTxt.setText(Html.fromHtml(imangeCount));
-
-        deviceDetailStatusTxt.setSelected(true);
-
-        String playNum = "<font color=\"#12B7F5\">4</font>个文件正在播放";
-        deviceDetailPlayNumTxt.setText(Html.fromHtml(playNum));
 
         mAdapter = new DeviceImageAdapter(this);
         mAdapter.append("http://img0.imgtn.bdimg.com/it/u=461866017,3145489827&fm=214&gp=0.jpg");
