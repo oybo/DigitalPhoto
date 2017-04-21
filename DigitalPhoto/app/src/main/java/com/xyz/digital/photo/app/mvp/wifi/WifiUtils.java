@@ -78,6 +78,21 @@ public class WifiUtils {
         return mWifiManager.getConnectionInfo();
     }
 
+    public boolean isConnect(ScanResult wifi) {
+        try {
+            WifiInfo wifiInfo = getCurrentWifiInfo();
+            if(wifiInfo != null) {
+                if((wifiInfo.getSSID().toString().replace("\"", "")).equals(wifi.SSID.toString().replace("\"", "")) &&
+                        (wifiInfo.getBSSID().toString().replace("\"", "")).equals(wifi.BSSID.toString().replace("\"", ""))) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     /**
      * 添加一个网络并连接 传入参数：WIFI发生配置类WifiConfiguration
      */

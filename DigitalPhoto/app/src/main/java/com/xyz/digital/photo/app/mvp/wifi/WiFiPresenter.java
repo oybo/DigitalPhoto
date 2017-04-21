@@ -6,7 +6,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.util.Log;
+
+import com.xyz.digital.photo.app.util.ToastUtil;
 
 import java.util.List;
 
@@ -19,28 +22,58 @@ import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
 public class WiFiPresenter implements WiFiContract.Presenter {
 
     private WiFiContract.View mView;
-
     // WifiManager对象
     private WifiManager mWifiManager;
+    private WifiUtils mWifiUtils;
+    private AsyncTask<Void, Void, Boolean> mConnectTask;
 
     public WiFiPresenter(WiFiContract.View view) {
         mView = view;
         mView.setPresenter(this);
 
         mWifiManager = (WifiManager) mView._getActivity().getSystemService(Context.WIFI_SERVICE);
+        mWifiUtils = new WifiUtils(mView._getActivity());
         registerBroadcast();
     }
 
     @Override
     public void scanWiFi() {
-        mView.showLoading();
         openWifi();
         mWifiManager.startScan();
     }
 
     @Override
-    public void connect(ScanResult wifi) {
-        new WifiUtils(mView._getActivity()).connectWifiTest(wifi.SSID, "(oylx20160621)");
+    public void connect(final ScanResult wifi) {
+        if(mWifiUtils.isConnect(wifi)) {
+            mView.onCallbackConnect();
+            return;
+        }
+        if(mConnectTask != null) {
+            mConnectTask.cancel(true);
+        }
+        mConnectTask = new AsyncTask<Void, Void, Boolean>() {
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                mView.showLoading();
+            }
+
+            @Override
+            protected Boolean doInBackground(Void... voids) {
+                boolean success = mWifiUtils.connectWifiTest(wifi.SSID, "qwer1234");
+                return success;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean success) {
+                super.onPostExecute(success);
+                ToastUtil.showToast(mView._getActivity(), success ? "连接成功" : "连接失败");
+
+                mView.hideLoading();
+                mView.onCallbackConnect();
+            }
+        };
+        mConnectTask.execute();
     }
 
     /**
@@ -68,8 +101,6 @@ public class WiFiPresenter implements WiFiContract.Presenter {
                         break;
                 }
             }
-
-            mView.hideLoading();
         }
     };
 

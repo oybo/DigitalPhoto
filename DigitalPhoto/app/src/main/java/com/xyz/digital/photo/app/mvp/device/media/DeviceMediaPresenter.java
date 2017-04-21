@@ -69,8 +69,8 @@ public class DeviceMediaPresenter implements DeviceMediaContract.Presenter {
                 } else if(type == MEDIA_FILE_TYPE.VIDEO) {
                     // 视频
                     MultiMediaUtils.getAllVideos(mView._getActivity(), mGruopMap);
-                } else if(type == MEDIA_FILE_TYPE.PLAY) {
-                    // 播放中
+                } else if(type == MEDIA_FILE_TYPE.ALL) {
+                    // 全部
                 }
 
                 if(mShowType == MEDIA_SHOW_TYPE.LIST) {

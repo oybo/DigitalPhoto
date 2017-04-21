@@ -6,6 +6,6 @@ package com.xyz.digital.photo.app.bean.e;
 
 public enum MEDIA_FILE_TYPE {
 
-    IMAGE, AUDIO, VIDEO, PLAY
+    IMAGE, AUDIO, VIDEO, ALL
 
 }

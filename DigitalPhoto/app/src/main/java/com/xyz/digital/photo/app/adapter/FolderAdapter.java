@@ -3,7 +3,6 @@ package com.xyz.digital.photo.app.adapter;
 import android.content.Context;
 import android.view.View;
 import android.widget.TextView;
-
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.adapter.base.RecyclerViewHolder;
@@ -13,7 +12,6 @@ import com.xyz.digital.photo.app.manager.ImageLoadManager;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
 import com.xyz.digital.photo.app.view.ProgressPieView;
 import com.xyz.digital.photo.app.view.RoundAngleImageView;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

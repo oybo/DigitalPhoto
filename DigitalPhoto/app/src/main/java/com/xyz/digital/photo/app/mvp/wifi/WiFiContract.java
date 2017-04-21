@@ -16,6 +16,7 @@ public interface WiFiContract {
 
     interface View extends BaseView<Presenter> {
         Activity _getActivity();
+        void onCallbackConnect();
         void onCallbackDevice(List<ScanResult> wifiP2pDevices);
     }
 

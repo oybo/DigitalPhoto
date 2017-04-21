@@ -2,10 +2,13 @@ package com.xyz.digital.photo.app.adapter;
 
 import android.content.Context;
 import android.net.wifi.ScanResult;
+import android.view.View;
+import android.widget.ImageView;
 
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.adapter.base.RecyclerViewHolder;
+import com.xyz.digital.photo.app.mvp.wifi.WifiUtils;
 
 /**
  * Created by O on 2017/3/20.
@@ -13,8 +16,11 @@ import com.xyz.digital.photo.app.adapter.base.RecyclerViewHolder;
 
 public class WifAdapter extends BaseRecyclerAdapter<ScanResult> {
 
+    private WifiUtils mWifiUtils;
+
     public WifAdapter(Context ctx) {
         super(ctx);
+        mWifiUtils = new WifiUtils(ctx);
     }
 
     @Override
@@ -27,7 +33,15 @@ public class WifAdapter extends BaseRecyclerAdapter<ScanResult> {
 
         holder.setText(R.id.item_wifi_device_position_txt, String.valueOf(position + 1));
 
-        holder.setImageResouce(R.id.item_wifi_device_status_txt, R.drawable.green_icon);
+        holder.setText(R.id.item_wifi_device_name_txt, item.SSID);
+
+        ImageView connectState = holder.getImageView(R.id.item_wifi_device_status_txt);
+        if(mWifiUtils.isConnect(item)) {
+            connectState.setImageResource(R.drawable.green_icon);
+            connectState.setVisibility(View.VISIBLE);
+        } else {
+            connectState.setVisibility(View.GONE);
+        }
 
         // 判断是否可用
 //
@@ -45,7 +59,6 @@ public class WifAdapter extends BaseRecyclerAdapter<ScanResult> {
 //            connectTxt.setVisibility(View.GONE);
 //        }
 //
-        holder.setText(R.id.item_wifi_device_name_txt, item.SSID);
 
 //        holder.setText(R.id.item_wifi_device_address_txt, item.level);
 

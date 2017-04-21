@@ -2,11 +2,12 @@ package com.xyz.digital.photo.app.ui.fragment;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +15,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.xyz.digital.photo.app.R;
+import com.xyz.digital.photo.app.adapter.DeviceListMediaAdapter;
 import com.xyz.digital.photo.app.adapter.DeviceMediaAdapter;
-import com.xyz.digital.photo.app.adapter.FolderAdapter;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
+import com.xyz.digital.photo.app.bean.FolderBean;
 import com.xyz.digital.photo.app.bean.MediaFileBean;
 import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 import com.xyz.digital.photo.app.bean.e.MEDIA_SHOW_TYPE;
@@ -25,11 +27,17 @@ import com.xyz.digital.photo.app.mvp.device.media.DeviceMediaPresenter;
 import com.xyz.digital.photo.app.ui.BaseFragment;
 import com.xyz.digital.photo.app.ui.activity.MainActivity;
 import com.xyz.digital.photo.app.util.Constants;
+import com.xyz.digital.photo.app.util.ScreenUtils;
 import com.xyz.digital.photo.app.util.ToastUtil;
 import com.xyz.digital.photo.app.view.ChooseModePopView;
 import com.xyz.digital.photo.app.view.DividerItemDecoration;
 import com.xyz.digital.photo.app.view.LoadingView;
+import com.xyz.digital.photo.app.view.swipemenulistview.SwipeMenu;
+import com.xyz.digital.photo.app.view.swipemenulistview.SwipeMenuCreator;
+import com.xyz.digital.photo.app.view.swipemenulistview.SwipeMenuItem;
+import com.xyz.digital.photo.app.view.swipemenulistview.SwipeMenuListView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -43,19 +51,29 @@ import butterknife.ButterKnife;
 public class DevicePhotoFragment extends BaseFragment implements View.OnClickListener, DeviceMediaContract.View, BaseRecyclerAdapter
         .onInternalClickListener {
 
-    @Bind(R.id.device_photo_model_type) ImageView mModelTypeImage;
-    @Bind(R.id.device_media_chart_recyclerview) RecyclerView mChartRecyclerView;
-    @Bind(R.id.device_media_list_recyclerview) RecyclerView mListRecyclerView;
-    @Bind(R.id.view_loading) LoadingView mLoadingView;
-    @Bind(R.id.fragment_photo_image_tab) TextView fragmentPhotoImageTab;
-    @Bind(R.id.fragment_photo_video_tab) TextView fragmentPhotoVideoTab;
-    @Bind(R.id.fragment_photo_audio_tab) TextView fragmentPhotoAudioTab;
-    @Bind(R.id.fragment_photo_play_tab) TextView fragmentPhotoPlayTab;
+    @Bind(R.id.device_photo_model_type)
+    ImageView mModelTypeImage;
+    @Bind(R.id.device_media_chart_recyclerview)
+    RecyclerView mChartRecyclerView;
+    @Bind(R.id.device_media_list_recyclerview)
+    SwipeMenuListView mListRecyclerView;
+    @Bind(R.id.view_loading)
+    LoadingView mLoadingView;
+    @Bind(R.id.fragment_photo_image_tab)
+    TextView fragmentPhotoImageTab;
+    @Bind(R.id.fragment_photo_video_tab)
+    TextView fragmentPhotoVideoTab;
+    @Bind(R.id.fragment_photo_audio_tab)
+    TextView fragmentPhotoAudioTab;
+    @Bind(R.id.fragment_photo_all_tab)
+    TextView fragmentPhotoAllTab;
 
     private DeviceMediaContract.Presenter mPresenter;
 
     private DeviceMediaAdapter mChartAdapter;
-    private FolderAdapter mListAdapter;
+
+    private List<FolderBean> mFolderBeans = new ArrayList<>();
+    private DeviceListMediaAdapter mListAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -75,13 +93,56 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
     private void initView() {
         mChartRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mChartRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
-        mListRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+
+        SwipeMenuCreator creator = new SwipeMenuCreator() {
+            @Override
+            public void create(SwipeMenu menu) {
+                // create "download" item
+                SwipeMenuItem downloadItem = new SwipeMenuItem(getActivity().getApplicationContext());
+                // set item background
+                downloadItem.setBackground(new ColorDrawable(Color.parseColor("#C5C7C6")));
+                // set item width
+                downloadItem.setWidth(ScreenUtils.dpToPxInt(80));
+                // set a icon
+                downloadItem.setTitleSize(16);
+                downloadItem.setTitleColor(Color.BLACK);
+                downloadItem.setTitle("下载");
+                // add to menu
+                menu.addMenuItem(downloadItem);
+                // create "delete" item
+                SwipeMenuItem deleteItem = new SwipeMenuItem(getActivity().getApplicationContext());
+                // set item background
+                deleteItem.setBackground(new ColorDrawable(Color.parseColor("#C42708")));
+                // set item width
+                deleteItem.setWidth(ScreenUtils.dpToPxInt(80));
+                // set a icon
+                deleteItem.setTitleSize(16);
+                deleteItem.setTitleColor(Color.BLACK);
+                deleteItem.setTitle("删除");
+                // add to menu
+                menu.addMenuItem(deleteItem);
+            }
+        };
+        // set creator
+        mListRecyclerView.setMenuCreator(creator);
+        // step 2. listener item click event
+        mListRecyclerView.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
+            @Override
+            public void onMenuItemClick(int position, SwipeMenu menu, int index) {
+                switch (index) {
+                    case 0:
+                        // delete
+
+                        break;
+                }
+            }
+        });
 
         mModelTypeImage.setOnClickListener(this);
         fragmentPhotoImageTab.setOnClickListener(this);
         fragmentPhotoVideoTab.setOnClickListener(this);
         fragmentPhotoAudioTab.setOnClickListener(this);
-        fragmentPhotoPlayTab.setOnClickListener(this);
+        fragmentPhotoAllTab.setOnClickListener(this);
         getView().findViewById(R.id.device_photo_choose_tab).setOnClickListener(this);
     }
 
@@ -89,7 +150,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         mChartAdapter = new DeviceMediaAdapter(getActivity());
         mChartRecyclerView.setAdapter(mChartAdapter);
 
-        mListAdapter = new FolderAdapter(getActivity());
+        mListAdapter = new DeviceListMediaAdapter(getActivity(), mFolderBeans, R.layout.item_grid_group_layout);
         mListRecyclerView.setAdapter(mListAdapter);
 
         mPresenter = new DeviceMediaPresenter(this);
@@ -106,7 +167,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         switch (view.getId()) {
             case R.id.fragment_photo_image_tab:
                 // 图片
-                if(fragmentPhotoImageTab.isSelected()) {
+                if (fragmentPhotoImageTab.isSelected()) {
                     return;
                 }
                 mPresenter.showMediaFiles(MEDIA_FILE_TYPE.IMAGE);
@@ -114,7 +175,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 break;
             case R.id.fragment_photo_video_tab:
                 // 视频
-                if(fragmentPhotoVideoTab.isSelected()) {
+                if (fragmentPhotoVideoTab.isSelected()) {
                     return;
                 }
                 mPresenter.showMediaFiles(MEDIA_FILE_TYPE.VIDEO);
@@ -122,18 +183,18 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 break;
             case R.id.fragment_photo_audio_tab:
                 // 音乐
-                if(fragmentPhotoAudioTab.isSelected()) {
+                if (fragmentPhotoAudioTab.isSelected()) {
                     return;
                 }
                 mPresenter.showMediaFiles(MEDIA_FILE_TYPE.AUDIO);
                 setSelectTab(3);
                 break;
-            case R.id.fragment_photo_play_tab:
+            case R.id.fragment_photo_all_tab:
                 // 播放中
-                if(fragmentPhotoPlayTab.isSelected()) {
+                if (fragmentPhotoAllTab.isSelected()) {
                     return;
                 }
-                mPresenter.showMediaFiles(MEDIA_FILE_TYPE.PLAY);
+                mPresenter.showMediaFiles(MEDIA_FILE_TYPE.ALL);
                 setSelectTab(4);
                 break;
             case R.id.device_photo_choose_tab:
@@ -161,7 +222,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         fragmentPhotoImageTab.setSelected(false);
         fragmentPhotoVideoTab.setSelected(false);
         fragmentPhotoAudioTab.setSelected(false);
-        fragmentPhotoPlayTab.setSelected(false);
+        fragmentPhotoAllTab.setSelected(false);
         switch (id) {
             case 1:
                 fragmentPhotoImageTab.setSelected(true);
@@ -173,7 +234,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 fragmentPhotoAudioTab.setSelected(true);
                 break;
             case 4:
-                fragmentPhotoPlayTab.setSelected(true);
+                fragmentPhotoAllTab.setSelected(true);
                 break;
         }
     }
@@ -206,8 +267,8 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         // 列表模式
         try {
 //            mListImages = images;
-            mListAdapter.clear();
-            mListAdapter.appendToList(mPresenter.subGroupOfMedia(files));
+            mFolderBeans.clear();
+            mFolderBeans.addAll(mPresenter.subGroupOfMedia(files));
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

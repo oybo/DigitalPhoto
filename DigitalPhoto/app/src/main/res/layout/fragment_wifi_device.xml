@@ -1,50 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <RelativeLayout
+    <View
         android:layout_width="match_parent"
         android:layout_height="@dimen/main_actionbar_height"
-        android:background="@color/colorPrimary">
+        android:background="@color/colorPrimary"/>
 
-        <TextView
-            android:id="@+id/fragment_device_resetscan_txt"
-            android:layout_width="wrap_content"
-            android:layout_height="50dip"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="10dip"
-            android:drawableLeft="@drawable/scan_icon"
-            android:drawablePadding="10dip"
-            android:gravity="center"
-            android:text="扫描设备"
-            android:textColor="#FFFFFF"
-            android:textSize="15sp" />
-
-        <ProgressBar
-            android:id="@+id/fragment_device_scan_loading"
-            android:layout_width="18dip"
-            android:layout_height="18dip"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="10dip"
-            android:layout_toRightOf="@id/fragment_device_resetscan_txt"
-            android:indeterminateBehavior="repeat"
-            android:indeterminateDrawable="@drawable/dialog_loading_progress"
-            android:indeterminateOnly="true" />
-    </RelativeLayout>
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/fragment_device_recyclerview"
+    <com.chanven.lib.cptr.PtrClassicFrameLayout
+        xmlns:cube_ptr="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/fragment_device_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="@dimen/main_actionbar_height"
-        android:scrollbars="none" />
+        android:padding="2dip"
+        cube_ptr:ptr_duration_to_close="100"
+        cube_ptr:ptr_duration_to_close_header="1000"
+        cube_ptr:ptr_keep_header_when_refresh="true"
+        cube_ptr:ptr_pull_to_fresh="false"
+        cube_ptr:ptr_ratio_of_header_height_to_refresh="1.2"
+        cube_ptr:ptr_resistance="2.0">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/fragment_device_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"/>
+    </com.chanven.lib.cptr.PtrClassicFrameLayout>
 
     <com.xyz.digital.photo.app.view.LoadingView
         android:id="@+id/view_loading"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerInParent="true" />
+        android:layout_centerInParent="true"
+        android:visibility="gone"/>
 
 </RelativeLayout>
