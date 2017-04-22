@@ -22,7 +22,7 @@
             <com.xyz.digital.photo.app.view.RoundAngleImageView
                 android:id="@+id/item_child_image"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:scaleType="centerCrop"
                 android:src="@drawable/defult_audio_icon"
                 app:roundHeight="5dip"

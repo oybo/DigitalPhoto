@@ -1,94 +1,124 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:padding="10dip">
+    android:orientation="vertical">
 
-    <com.xyz.digital.photo.app.view.RoundAngleImageView
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/item_device_media_image"
-        android:layout_width="120dip"
-        android:layout_height="wrap_content"
-        android:scaleType="centerCrop"
-        app:roundHeight="5dip"
-        app:roundWidth="5dip"/>
-
-    <RelativeLayout
-        android:layout_width="0dip"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="10dip"
-        android:layout_weight="1"
-        android:padding="2dip">
+        android:layout_margin="6dip"
+        android:background="@drawable/view_quadrate_round"
+        android:orientation="vertical"
+        android:padding="1dip">
 
-        <TextView
-            android:id="@+id/item_device_media_title_txt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:text="Camera"
-            android:textColor="#333333"
-            android:textSize="14sp"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/item_device_media_date_txt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/item_device_media_title_txt"
-            android:layout_marginTop="2dip"
-            android:singleLine="true"
-            android:text="2016-1-2"
-            android:textColor="#767676"
-            android:textSize="12sp"/>
+            <com.xyz.digital.photo.app.view.RoundAngleImageView
+                android:id="@+id/item_device_media_imange"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dip"
+                android:scaleType="centerCrop"
+                android:src="@drawable/defult_audio_icon"
+                app:roundHeight="5dip"
+                app:roundWidth="5dip"/>
 
-        <TextView
-            android:id="@+id/item_device_media_size_txt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/item_device_media_date_txt"
-            android:layout_marginTop="2dip"
-            android:singleLine="true"
-            android:text="120KB"
-            android:textColor="#767676"
-            android:textSize="12sp"/>
+            <ImageView
+                android:id="@+id/item_device_media_play_image"
+                android:layout_width="55dip"
+                android:layout_height="55dip"
+                android:layout_alignBottom="@id/item_device_media_imange"
+                android:layout_alignRight="@id/item_device_media_imange"
+                android:layout_marginBottom="-30dip"
+                android:padding="5dip"
+                android:src="@drawable/media_play_icon"/>
 
-        <TextView
-            android:id="@+id/item_device_media_download_txt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/item_device_media_size_txt"
-            android:layout_marginTop="5dip"
-            android:drawableLeft="@drawable/selector_media_download"
-            android:drawablePadding="2dip"
-            android:text="下载"
-            android:textColor="@drawable/selector_txt_download"
-            android:textSize="13sp"/>
+            <LinearLayout
+                android:id="@+id/item_device_media_download_layout"
+                android:layout_width="match_parent"
+                android:layout_height="30dip"
+                android:layout_below="@id/item_device_media_imange"
+                android:layout_marginRight="-3dip"
+                android:layout_marginTop="-20dip"
+                android:layout_toLeftOf="@id/item_device_media_play_image"
+                android:orientation="horizontal"
+                android:paddingLeft="6dip">
 
-        <TextView
-            android:id="@+id/item_device_media_delete_txt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/item_device_media_size_txt"
-            android:layout_marginLeft="15dip"
-            android:layout_marginTop="5dip"
-            android:layout_toRightOf="@id/item_device_media_download_txt"
-            android:drawableLeft="@drawable/media_delete_icon"
-            android:drawablePadding="2dip"
-            android:text="删除"
-            android:textColor="@drawable/selector_txt_download"
-            android:textSize="13sp"/>
+                <TextView
+                    android:id="@+id/item_device_media_download_txt"
+                    android:layout_width="0dip"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="5dip"
+                    android:layout_weight="1"
+                    android:drawableLeft="@drawable/selector_media_download"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:text="已下载"
+                    android:textColor="@drawable/selector_txt_download"
+                    android:textSize="12sp"/>
 
-    </RelativeLayout>
+                <TextView
+                    android:id="@+id/item_device_media_delete_txt"
+                    android:layout_width="0dip"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="6dip"
+                    android:layout_marginTop="5dip"
+                    android:layout_toRightOf="@id/item_device_media_download_txt"
+                    android:layout_weight="1"
+                    android:drawableLeft="@drawable/media_delete_icon"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:text="删除"
+                    android:textColor="@drawable/selector_txt_download"
+                    android:textSize="12sp"/>
 
-    <ImageView
-        android:id="@+id/item_device_media_play_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:padding="10dip"
-        android:src="@drawable/media_play_icon"/>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/item_device_media_title_txt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/item_device_media_download_layout"
+                android:layout_marginLeft="6dip"
+                android:layout_marginRight="10dip"
+                android:layout_marginTop="1dip"
+                android:ellipsize="middle"
+                android:singleLine="true"
+                android:text="Camera"
+                android:textColor="#333333"
+                android:textSize="15sp"/>
+
+            <TextView
+                android:id="@+id/item_device_media_date_txt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/item_device_media_title_txt"
+                android:layout_marginLeft="6dip"
+                android:singleLine="true"
+                android:text="2016-1-2"
+                android:textColor="#666666"
+                android:textSize="12sp"/>
+
+            <TextView
+                android:id="@+id/item_device_media_size_txt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/item_device_media_title_txt"
+                android:layout_marginLeft="15dip"
+                android:layout_toRightOf="@id/item_device_media_date_txt"
+                android:singleLine="true"
+                android:text="120KB"
+                android:textColor="#666666"
+                android:textSize="12sp"/>
+
+        </RelativeLayout>
+
+    </LinearLayout>
 
 </LinearLayout>

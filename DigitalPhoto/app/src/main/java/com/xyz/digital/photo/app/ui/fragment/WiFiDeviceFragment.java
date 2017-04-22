@@ -78,6 +78,7 @@ public class WiFiDeviceFragment extends BaseFragment implements WiFiContract.Vie
         mAdapter = new WifAdapter(getActivity());
         fragmentDeviceRecyclerview.setAdapter(mAdapter);
 
+        mLoadingView.show();
         fragmentDeviceRefreshLayout.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -118,6 +119,7 @@ public class WiFiDeviceFragment extends BaseFragment implements WiFiContract.Vie
                 }
             });
         }
+        mLoadingView.hide();
     }
 
     @Override

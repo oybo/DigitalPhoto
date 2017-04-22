@@ -6,8 +6,8 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,27 +51,19 @@ import butterknife.ButterKnife;
 public class DevicePhotoFragment extends BaseFragment implements View.OnClickListener, DeviceMediaContract.View, BaseRecyclerAdapter
         .onInternalClickListener {
 
-    @Bind(R.id.device_photo_model_type)
-    ImageView mModelTypeImage;
-    @Bind(R.id.device_media_chart_recyclerview)
-    RecyclerView mChartRecyclerView;
-    @Bind(R.id.device_media_list_recyclerview)
-    SwipeMenuListView mListRecyclerView;
-    @Bind(R.id.view_loading)
-    LoadingView mLoadingView;
-    @Bind(R.id.fragment_photo_image_tab)
-    TextView fragmentPhotoImageTab;
-    @Bind(R.id.fragment_photo_video_tab)
-    TextView fragmentPhotoVideoTab;
-    @Bind(R.id.fragment_photo_audio_tab)
-    TextView fragmentPhotoAudioTab;
-    @Bind(R.id.fragment_photo_all_tab)
-    TextView fragmentPhotoAllTab;
+    @Bind(R.id.device_photo_model_type) ImageView mModelTypeImage;
+    @Bind(R.id.device_media_chart_recyclerview) RecyclerView mChartRecyclerView;
+    @Bind(R.id.device_media_list_recyclerview) SwipeMenuListView mListRecyclerView;
+    @Bind(R.id.view_loading) LoadingView mLoadingView;
+    @Bind(R.id.fragment_photo_image_tab) TextView fragmentPhotoImageTab;
+    @Bind(R.id.fragment_photo_video_tab) TextView fragmentPhotoVideoTab;
+    @Bind(R.id.fragment_photo_audio_tab) TextView fragmentPhotoAudioTab;
+    @Bind(R.id.fragment_photo_all_tab) TextView fragmentPhotoAllTab;
 
     private DeviceMediaContract.Presenter mPresenter;
-
+    /**     图表模式       */
     private DeviceMediaAdapter mChartAdapter;
-
+    /**     列表模式       */
     private List<FolderBean> mFolderBeans = new ArrayList<>();
     private DeviceListMediaAdapter mListAdapter;
 
@@ -91,38 +83,19 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
     }
 
     private void initView() {
-        mChartRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mChartRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         mChartRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
 
         SwipeMenuCreator creator = new SwipeMenuCreator() {
             @Override
             public void create(SwipeMenu menu) {
                 // create "download" item
-                SwipeMenuItem downloadItem = new SwipeMenuItem(getActivity().getApplicationContext());
-                // set item background
-                downloadItem.setBackground(new ColorDrawable(Color.parseColor("#C5C7C6")));
-                // set item width
-                downloadItem.setWidth(ScreenUtils.dpToPxInt(80));
-                // set a icon
-                downloadItem.setTitleSize(16);
-                downloadItem.setTitleColor(Color.BLACK);
-                downloadItem.setTitle("下载");
-                // add to menu
-                menu.addMenuItem(downloadItem);
+                menu.addMenuItem(createSwipeMenuItem(Color.parseColor("#C5C7C6"), "下载"));
                 // create "delete" item
-                SwipeMenuItem deleteItem = new SwipeMenuItem(getActivity().getApplicationContext());
-                // set item background
-                deleteItem.setBackground(new ColorDrawable(Color.parseColor("#C42708")));
-                // set item width
-                deleteItem.setWidth(ScreenUtils.dpToPxInt(80));
-                // set a icon
-                deleteItem.setTitleSize(16);
-                deleteItem.setTitleColor(Color.BLACK);
-                deleteItem.setTitle("删除");
-                // add to menu
-                menu.addMenuItem(deleteItem);
+                menu.addMenuItem(createSwipeMenuItem(Color.parseColor("#C42708"), "删除"));
             }
         };
+//        mListRecyclerView.
         // set creator
         mListRecyclerView.setMenuCreator(creator);
         // step 2. listener item click event
@@ -131,7 +104,11 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
             public void onMenuItemClick(int position, SwipeMenu menu, int index) {
                 switch (index) {
                     case 0:
-                        // delete
+                        // 下载
+
+                        break;
+                    case 1:
+                        // 删除
 
                         break;
                 }
@@ -322,6 +299,21 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
     @Override
     public void hideLoading() {
         mLoadingView.hide();
+    }
+
+    private SwipeMenuItem createSwipeMenuItem(int color, String txt) {
+        SwipeMenuItem swipeMenuItem = new SwipeMenuItem(getActivity().getApplicationContext());
+        // set item background
+        swipeMenuItem.setBackground(new ColorDrawable(color));
+        // set item width
+        swipeMenuItem.setWidth(ScreenUtils.dpToPxInt(80));
+        // set a icon
+        // set a txt
+        swipeMenuItem.setTitleSize(16);
+        swipeMenuItem.setTitleColor(Color.BLACK);
+        swipeMenuItem.setTitle(txt);
+
+        return swipeMenuItem;
     }
 
 }

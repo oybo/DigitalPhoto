@@ -34,7 +34,7 @@ public class DeviceMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
 
         holder.setText(R.id.item_device_media_size_txt, item.getSize());
 
-        ImageView imageView = holder.getImageView(R.id.item_device_media_image);
+        ImageView imageView = holder.getImageView(R.id.item_device_media_imange);
 
         // 图片
         if(item.getFileType() == MEDIA_FILE_TYPE.AUDIO) {
