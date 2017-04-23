@@ -6,19 +6,21 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
+
 import com.touchmenotapps.widget.radialmenu.menu.v1.RadialMenuItem;
 import com.touchmenotapps.widget.radialmenu.menu.v1.RadialMenuWidget;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.ui.BaseFragment;
 import com.xyz.digital.photo.app.util.ToastUtil;
+
 import java.util.ArrayList;
 
 /**
  * Created by Administrator on 2017/4/4.
  */
 
-public class RemoteControlFragment extends BaseFragment {
+public class RemoteControlFragment extends BaseFragment implements View.OnClickListener {
 
     private RadialMenuWidget mMenuWidget;
     private RadialMenuItem mConfirmMenuItem, mUpMenuItem, mDownMenuItem, mLeftMenuItem, mRightMenuItem;
@@ -36,10 +38,14 @@ public class RemoteControlFragment extends BaseFragment {
     }
 
     private void initView() {
-        FrameLayout frameLayout = (FrameLayout) getView().findViewById(R.id.book_read_menu_layout);
+        RelativeLayout layout = (RelativeLayout) getView().findViewById(R.id.book_read_menu_menu_widget_layout);
         mMenuWidget = new RadialMenuWidget(getActivity());
+        RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        rlp.addRule(RelativeLayout.CENTER_IN_PARENT);
+        layout.addView(mMenuWidget, rlp);
         // 确定
-        mConfirmMenuItem = new RadialMenuItem(getString(android.R.string.ok), "");
+        mConfirmMenuItem = new RadialMenuItem(getString(android.R.string.ok), getString(android.R.string.ok));
         mConfirmMenuItem.setOnMenuItemPressed(new MyMenuItemClickListener(0));
         // 添加上下左右菜单
         mUpMenuItem = createRadialMenuItem(1, R.drawable.login_pwd_icon);
@@ -65,14 +71,24 @@ public class RemoteControlFragment extends BaseFragment {
                 add(mRightMenuItem);
             }
         });
-        mMenuWidget.show(frameLayout);
+
+        getView().findViewById(R.id.fragment_control_tab_power_layout).setOnClickListener(this);
     }
 
     private RadialMenuItem createRadialMenuItem(int type, int resouceId) {
-        RadialMenuItem menuItem = new RadialMenuItem("", "");
+        RadialMenuItem menuItem = new RadialMenuItem(null, " ");
         menuItem.setDisplayIcon(resouceId);
         menuItem.setOnMenuItemPressed(new MyMenuItemClickListener(type));
         return menuItem;
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.fragment_control_tab_power_layout:
+
+                break;
+        }
     }
 
     private class MyMenuItemClickListener implements RadialMenuItem.RadialMenuItemClickListener {

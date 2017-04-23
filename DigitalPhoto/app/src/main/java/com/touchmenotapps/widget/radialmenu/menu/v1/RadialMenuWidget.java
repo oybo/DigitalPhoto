@@ -24,6 +24,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -45,8 +46,7 @@ public class RadialMenuWidget extends View {
 	private List<RadialMenuItem> menuEntries = new ArrayList<RadialMenuItem>();
 	private RadialMenuItem centerCircle = null;
 
-	private float screen_density = getContext().getResources()
-			.getDisplayMetrics().density;
+	private float screen_density = getContext().getResources().getDisplayMetrics().density;
 
 	private int defaultColor = Color.rgb(34, 96, 120); // default color of wedge
 														// pieces
@@ -101,6 +101,7 @@ public class RadialMenuWidget extends View {
 												// outer ring
 
 	private int MinSize = scalePX(35); // Radius of inner ring size
+	private int mSize = scalePX(100); // Radius of outer ring size
 	private int MaxSize = scalePX(90); // Radius of outer ring size
 	private int r2MinSize = MaxSize + scalePX(5); // Radius of inner second ring
 													// size
@@ -153,19 +154,27 @@ public class RadialMenuWidget extends View {
 	 * Radial menu widget constructor.
 	 * @param context - Application Context.
 	 * <strong> Usage </strong>
-	 * 
+	 *
 	 * RadialMenuWidget pieMenu = new RadialMenuWidget(this);
 	 * pieMenu.addMenuEntry(menuItem);
 	 * pieMenu.show(view);
 	 */
 	public RadialMenuWidget(Context context) {
-		super(context);
+		this(context, null);
+	}
+
+	public RadialMenuWidget(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		init(context);
+	}
+
+	private void init(Context context) {
 		helper = new RadialMenuHelper();
 		mWindow = helper.initPopup(context);
 		// Gets screen specs and defaults to center of screen
-		this.xPosition = (getResources().getDisplayMetrics().widthPixels) / 2;
-		this.yPosition = (getResources().getDisplayMetrics().heightPixels) / 2;
-		
+		this.xPosition = mSize;
+		this.yPosition = mSize;
+
 		determineWedges();
 		helper.onOpenAnimation(this, xPosition, yPosition, xSource, ySource);
 	}
@@ -312,12 +321,21 @@ public class RadialMenuWidget extends View {
 	}
 
 	@Override
+	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+		setMeasuredDimension(mSize * 2, mSize * 2);
+	}
+
+	@Override
 	protected void onDraw(Canvas c) {
 
 		Paint paint = new Paint();
 		paint.setAntiAlias(true);
 		paint.setStrokeWidth(3);
 
+		xSource = 200;
+		ySource = 600;
 		// draws a dot at the source of the press
 		if (showSource == true) {
 			paint.setColor(outlineColor);
