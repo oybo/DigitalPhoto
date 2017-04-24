@@ -8,6 +8,9 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by yungcs on 2016/1/7.
  */
@@ -50,8 +53,33 @@ public class MyNestedScrollView extends NestedScrollView {
         });
     }
 
+    private List<View> mInterceptTouchViews = new ArrayList<>();
+
+    public void addInterceptTouchView(View view) {
+        mInterceptTouchViews.add(view);
+    }
+
+    private boolean inRangeOfView(View view, MotionEvent ev) {
+        int[] location = new int[2];
+        view.getLocationOnScreen(location);
+        int x = location[0];
+        int y = location[1];
+        if (ev.getX() < x || ev.getX() > (x + view.getWidth()) || ev.getY() < y || ev.getY() > (y + view.getHeight())) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent e) {
+        if(mInterceptTouchViews.size() > 0) {
+            for (View view : mInterceptTouchViews) {
+                if(inRangeOfView(view, e)) {
+                    view.onTouchEvent(e);
+                    return false;
+                }
+            }
+        }
         int action = e.getAction();
         switch (action) {
             case MotionEvent.ACTION_DOWN:

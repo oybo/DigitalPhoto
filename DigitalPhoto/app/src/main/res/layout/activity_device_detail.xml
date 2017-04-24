@@ -96,11 +96,11 @@
                         android:id="@+id/device_detail_disk_usable_size_progressbar"
                         style="?android:attr/progressBarStyleHorizontal"
                         android:layout_width="match_parent"
-                        android:layout_height="3.5dip"
+                        android:layout_height="4dip"
                         android:layout_marginTop="5dip"
                         android:max="100"
                         android:progress="70"
-                        android:progressDrawable="@drawable/seekbar_style"/>
+                        android:progressDrawable="@drawable/seekbar_disk_size_style"/>
 
                 </LinearLayout>
 
@@ -148,11 +148,11 @@
                         android:id="@+id/device_detail_u_disk_usable_size_progressbar"
                         style="?android:attr/progressBarStyleHorizontal"
                         android:layout_width="match_parent"
-                        android:layout_height="3.5dip"
+                        android:layout_height="4dip"
                         android:layout_marginTop="5dip"
                         android:max="100"
                         android:progress="70"
-                        android:progressDrawable="@drawable/seekbar_style"/>
+                        android:progressDrawable="@drawable/seekbar_disk_size_style"/>
 
                 </LinearLayout>
 

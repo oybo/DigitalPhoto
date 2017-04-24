@@ -104,6 +104,13 @@
 
         </LinearLayout>
 
+        <com.xyz.digital.photo.app.view.LoadingView
+            android:id="@+id/view_loading"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:visibility="gone"/>
+
     </RelativeLayout>
 
 </LinearLayout>

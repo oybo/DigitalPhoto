@@ -376,7 +376,7 @@ public class RadialMenuWidget extends View {
 				paint.setStyle(Paint.Style.FILL);
 				c.drawPath(f, paint);
 			} else {
-				paint.setColor(defaultColor);
+				paint.setColor(Color.parseColor("#E3E5E6"));
 				paint.setAlpha(defaultAlpha);
 				paint.setStyle(Paint.Style.FILL);
 				c.drawPath(f, paint);
@@ -612,10 +612,9 @@ public class RadialMenuWidget extends View {
 				paint.setAlpha(selectedAlpha);
 				paint.setStyle(Paint.Style.FILL);
 				c.drawCircle(xPosition, yPosition, cRadius, paint);
-				helper.onCloseAnimation(this, xPosition, yPosition, xSource,
-						ySource);
+				helper.onCloseAnimation(this, xPosition, yPosition, xSource, ySource);
 			} else {
-				paint.setColor(defaultColor);
+				paint.setColor(Color.parseColor("#CED1D3"));
 				paint.setAlpha(defaultAlpha);
 				paint.setStyle(Paint.Style.FILL);
 				c.drawCircle(xPosition, yPosition, cRadius, paint);

@@ -1,225 +1,310 @@
 package com.xyz.digital.photo.app.view;
 
 import android.content.Context;
-import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.MotionEvent;
-import android.view.ViewConfiguration;
-import android.view.ViewParent;
-import android.widget.SeekBar;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 
-public class VerticalSeekBar extends SeekBar
+
+public class VerticalSeekBar extends FrameLayout
 {
-    private boolean mIsDragging;
-    private float mTouchDownY;
-    private int mScaledTouchSlop;
-    private boolean isInScrollingContainer = false;
-
-    public boolean isInScrollingContainer()
-    {
-        return isInScrollingContainer;
-    }
-
-    public void setInScrollingContainer(boolean isInScrollingContainer)
-    {
-        this.isInScrollingContainer = isInScrollingContainer;
-    }
-
-    /**
-     * On touch, this offset plus the scaled value from the position of the
-     * touch will form the progress value. Usually 0.
-     */
-    float mTouchProgressOffset;
 
     public VerticalSeekBar(Context context, AttributeSet attrs, int defStyle)
     {
         super(context, attrs, defStyle);
-        mScaledTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-
+        initialize(context);
     }
 
     public VerticalSeekBar(Context context, AttributeSet attrs)
     {
         super(context, attrs);
+        initialize(context);
     }
 
     public VerticalSeekBar(Context context)
     {
         super(context);
+        initialize(context);
+    }
+
+    private View mProgressBg;
+    private View mSecondaryProgressBg;
+    private View mBg;
+    private FrameLayout mSlider;
+    private int mProgress = 0;
+    private int mSecondaryProgress = 0;
+    private int mMax = 100;
+    private boolean mTrackingTouch = false;
+    private OnSeekBarChangeListener mOnSeekBarChangeListener;
+    private int mBGSize =6;          //进度条大小
+    private int mBGRadius=20;     //进度条圆角
+    private int mCircleSize=60;       //圆的大小
+    private TextView mTextView;   //字
+
+
+    public interface OnSeekBarChangeListener
+    {
+        void onProgressChanged(VerticalSeekBar seekBar, int progress, boolean fromUser);
+        void onStartTrackingTouch(VerticalSeekBar seekBar);
+        void onStopTrackingTouch(VerticalSeekBar seekBar);
+        void onrequestDisallowInterceptTouchEvent(boolean enable);
+    }
+
+    private void initialize(Context context)
+    {
+        LayoutParams params = new LayoutParams(mBGSize, LayoutParams.MATCH_PARENT);
+        params.gravity = Gravity.CENTER_HORIZONTAL;
+        mBg = new View(context);
+        addView(mBg, params);
+
+        GradientDrawable drawable = new GradientDrawable();
+        drawable.setColor(0xffbcbab8);
+        drawable.setCornerRadius(mBGRadius);
+        mBg.setBackgroundDrawable(drawable);
+
+        params = new LayoutParams(mBGSize, 0);
+        params.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+        mSecondaryProgressBg = new View(context);
+        addView(mSecondaryProgressBg, params);
+
+        drawable = new GradientDrawable();
+        drawable.setColor(0xffff5959);
+        drawable.setCornerRadius(mBGRadius);
+        mSecondaryProgressBg.setBackgroundDrawable(drawable);
+
+        params = new LayoutParams(mBGSize, 0);
+        params.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+        mProgressBg = new View(context);
+        addView(mProgressBg, params);
+
+        drawable = new GradientDrawable();
+        drawable.setColor(0xffff5959);
+        drawable.setCornerRadius(mBGRadius);
+        mProgressBg.setBackgroundDrawable(drawable);
+
+        params = new LayoutParams(mCircleSize, mCircleSize);
+        params.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+        mSlider = new FrameLayout(context);
+        addView(mSlider, params);
+
+        drawable = new GradientDrawable();
+        drawable.setColor(0xffdddddd);
+        drawable.setShape(GradientDrawable.OVAL);
+
+        params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        params.gravity=Gravity.CENTER;
+        mTextView=new TextView(context);
+        mTextView.setGravity(Gravity.CENTER);
+        mTextView.setTextSize(12);
+        mTextView.setIncludeFontPadding(false);
+        mTextView.setText("0");
+        mTextView.setTextColor(0xff666666);
+        mSlider.addView(mTextView, params);
+
+        mSlider.setBackgroundDrawable(drawable);
+
+        setClickable(true);
+    }
+    public String getText() {
+        return mTextView.getText().toString();
+    }
+
+    public void setmText(String mText) {
+        mTextView.setText(mText);
+    }
+
+    public void setOnSeekBarChangeListener(OnSeekBarChangeListener l)
+    {
+        mOnSeekBarChangeListener = l;
+    }
+
+    public void setThumb(Drawable d)
+    {
+        mSlider.setBackgroundDrawable(d);
+    }
+
+    public void setThumbSize(int w, int h)
+    {
+        LayoutParams params = (LayoutParams)mSlider.getLayoutParams();
+        params.width = w;
+        params.height = h;
+        mSlider.setLayoutParams(params);
+    }
+
+    public void setProgressSize(int size)
+    {
+        LayoutParams params = (LayoutParams)mProgressBg.getLayoutParams();
+        params.width = size;
+        mProgressBg.setLayoutParams(params);
+
+        params = (LayoutParams)mSecondaryProgressBg.getLayoutParams();
+        params.width = size;
+        mSecondaryProgressBg.setLayoutParams(params);
+
+        params = (LayoutParams)mBg.getLayoutParams();
+        params.width = size;
+        mBg.setLayoutParams(params);
+    }
+
+    public void setProgressBackground(Drawable drawable)
+    {
+        mBg.setBackgroundDrawable(drawable);
+    }
+
+    public void setProgressDrawable(Drawable drawable)
+    {
+        mProgressBg.setBackgroundDrawable(drawable);
+    }
+
+    public void setSecondaryProgressDrawable(Drawable drawable)
+    {
+        mSecondaryProgressBg.setBackgroundDrawable(drawable);
+    }
+
+    public void setMax(int max)
+    {
+        mMax = max;
+    }
+
+    public void setProgress(int progress)
+    {
+        setProgress(progress, false);
+    }
+
+    public int getProgress()
+    {
+        return mProgress;
+    }
+
+    private void setProgress(int progress, boolean fromUser)
+    {
+        if(progress < 0)
+            progress = 0;
+        if(progress > mMax)
+            progress = mMax;
+
+        if(mProgress != progress)
+        {
+            mProgress = progress;
+            updateProgress(fromUser);
+        }
+        mTextView.setText(progress+"");
+    }
+
+    private void updateProgress(boolean fromUser)
+    {
+        int paddingTop = getPaddingTop();
+        int paddingBottom = getPaddingBottom();
+        int h = getHeight() - paddingTop - paddingBottom;
+        if(h > 0)
+        {
+            LayoutParams params = (LayoutParams)mProgressBg.getLayoutParams();
+            params.height = h*mProgress/mMax;
+            mProgressBg.setLayoutParams(params);
+
+            params = (LayoutParams)mSlider.getLayoutParams();
+            params.bottomMargin = (h-params.height)*mProgress/mMax;
+            mSlider.setLayoutParams(params);
+        }
+        if(mOnSeekBarChangeListener != null){
+            mOnSeekBarChangeListener.onProgressChanged(this, mProgress, fromUser);
+        }
+    }
+
+    public void setSecondaryProgress(int progress)
+    {
+        if(progress < 0)
+            progress = 0;
+        if(progress > mMax)
+            progress = mMax;
+
+        mSecondaryProgress = progress;
+        updateSecondaryProgress();
+    }
+
+    private void updateSecondaryProgress()
+    {
+        int paddingTop = getPaddingTop();
+        int paddingBottom = getPaddingBottom();
+        int h = getHeight() - paddingTop - paddingBottom;
+        if(h > 0)
+        {
+            LayoutParams params = (LayoutParams)mSecondaryProgressBg.getLayoutParams();
+            params.height = h*mSecondaryProgress/mMax;
+            mSecondaryProgressBg.setLayoutParams(params);
+        }
+    }
+
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev)
+    {
+        int action = ev.getAction();
+        int y = (int)ev.getY();
+        int paddingTop = getPaddingTop();
+        int paddingBottom = getPaddingBottom();
+        int h = getHeight() - paddingTop - paddingBottom;
+        if(y < paddingTop){
+            y = paddingTop;
+        }
+        if(y > h + paddingTop){
+            y = h + paddingTop;
+        }
+        y -= paddingTop;
+        if(action == MotionEvent.ACTION_DOWN)
+        {
+            if(mOnSeekBarChangeListener != null){
+                mOnSeekBarChangeListener.onrequestDisallowInterceptTouchEvent(true);
+            }
+            int progress = mMax*(h-y)/h;
+            if(progress != mProgress)
+            {
+                if(mTrackingTouch == false){
+                    mTrackingTouch = true;
+                    if(mOnSeekBarChangeListener != null){
+                        mOnSeekBarChangeListener.onStartTrackingTouch(this);
+                    }
+                }
+                setProgress(progress, true);
+            }
+        }
+        else if(action == MotionEvent.ACTION_MOVE)
+        {
+            int progress = mMax*(h-y)/h;
+            if(progress != mProgress)
+            {
+                if(mTrackingTouch == false){
+                    mTrackingTouch = true;
+                    if(mOnSeekBarChangeListener != null){
+                        mOnSeekBarChangeListener.onStartTrackingTouch(this);
+                    }
+                }
+                setProgress(progress, true);
+            }
+        }
+        else if(action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL)
+        {
+            if(mOnSeekBarChangeListener != null){
+                mOnSeekBarChangeListener.onrequestDisallowInterceptTouchEvent(false);
+            }
+            mTrackingTouch = false;
+            if(mOnSeekBarChangeListener != null){
+                mOnSeekBarChangeListener.onStopTrackingTouch(this);
+            }
+        }
+        return super.dispatchTouchEvent(ev);
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh)
     {
-
-        super.onSizeChanged(h, w, oldh, oldw);
-
+        updateProgress(false);
+        //updateSecondaryProgress();
+        super.onSizeChanged(w, h, oldw, oldh);
     }
-
-    @Override
-    protected synchronized void onMeasure(int widthMeasureSpec,
-                                          int heightMeasureSpec)
-    {
-        super.onMeasure(heightMeasureSpec, widthMeasureSpec);
-        setMeasuredDimension(getMeasuredHeight(), getMeasuredWidth());
-    }
-
-    @Override
-    protected synchronized void onDraw(Canvas canvas)
-    {
-        canvas.rotate(-90);
-        canvas.translate(-getHeight(), 0);
-        super.onDraw(canvas);
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event)
-    {
-        if (!isEnabled())
-        {
-            return false;
-        }
-
-        switch (event.getAction())
-        {
-            case MotionEvent.ACTION_DOWN:
-                if (isInScrollingContainer())
-                {
-
-                    mTouchDownY = event.getY();
-                }
-                else
-                {
-                    setPressed(true);
-
-                    invalidate();
-                    onStartTrackingTouch();
-                    trackTouchEvent(event);
-                    attemptClaimDrag();
-
-                    onSizeChanged(getWidth(), getHeight(), 0, 0);
-                }
-                break;
-
-            case MotionEvent.ACTION_MOVE:
-                if (mIsDragging)
-                {
-                    trackTouchEvent(event);
-
-                }
-                else
-                {
-                    final float y = event.getY();
-                    if (Math.abs(y - mTouchDownY) > mScaledTouchSlop)
-                    {
-                        setPressed(true);
-
-                        invalidate();
-                        onStartTrackingTouch();
-                        trackTouchEvent(event);
-                        attemptClaimDrag();
-
-                    }
-                }
-                onSizeChanged(getWidth(), getHeight(), 0, 0);
-                break;
-
-            case MotionEvent.ACTION_UP:
-                if (mIsDragging)
-                {
-                    trackTouchEvent(event);
-                    onStopTrackingTouch();
-                    setPressed(false);
-
-                }
-                else
-                {
-                    // Touch up when we never crossed the touch slop threshold
-                    // should
-                    // be interpreted as a tap-seek to that location.
-                    onStartTrackingTouch();
-                    trackTouchEvent(event);
-                    onStopTrackingTouch();
-
-                }
-                onSizeChanged(getWidth(), getHeight(), 0, 0);
-                // ProgressBar doesn't know to repaint the thumb drawable
-                // in its inactive state when the touch stops (because the
-                // value has not apparently changed)
-                invalidate();
-                break;
-        }
-        return true;
-
-    }
-
-    private void trackTouchEvent(MotionEvent event)
-    {
-        final int height = getHeight();
-        final int top = getPaddingTop();
-        final int bottom = getPaddingBottom();
-        final int available = height - top - bottom;
-
-        int y = (int) event.getY();
-
-        float scale;
-        float progress = 0;
-
-        // 下面是最小值
-        if (y > height - bottom)
-        {
-            scale = 0.0f;
-        }
-        else if (y < top)
-        {
-            scale = 1.0f;
-        }
-        else
-        {
-            scale = (float) (available - y + top) / (float) available;
-            progress = mTouchProgressOffset;
-        }
-
-        final int max = getMax();
-        progress += scale * max;
-
-        setProgress((int) progress);
-
-    }
-
-    /**
-     * This is called when the user has started touching this widget.
-     */
-    void onStartTrackingTouch()
-    {
-        mIsDragging = true;
-    }
-
-    /**
-     * This is called when the user either releases his touch or the touch is
-     * canceled.
-     */
-    void onStopTrackingTouch()
-    {
-        mIsDragging = false;
-    }
-
-    private void attemptClaimDrag()
-    {
-        ViewParent p = getParent();
-        if (p != null)
-        {
-            p.requestDisallowInterceptTouchEvent(true);
-        }
-    }
-
-    @Override
-    public synchronized void setProgress(int progress)
-    {
-
-        super.setProgress(progress);
-        onSizeChanged(getWidth(), getHeight(), 0, 0);
-
-    }
-
 }

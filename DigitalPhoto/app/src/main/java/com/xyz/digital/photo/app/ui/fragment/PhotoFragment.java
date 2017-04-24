@@ -18,14 +18,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import com.lzy.okgo.OkGo;
-import com.lzy.okgo.request.PostRequest;
-import com.lzy.okserver.download.DownloadManager;
-import com.lzy.okserver.listener.UploadListener;
-import com.lzy.okserver.task.ExecutorWithListener;
-import com.lzy.okserver.upload.UploadInfo;
-import com.lzy.okserver.upload.UploadManager;
+import com.actions.actcommunication.ActCommunication;
+import com.actions.actfilemanager.ACTFileEventListener;
+import com.actions.actfilemanager.ActFileManager;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.FolderAdapter;
 import com.xyz.digital.photo.app.adapter.LocalMediaAdapter;
@@ -47,24 +42,18 @@ import com.xyz.digital.photo.app.view.DialogTips;
 import com.xyz.digital.photo.app.view.DividerItemDecoration;
 import com.xyz.digital.photo.app.view.LoadingView;
 import com.xyz.digital.photo.app.view.PhotoUploadPopView;
-import com.xyz.digital.photo.app.view.ProgressPieView;
-
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import okhttp3.Response;
 
 /**
  * Created by O on 2017/3/18.
  * 本地文件
  */
 
-public class PhotoFragment extends BaseFragment implements PhotoContract.View, View.OnClickListener, ExecutorWithListener
-        .OnAllTaskEndListener {
+public class PhotoFragment extends BaseFragment implements PhotoContract.View, View.OnClickListener{
 
     @Bind(R.id.fragment_photo_model_type) ImageView mModelTypeImage;
     @Bind(R.id.fragment_media_chart_recyclerview) RecyclerView mChartRecyclerView;
@@ -87,10 +76,9 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
     private FolderAdapter mListAdapter;
     private int firstItemPosition;
 
-    /**
-     * 上传管理
-     */
-    private UploadManager uploadManager;
+    /**    上传管理    */
+    private ActFileManager actFileManager = new ActFileManager();
+    private static String mRemoteCurrentPath = "/";
     private boolean isUpload;
 
     @Override
@@ -134,11 +122,10 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
         mPresenter = new PhotoPresenter(this);
         // 默认图表模式
         mPresenter.showType(MEDIA_SHOW_TYPE.CHART);
-
         // 上传管理
-        uploadManager = UploadManager.getInstance();
-        uploadManager.getThreadPool().setCorePoolSize(1);
-        uploadManager.getThreadPool().getExecutor().addOnAllTaskEndListener(this);
+        actFileManager.registerEventListener(new MyACTFileEventListener());
+        actFileManager.connect(Constants.HOST_IP);
+        actFileManager.browseFiles(mRemoteCurrentPath);
 
         // 图表模式
         mChartAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
@@ -241,19 +228,19 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
             switch (v.getId()) {
                 case R.id.item_child_upload_cancel:
                     // 停止上传任务
-                    try {
-                        String path = mChartAdapter.getItem(position).getFilePath();
-                        for (UploadInfo uploadInfo : uploadManager.getAllTask()) {
-                            if (path.equals(uploadInfo.getTaskKey())) {
-                                uploadInfo.getTask().cancel(true);
-                                uploadManager.getAllTask().remove(uploadInfo);
-                                mChartAdapter.addUpload(position);
-                                return;
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+//                    try {
+//                        String path = mChartAdapter.getItem(position).getFilePath();
+//                        for (UploadInfo uploadInfo : uploadManager.getAllTask()) {
+//                            if (path.equals(uploadInfo.getTaskKey())) {
+//                                uploadInfo.getTask().cancel(true);
+//                                uploadManager.getAllTask().remove(uploadInfo);
+//                                mChartAdapter.addUpload(position);
+//                                return;
+//                            }
+//                        }
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
                     break;
                 case R.id.item_child_isupload_txt:
                     // 点击单个上传
@@ -478,9 +465,8 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
             for (int i = 0; i < uploads.size(); i++) {
                 FolderBean bean = uploads.get(i);
                 if(!mListAdapter.isUpload(bean.getTopImagePath())) {
-                    PostRequest postRequest = OkGo.post(Constants.URL_FORM_UPLOAD);
-                    postRequest.params("fileKey" + i, new File(bean.getTopImagePath()));
-                    uploadManager.addTask(bean.getTopImagePath(), postRequest, new MyUploadListener());
+                    // 执行上传
+                    actFileManager.uploadFile(bean.getTopImagePath(), mRemoteCurrentPath + bean.getFolderName());
 
                     mListAdapter.addUpload(bean.getPosition());
                 }
@@ -491,9 +477,8 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
             for (int i = 0; i < uploads.size(); i++) {
                 MediaFileBean bean = uploads.get(i);
                 if(!mChartAdapter.isUpload(bean.getFilePath())) {
-                    PostRequest postRequest = OkGo.post(Constants.URL_FORM_UPLOAD);
-                    postRequest.params("fileKey" + i, new File(bean.getFilePath()));
-                    uploadManager.addTask(bean.getFilePath(), postRequest, new MyUploadListener());
+                    // 执行上传
+                    actFileManager.uploadFile(bean.getFilePath(), mRemoteCurrentPath + bean.getFileName());
 
                     mChartAdapter.addUpload(bean.getPosition());
                 }
@@ -606,89 +591,105 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
         }
     }
 
-    @Override
-    public void onAllTaskEnd() {
-        // 全部上传完成
-        isUpload = false;
-        mChartAdapter.clearUpload();
-        mSelectNumTxt.setText("已选择0项");
-        ToastUtil.showToast(getActivity(), "上传完成");
-    }
+//    @Override
+//    public void onAllTaskEnd() {
+//        // 全部上传完成
+//        isUpload = false;
+//        mChartAdapter.clearUpload();
+//        mSelectNumTxt.setText("已选择0项");
+//        ToastUtil.showToast(getActivity(), "上传完成");
+//    }
 
-    private class MyUploadListener extends UploadListener<String> {
+//    private void refresh(UploadInfo uploadInfo) {
+//        ProgressPieView pieView;
+//        if(mListLayout.getVisibility() == View.VISIBLE) {
+//            pieView = (ProgressPieView) mListRecyclerView.findViewWithTag("ProgressPieView" + uploadInfo.getTaskKey());
+//        } else {
+//            pieView = (ProgressPieView) mChartRecyclerView.findViewWithTag("ProgressPieView" + uploadInfo.getTaskKey());
+//        }
+//        if (pieView != null) {
+//            if (uploadInfo.getState() == DownloadManager.NONE) {
+//                pieView.setText("准备");
+//            } else if (uploadInfo.getState() == UploadManager.WAITING) {
+//                pieView.setText("等待");
+//            } else if (uploadInfo.getState() == UploadManager.UPLOADING) {
+//                pieView.setProgress((int) (uploadInfo.getProgress() * 100));
+//                pieView.setText((Math.round(uploadInfo.getProgress() * 10000) * 1.0f / 100) + "%");
+//            } else if (uploadInfo.getState() == UploadManager.ERROR) {
+//                pieView.setText("错误");
+//            } else if (uploadInfo.getState() == UploadManager.FINISH) {
+//                pieView.setText("成功");
+//                if(mListLayout.getVisibility() == View.VISIBLE) {
+//                    for(FolderBean folderBean : mListAdapter.getList()) {
+//                        if(folderBean.getTopImagePath().equals(uploadInfo.getTaskKey())) {
+//                            PreferenceUtils.getInstance().putBoolen(folderBean.getTopImagePath(), true);
+//                            mListAdapter.removeUpload(folderBean.getPosition());
+//                            mListAdapter.notifyItemChanged(folderBean.getPosition());
+//                            return;
+//                        }
+//                    }
+//                } else {
+//                    for(MediaFileBean mediaFileBean : mChartAdapter.getList()) {
+//                        if(mediaFileBean.getFilePath().equals(uploadInfo.getTaskKey())) {
+//                            PreferenceUtils.getInstance().putBoolen(mediaFileBean.getFilePath(), true);
+//                            mChartAdapter.removeUpload(mediaFileBean.getPosition());
+//                            mChartAdapter.notifyItemChanged(mediaFileBean.getPosition());
+//                            return;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 
+    private static final String LOG_TAG = "=======upload=======";
+
+    public class MyACTFileEventListener implements ACTFileEventListener {
         @Override
-        public void onProgress(UploadInfo uploadInfo) {
-            Log.e("MyUploadListener", "onProgress:" + uploadInfo.getTotalLength() + " " + uploadInfo.getUploadLength() + " " + uploadInfo
-                    .getProgress());
-
-            refresh(uploadInfo);
+        public void onOperationProgression(int opcode, int processed, int total) {
+            Log.d(LOG_TAG, "opcode = " + opcode + " and processed " + processed + " among " + total);
         }
 
         @Override
-        public void onFinish(String s) {
-            Log.e("MyUploadListener", "finish:");
-        }
-
-        @Override
-        public void onError(UploadInfo uploadInfo, String errorMsg, Exception e) {
-            Log.e("MyUploadListener", "onError:" + errorMsg);
-        }
-
-        @Override
-        public String parseNetworkResponse(Response response) throws Exception {
-            return response.body().string();
-        }
-
-        private void refresh(UploadInfo uploadInfo) {
-            ProgressPieView pieView;
-            if(mListLayout.getVisibility() == View.VISIBLE) {
-                pieView = (ProgressPieView) mListRecyclerView.findViewWithTag("ProgressPieView" + uploadInfo.getTaskKey());
+        public void onUploadCompleted(String remotePath, String localPath, int result) {
+            if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
+                ActCommunication.getInstance().onUploadFile(remotePath);
+                Log.d(LOG_TAG, "upload success: " + remotePath);
+//                refresh(null);
             } else {
-                pieView = (ProgressPieView) mChartRecyclerView.findViewWithTag("ProgressPieView" + uploadInfo.getTaskKey());
-            }
-            if (pieView != null) {
-                if (uploadInfo.getState() == DownloadManager.NONE) {
-                    pieView.setText("准备");
-                } else if (uploadInfo.getState() == UploadManager.WAITING) {
-                    pieView.setText("等待");
-                } else if (uploadInfo.getState() == UploadManager.UPLOADING) {
-                    pieView.setProgress((int) (uploadInfo.getProgress() * 100));
-                    pieView.setText((Math.round(uploadInfo.getProgress() * 10000) * 1.0f / 100) + "%");
-                } else if (uploadInfo.getState() == UploadManager.ERROR) {
-                    pieView.setText("错误");
-                } else if (uploadInfo.getState() == UploadManager.FINISH) {
-                    pieView.setText("成功");
-                    if(mListLayout.getVisibility() == View.VISIBLE) {
-                        for(FolderBean folderBean : mListAdapter.getList()) {
-                            if(folderBean.getTopImagePath().equals(uploadInfo.getTaskKey())) {
-                                PreferenceUtils.getInstance().putBoolen(folderBean.getTopImagePath(), true);
-                                mListAdapter.removeUpload(folderBean.getPosition());
-                                mListAdapter.notifyItemChanged(folderBean.getPosition());
-                                return;
-                            }
-                        }
-                    } else {
-                        for(MediaFileBean mediaFileBean : mChartAdapter.getList()) {
-                            if(mediaFileBean.getFilePath().equals(uploadInfo.getTaskKey())) {
-                                PreferenceUtils.getInstance().putBoolen(mediaFileBean.getFilePath(), true);
-                                mChartAdapter.removeUpload(mediaFileBean.getPosition());
-                                mChartAdapter.notifyItemChanged(mediaFileBean.getPosition());
-                                return;
-                            }
-                        }
-                    }
-                }
+                ToastUtil.showToast(getActivity(), "上传失败");
             }
         }
 
+        @Override
+        public void onDownloadCompleted(String remotePath, String localPath, int result) {
+        }
+
+        @Override
+        public void onDeleteCompleted(String parentPath, int result) {
+        }
+
+        @Override
+        public void onBrowseCompleted(Object filelist, String currentPath, int result) {
+        }
+
+        @Override
+        public void onDeleteDirectoryCompleted(String parentPath, int result) {
+        }
+
+        @Override
+        public void onCreateDirectoryCompleted(String parentPath, int result) {
+        }
+
+        @Override
+        public void onDisconnectCompleted(int result) {
+        }
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         ButterKnife.unbind(this);
-        uploadManager.getThreadPool().getExecutor().removeOnAllTaskEndListener(this);
     }
 
 }

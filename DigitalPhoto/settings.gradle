@@ -1,1 +1,1 @@
-include ':app', ':library_pullrefresh'
+include ':app', ':library_pullrefresh', ':actfilemanager'

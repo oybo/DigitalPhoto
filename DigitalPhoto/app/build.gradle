@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.xyz.digital.photo.app"
-        minSdkVersion 14
+        minSdkVersion 16
         targetSdkVersion 22
         versionCode 2
         versionName "1.0"
@@ -50,17 +50,20 @@ android {
     }
 }
 
+repositories {
+    flatDir {
+        dirs 'aar_libs'
+    }
+}
+
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:appcompat-v7:24.2.1'
-    compile 'com.android.support:recyclerview-v7:24.2.1'
     compile 'com.android.support:design:24.2.1'
-    // OkGo封装库
-    compile 'com.lzy.net:okgo:+'
-    compile 'com.lzy.net:okserver:+'
     // 图片加载
     compile 'com.github.bumptech.glide:glide:+'
     // findviewbyid插件
     compile 'com.jakewharton:butterknife:7.0.1'
+    compile(name: 'actcommunication-release', ext: 'aar')
     compile project(':library_pullrefresh')
+    compile project(':actfilemanager')
 }

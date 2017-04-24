@@ -115,7 +115,7 @@ public class MainActivity extends BaseActivity {
 
         fragments = new Fragment[]{ mWiFiDeviceFragment, mPhotoFragment, mRemoteControlFragment, mSetFragment, mDevicePhotoFragment };
 
-        currentTab(tab_index);
+        currentTab(2);
         currentFragment(fgrament_index);
     }
 
