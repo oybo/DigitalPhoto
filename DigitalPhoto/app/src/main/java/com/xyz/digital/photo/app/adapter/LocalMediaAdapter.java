@@ -6,17 +6,17 @@ import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
-
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.adapter.base.RecyclerViewHolder;
 import com.xyz.digital.photo.app.bean.MediaFileBean;
+import com.xyz.digital.photo.app.bean.UploadInfo;
 import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
+import com.xyz.digital.photo.app.manager.DeviceManager;
 import com.xyz.digital.photo.app.manager.ImageLoadManager;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
 import com.xyz.digital.photo.app.view.ProgressPieView;
 import com.xyz.digital.photo.app.view.RoundAngleImageView;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +27,8 @@ import java.util.Map;
  */
 
 public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
+
+    private static final int selectColor = Color.parseColor("#77000000");
 
     public LocalMediaAdapter(Context ctx) {
         super(ctx);
@@ -75,7 +77,7 @@ public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
 
         // 判断是否处于选中
         if (isShowSelect && mSelectMaps.containsKey(item.getFilePath())) {
-            imageView.setColorFilter(Color.parseColor("#77000000"));
+            imageView.setColorFilter(selectColor);
             holder.getView(R.id.item_child_select_image).setVisibility(View.VISIBLE);
         } else {
             imageView.setColorFilter(null);
@@ -85,12 +87,18 @@ public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
         // 判断是否处于上传
         ProgressPieView pieView = (ProgressPieView) holder.getView(R.id.item_child_upload_progress);
         pieView.setTag("ProgressPieView" + item.getFilePath());
-        if (mUploadMaps.containsKey(item.getFilePath())) {
+        if (DeviceManager.getInstance().isUpload(item.getFilePath())) {
             if(imageView.getColorFilter() == null) {
-                imageView.setColorFilter(Color.parseColor("#77000000"));
+                imageView.setColorFilter(selectColor);
             }
             holder.getView(R.id.item_child_upload_cancel).setVisibility(View.VISIBLE);
             pieView.setVisibility(View.VISIBLE);
+            UploadInfo uploadInfo = DeviceManager.getInstance().getUploadInfo(item.getFilePath());
+            switch (uploadInfo.getState()) {
+                case 0:
+                    pieView.setText("等待");
+                    break;
+            }
         } else {
             holder.getView(R.id.item_child_upload_cancel).setVisibility(View.GONE);
             pieView.setVisibility(View.GONE);
@@ -102,7 +110,7 @@ public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
             holder.getView(R.id.item_child_isupload_txt).setVisibility(View.VISIBLE);
             holder.getView(R.id.item_child_upload_cancel).setVisibility(View.GONE);
             pieView.setText("成功");
-            if(!mUploadMaps.containsKey(item.getFilePath())) {
+            if(!DeviceManager.getInstance().isUpload(item.getFilePath())) {
                 pieView.setVisibility(View.GONE);
             }
 
@@ -171,36 +179,20 @@ public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
         return lists;
     }
 
-    private HashMap<String, MediaFileBean> mUploadMaps = new HashMap<>();
-
     public boolean isUpload(String key) {
-        return mUploadMaps.containsKey(key);
+        return DeviceManager.getInstance().isUpload(key);
     }
 
     public void addUpload(int pos) {
         MediaFileBean bean = getItem(pos);
-        if (mUploadMaps.containsKey(bean.getFilePath())) {
-            mUploadMaps.remove(bean.getFilePath());
-        } else {
-            mUploadMaps.put(bean.getFilePath(), bean);
-        }
+        DeviceManager.getInstance().addUpload(bean.getFilePath(), bean.getFileName());
         notifyItemChanged(pos);
     }
 
     public void removeUpload(int pos) {
         MediaFileBean bean = getItem(pos);
-        mUploadMaps.remove(bean.getFilePath());
+        DeviceManager.getInstance().removeUpload(bean.getFilePath());
         mSelectMaps.remove(bean.getFilePath());
-    }
-
-    public void clearUpload() {
-        if(mUploadMaps.size() > 0) {
-            mSelectMaps.clear();
-            mUploadMaps.clear();
-            for (Map.Entry<String, MediaFileBean> entry : mUploadMaps.entrySet()) {
-                notifyItemChanged(entry.getValue().getPosition());
-            }
-        }
     }
 
 }

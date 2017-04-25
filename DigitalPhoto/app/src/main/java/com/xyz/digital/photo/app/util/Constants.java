@@ -24,4 +24,7 @@ public class Constants {
     /**    U盘信息     */
     public static final String SEND_UDISK_INFO_ACTION = "SEND_CONNECT_STATE";
 
+    /**    刷新上传状态和进度     */
+    public static final String SEND_REFRESH_UPLOAD_STATE = "SEND_REFRESH_UPLOAD_STATE";
+
 }

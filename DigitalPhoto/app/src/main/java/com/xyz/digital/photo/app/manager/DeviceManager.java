@@ -9,12 +9,16 @@ import com.actions.actfilemanager.ActFileInfo;
 import com.actions.actfilemanager.ActFileManager;
 import com.xyz.digital.photo.app.AppContext;
 import com.xyz.digital.photo.app.bean.EventBase;
+import com.xyz.digital.photo.app.bean.UploadInfo;
 import com.xyz.digital.photo.app.util.Constants;
 import com.xyz.digital.photo.app.util.ToastUtil;
 
 import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by O on 2017/4/25.
@@ -57,14 +61,63 @@ public class DeviceManager {
         return mRemoteFileList;
     }
 
-    public void uploadFile(String LocalFile, String remotePath) {
-        actFileManager.uploadFile(LocalFile, remotePath);
+    private Map<String, UploadInfo> mUploadInfos = new HashMap<>();
+
+    public boolean isUploading() {
+        return mUploadInfos.size() > 0;
+    }
+
+    public void addUpload(String filePath, String fileName) {
+        UploadInfo uploadInfo = new UploadInfo(filePath, fileName);
+        mUploadInfos.put(filePath, uploadInfo);
+        // 这里刷新上传状态
+        sendUploadMessage(uploadInfo);
+    }
+
+    public void removeUpload(String filePath) {
+        mUploadInfos.remove(filePath);
+    }
+
+    public boolean isUpload(String filePath) {
+        return mUploadInfos.containsKey(filePath);
+    }
+
+    public UploadInfo getUploadInfo(String filePath) {
+        if(isUpload(filePath)) {
+            return mUploadInfos.get(filePath);
+        }
+        return null;
+    }
+
+    private UploadInfo mUploadInfo;
+
+    public void startUpload() {
+        if(mUploadInfos.size() == 0) {
+            mUploadInfo = null;
+            return;
+        }
+        for(Map.Entry<String, UploadInfo> entry : mUploadInfos.entrySet()) {
+            mUploadInfo = entry.getValue();
+            actFileManager.uploadFile(mUploadInfo.getFilePath(), "/" + mUploadInfo.getFileName());
+            return;
+        }
+    }
+
+    private void sendUploadMessage(UploadInfo uploadInfo) {
+        EventBase eventBase = new EventBase();
+        eventBase.setAction(Constants.SEND_REFRESH_UPLOAD_STATE);
+        eventBase.setData(uploadInfo);
+        EventBus.getDefault().post(eventBase);
     }
 
     public class MyACTFileEventListener implements ACTFileEventListener {
         @Override
         public void onOperationProgression(int opcode, int processed, int total) {
             Log.d(LOG_TAG, "opcode = " + opcode + " and processed " + processed + " among " + total);
+            mUploadInfo.setState(1);
+            mUploadInfo.setProcessed(processed);
+            mUploadInfo.setTotal(total);
+            sendUploadMessage(mUploadInfo);
         }
 
         @Override
@@ -72,10 +125,15 @@ public class DeviceManager {
             if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
                 ActCommunication.getInstance().onUploadFile(remotePath);
                 Log.d(LOG_TAG, "upload success: " + remotePath);
-//                refresh(null);
-                ToastUtil.showToast(AppContext.getInstance(), "上传成功");
+                mUploadInfo.setState(2);
+                sendUploadMessage(mUploadInfo);
+                mUploadInfos.remove(mUploadInfo.getFilePath());
+                startUpload();
             } else {
-                ToastUtil.showToast(AppContext.getInstance(), "上传失败");
+                mUploadInfo.setState(-1);
+                sendUploadMessage(mUploadInfo);
+                mUploadInfos.remove(mUploadInfo.getFilePath());
+                ToastUtil.showToast(AppContext.getInstance(), mUploadInfo.getFileName() + "上传失败");
             }
         }
 

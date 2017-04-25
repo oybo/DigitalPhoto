@@ -1,6 +1,7 @@
 package com.xyz.digital.photo.app.util;
 
 import java.io.File;
+import java.math.BigDecimal;
 
 /**
  * Created by O on 2017/4/5.
@@ -85,6 +86,34 @@ public class PubUtils {
             for (final File child : children)
                 total += getTotalSizeOfFilesInDir(child);
         return total;
+    }
+
+    /**
+     * 计算百分比
+     *
+     * @param all
+     *            , pro
+     * @return
+     */
+    public static String getSHCollagen(int all, int pro) {
+        String str = "";
+        if (all < 0 || pro < 0 || all < pro) {
+            return str;
+        }
+        try {
+            double proTemp = (double) pro * 100;
+            double allTemp = all;
+            BigDecimal bigPro = new BigDecimal(proTemp + "");
+            BigDecimal bigAll = new BigDecimal(allTemp + "");
+            BigDecimal proDou = bigPro.divide(bigAll, 2, BigDecimal.ROUND_HALF_UP);
+            str = proDou.toString();
+            if (str.indexOf(".") > 0) {
+                str = str.substring(0, str.indexOf("."));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return str;
     }
 
 }

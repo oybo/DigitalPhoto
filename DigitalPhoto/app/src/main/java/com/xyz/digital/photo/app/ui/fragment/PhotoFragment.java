@@ -22,8 +22,10 @@ import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.FolderAdapter;
 import com.xyz.digital.photo.app.adapter.LocalMediaAdapter;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
+import com.xyz.digital.photo.app.bean.EventBase;
 import com.xyz.digital.photo.app.bean.FolderBean;
 import com.xyz.digital.photo.app.bean.MediaFileBean;
+import com.xyz.digital.photo.app.bean.UploadInfo;
 import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 import com.xyz.digital.photo.app.bean.e.MEDIA_SHOW_TYPE;
 import com.xyz.digital.photo.app.manager.DeviceManager;
@@ -31,14 +33,21 @@ import com.xyz.digital.photo.app.mvp.Photo.PhotoContract;
 import com.xyz.digital.photo.app.mvp.Photo.PhotoPresenter;
 import com.xyz.digital.photo.app.ui.BaseFragment;
 import com.xyz.digital.photo.app.ui.activity.PhotoViewActivity;
+import com.xyz.digital.photo.app.util.Constants;
 import com.xyz.digital.photo.app.util.FileUtil;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
+import com.xyz.digital.photo.app.util.PubUtils;
 import com.xyz.digital.photo.app.util.ToastUtil;
 import com.xyz.digital.photo.app.view.ChooseModePopView;
 import com.xyz.digital.photo.app.view.DialogTips;
 import com.xyz.digital.photo.app.view.DividerItemDecoration;
 import com.xyz.digital.photo.app.view.LoadingView;
 import com.xyz.digital.photo.app.view.PhotoUploadPopView;
+import com.xyz.digital.photo.app.view.ProgressPieView;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -75,8 +84,6 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
     private FolderAdapter mListAdapter;
     private int firstItemPosition;
 
-    private boolean isUpload;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_photo, container, false);
@@ -90,6 +97,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
 
         initView();
         initData();
+        EventBus.getDefault().register(this);
     }
 
     private void initView() {
@@ -239,8 +247,10 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                     MediaFileBean file = mChartAdapter.getItem(position);
                     boolean isUpload = PreferenceUtils.getInstance().getBoolean(file.getFilePath(), false);
                     if(!isUpload) {
-                        mChartAdapter.select(position);
-                        uploadFiles();
+                        if(!DeviceManager.getInstance().isUpload(file.getFilePath())) {
+                            mChartAdapter.select(position);
+                            uploadFiles();
+                        }
                     }
                     break;
             }
@@ -335,7 +345,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
 
     @Override
     public void onClick(View view) {
-        if (isUpload) {
+        if (DeviceManager.getInstance().isUploading()) {
             ToastUtil.showToast(getActivity(), "正在上传,请稍后");
             return;
         }
@@ -450,7 +460,6 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
     }
 
     private void uploadFiles() {
-        isUpload = true;
         if(mListLayout.getVisibility() == View.VISIBLE) {
             // 列表模式
             List<FolderBean> uploads = mListAdapter.getSelectFiles();
@@ -458,20 +467,23 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                 FolderBean bean = uploads.get(i);
                 if(!mListAdapter.isUpload(bean.getTopImagePath())) {
                     // 执行上传
-                    DeviceManager.getInstance().uploadFile(bean.getTopImagePath(), "/" + bean.getFolderName());
+//                    DeviceManager.getInstance().uploadFile(bean.getTopImagePath(), "/" + bean.getFolderName());
                     mListAdapter.addUpload(bean.getPosition());
                 }
             }
         } else {
             // 图表模式
             List<MediaFileBean> uploads = mChartAdapter.getSelectFiles();
+            boolean isUploading = DeviceManager.getInstance().isUploading();
             for (int i = 0; i < uploads.size(); i++) {
                 MediaFileBean bean = uploads.get(i);
                 if(!mChartAdapter.isUpload(bean.getFilePath())) {
-                    // 执行上传
-                    DeviceManager.getInstance().uploadFile(bean.getFilePath(), "/" + bean.getFileName());
+                    // 添加上传
                     mChartAdapter.addUpload(bean.getPosition());
                 }
+            }
+            if(!isUploading) {
+                DeviceManager.getInstance().startUpload();
             }
         }
     }
@@ -583,61 +595,71 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
         }
     }
 
-//    @Override
-//    public void onAllTaskEnd() {
-//        // 全部上传完成
-//        isUpload = false;
-//        mChartAdapter.clearUpload();
-//        mSelectNumTxt.setText("已选择0项");
-//        ToastUtil.showToast(getActivity(), "上传完成");
-//    }
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEventMainThread(EventBase eventBase) {
+        String action = eventBase.getAction();
+        if (action.equals(Constants.SEND_REFRESH_UPLOAD_STATE)) {
+            // 刷新上传状态
+            UploadInfo uploadInfo = (UploadInfo) eventBase.getData();
+            refresh(uploadInfo);
+        }
+    }
 
-//    private void refresh(UploadInfo uploadInfo) {
-//        ProgressPieView pieView;
-//        if(mListLayout.getVisibility() == View.VISIBLE) {
-//            pieView = (ProgressPieView) mListRecyclerView.findViewWithTag("ProgressPieView" + uploadInfo.getTaskKey());
-//        } else {
-//            pieView = (ProgressPieView) mChartRecyclerView.findViewWithTag("ProgressPieView" + uploadInfo.getTaskKey());
-//        }
-//        if (pieView != null) {
-//            if (uploadInfo.getState() == DownloadManager.NONE) {
-//                pieView.setText("准备");
-//            } else if (uploadInfo.getState() == UploadManager.WAITING) {
-//                pieView.setText("等待");
-//            } else if (uploadInfo.getState() == UploadManager.UPLOADING) {
-//                pieView.setProgress((int) (uploadInfo.getProgress() * 100));
-//                pieView.setText((Math.round(uploadInfo.getProgress() * 10000) * 1.0f / 100) + "%");
-//            } else if (uploadInfo.getState() == UploadManager.ERROR) {
-//                pieView.setText("错误");
-//            } else if (uploadInfo.getState() == UploadManager.FINISH) {
-//                pieView.setText("成功");
-//                if(mListLayout.getVisibility() == View.VISIBLE) {
-//                    for(FolderBean folderBean : mListAdapter.getList()) {
-//                        if(folderBean.getTopImagePath().equals(uploadInfo.getTaskKey())) {
-//                            PreferenceUtils.getInstance().putBoolen(folderBean.getTopImagePath(), true);
-//                            mListAdapter.removeUpload(folderBean.getPosition());
-//                            mListAdapter.notifyItemChanged(folderBean.getPosition());
-//                            return;
-//                        }
-//                    }
-//                } else {
-//                    for(MediaFileBean mediaFileBean : mChartAdapter.getList()) {
-//                        if(mediaFileBean.getFilePath().equals(uploadInfo.getTaskKey())) {
-//                            PreferenceUtils.getInstance().putBoolen(mediaFileBean.getFilePath(), true);
-//                            mChartAdapter.removeUpload(mediaFileBean.getPosition());
-//                            mChartAdapter.notifyItemChanged(mediaFileBean.getPosition());
-//                            return;
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
+    private void refresh(UploadInfo uploadInfo) {
+        try {
+            ProgressPieView pieView;
+            if(mListLayout.getVisibility() == View.VISIBLE) {
+                pieView = (ProgressPieView) mListRecyclerView.findViewWithTag("ProgressPieView" + uploadInfo.getFilePath());
+            } else {
+                pieView = (ProgressPieView) mChartRecyclerView.findViewWithTag("ProgressPieView" + uploadInfo.getFilePath());
+            }
+            if (pieView != null) {
+                int state = uploadInfo.getState();
+                if(state == 0) {
+                    // 等待上传
+                    pieView.setText("等待");
+                } else if(state == 1) {
+                    // 上传中
+                    int progress = Integer.parseInt(PubUtils.getSHCollagen(uploadInfo.getTotal(), uploadInfo.getProcessed()));
+                    pieView.setProgress(progress);
+                    pieView.setText((Math.round(progress * 100) * 1.0f / 100) + "%");
+                } else if (state == -1) {
+                    // 上传出错
+                    pieView.setText("错误");
+                } else if (state == 2) {
+                    // 上传成功
+                    pieView.setText("成功");
+                    if(mListLayout.getVisibility() == View.VISIBLE) {
+                        for(FolderBean folderBean : mListAdapter.getList()) {
+                            if(folderBean.getTopImagePath().equals(uploadInfo.getFilePath())) {
+                                PreferenceUtils.getInstance().putBoolen(folderBean.getTopImagePath(), true);
+                                mListAdapter.removeUpload(folderBean.getPosition());
+                                mListAdapter.notifyItemChanged(folderBean.getPosition());
+                                return;
+                            }
+                        }
+                    } else {
+                        for(MediaFileBean mediaFileBean : mChartAdapter.getList()) {
+                            if(mediaFileBean.getFilePath().equals(uploadInfo.getFilePath())) {
+                                PreferenceUtils.getInstance().putBoolen(mediaFileBean.getFilePath(), true);
+                                mChartAdapter.removeUpload(mediaFileBean.getPosition());
+                                mChartAdapter.notifyItemChanged(mediaFileBean.getPosition());
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         ButterKnife.unbind(this);
+        EventBus.getDefault().unregister(this);
     }
 
 }
