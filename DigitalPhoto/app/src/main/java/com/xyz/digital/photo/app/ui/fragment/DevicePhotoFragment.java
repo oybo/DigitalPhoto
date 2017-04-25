@@ -18,13 +18,14 @@ import android.widget.TextView;
 
 import com.actions.actfilemanager.ACTFileEventListener;
 import com.actions.actfilemanager.ActFileInfo;
-import com.actions.actfilemanager.ActFileManager;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.DeviceListMediaAdapter;
 import com.xyz.digital.photo.app.adapter.DeviceMediaAdapter;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
+import com.xyz.digital.photo.app.bean.EventBase;
 import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 import com.xyz.digital.photo.app.bean.e.MEDIA_SHOW_TYPE;
+import com.xyz.digital.photo.app.manager.DeviceManager;
 import com.xyz.digital.photo.app.ui.BaseFragment;
 import com.xyz.digital.photo.app.ui.activity.MainActivity;
 import com.xyz.digital.photo.app.util.Constants;
@@ -37,6 +38,10 @@ import com.xyz.digital.photo.app.view.swipemenulistview.SwipeMenu;
 import com.xyz.digital.photo.app.view.swipemenulistview.SwipeMenuCreator;
 import com.xyz.digital.photo.app.view.swipemenulistview.SwipeMenuItem;
 import com.xyz.digital.photo.app.view.swipemenulistview.SwipeMenuListView;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +67,12 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
     @Bind(R.id.remote_browser_frag_txt_upper) TextView mUpperView;
 
     /**
+     * 显示模式
+     */
+    private MEDIA_SHOW_TYPE mShowModelType;
+    private MEDIA_FILE_TYPE mShowMediaType;
+
+    /**
      * 图表模式
      */
     private DeviceMediaAdapter mChartAdapter;
@@ -70,9 +81,9 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
      */
     private DeviceListMediaAdapter mListAdapter;
 
+    private List<ActFileInfo> mRemoteFileList = new ArrayList<>();
+
     private static final String PATH = "本机存储:";
-    protected ArrayList<ActFileInfo> mRemoteFileList = new ArrayList<ActFileInfo>();
-    private ActFileManager actFileManager = new ActFileManager();
     private static String mRemoteCurrentPath = "/";
 
     @Override
@@ -124,7 +135,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         mListRecyclerView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                final ActFileInfo info = mRemoteFileList.get(position);
+                final ActFileInfo info = DeviceManager.getInstance().getRemoteDeviceFiles().get(position);
                 if (info.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
                     // 点击文件夹
                     String requestPath = "";
@@ -133,7 +144,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                     } else {
                         requestPath = mRemoteCurrentPath + "/" + info.getFileName();
                     }
-                    actFileManager.browseFiles(requestPath + "/");
+//                    actFileManager.browseFiles(requestPath + "/");
                     mRemoteCurrentPath = requestPath;
                     mUpperView.setText(PATH + requestPath);
                 } else if (info.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
@@ -151,24 +162,33 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
     }
 
     private void initData() {
-        // 默认图表模式
-        showModel(MEDIA_SHOW_TYPE.CHART);
-
-        actFileManager.registerEventListener(new MyACTFileEventListener());
-        actFileManager.connect(Constants.HOST_IP);
-        actFileManager.browseFiles(mRemoteCurrentPath);
-
         mChartAdapter = new DeviceMediaAdapter(getActivity());
         mChartRecyclerView.setAdapter(mChartAdapter);
 
         mListAdapter = new DeviceListMediaAdapter(getActivity(), mRemoteFileList, R.layout.item_grid_group_layout);
         mListRecyclerView.setAdapter(mListAdapter);
 
+        mRemoteFileList.addAll(DeviceManager.getInstance().getRemoteDeviceFiles());
+        // 默认图表模式
+        showModel(MEDIA_SHOW_TYPE.CHART);
+
         mUpperView.setText(PATH + mRemoteCurrentPath);
 
         mChartAdapter.setOnInViewClickListener(R.id.item_device_media_download_txt, this);
         mChartAdapter.setOnInViewClickListener(R.id.item_device_media_delete_txt, this);
         mChartAdapter.setOnInViewClickListener(R.id.item_device_media_play_image, this);
+
+        EventBus.getDefault().register(this);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEventMainThread(EventBase eventBase) {
+        String action = eventBase.getAction();
+        if (action.equals(Constants.REFRESH_DEVICE_FILE)) {
+            mRemoteFileList.clear();
+            mRemoteFileList.addAll(DeviceManager.getInstance().getRemoteDeviceFiles());
+            showFiles(mShowMediaType);
+        }
     }
 
     @Override
@@ -192,15 +212,34 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 break;
             case R.id.device_photo_choose_tab:
                 // 切换设备
-                Intent intent = new Intent(getActivity(), MainActivity.class);
-                intent.putExtra("type", Constants.MAIN_DEVICE_LIST);
-                startActivity(intent);
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected void onPreExecute() {
+                        super.onPreExecute();
+                        showLoading();
+                    }
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        DeviceManager.getInstance().disConnect();
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Void aVoid) {
+                        super.onPostExecute(aVoid);
+                        hideLoading();
+                        Intent intent = new Intent(getActivity(), MainActivity.class);
+                        intent.putExtra("type", Constants.MAIN_DEVICE_LIST);
+                        startActivity(intent);
+                    }
+                }.execute();
                 break;
             case R.id.device_photo_model_type:
                 // 点击切换浏览模式
                 new ChooseModePopView(getActivity(), this).showAsDropDown(view, 0, 0);
                 break;
             case R.id.view_chart_mode:
+                // 图表模式
                 showModel(MEDIA_SHOW_TYPE.CHART);
                 break;
             case R.id.view_list_mode:
@@ -210,8 +249,31 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         }
     }
 
+    public void refresh() {
+        mRemoteFileList.clear();
+        mRemoteFileList.addAll(DeviceManager.getInstance().getRemoteDeviceFiles());
+        // 默认图表模式
+        showModel(MEDIA_SHOW_TYPE.CHART);
+    }
+
+    private void showModel(MEDIA_SHOW_TYPE type) {
+        mShowModelType = type;
+        if (type == MEDIA_SHOW_TYPE.CHART) {
+            // 图表模式
+            mListLayout.setVisibility(View.GONE);
+            mChartRecyclerView.setVisibility(View.VISIBLE);
+            mModelTypeImage.setImageResource(R.drawable.mode_chrat_icon);
+        } else if (type == MEDIA_SHOW_TYPE.LIST) {
+            // 列表模式
+            mChartRecyclerView.setVisibility(View.GONE);
+            mListLayout.setVisibility(View.VISIBLE);
+            mModelTypeImage.setImageResource(R.drawable.mode_list_icon);
+        }
+        showFiles(MEDIA_FILE_TYPE.IMAGE);
+    }
+
     private void showFiles(MEDIA_FILE_TYPE type) {
-        refreshAdapter(type);
+        mShowMediaType = type;
         if (type == MEDIA_FILE_TYPE.IMAGE) {
             // 图片
             if (fragmentPhotoImageTab.isSelected()) {
@@ -237,6 +299,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
             }
             setSelectTab(4);
         }
+        refreshAdapter(type);
     }
 
     private void refreshAdapter(final MEDIA_FILE_TYPE type) {
@@ -251,34 +314,28 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
             protected List<ActFileInfo> doInBackground(Void... voids) {
                 List<ActFileInfo> result = new ArrayList<ActFileInfo>();
                 for(ActFileInfo fileInfo : mRemoteFileList) {
-                    if(fileInfo.getFileType() == 0) {
+//                    if(fileInfo.getFileType() == 0) {
                         result.add(fileInfo);
-                    }
+//                    }
                 }
                 return result;
             }
 
             @Override
-            protected void onPostExecute(List<ActFileInfo> actFileInfos) {
-                super.onPostExecute(actFileInfos);
+            protected void onPostExecute(List<ActFileInfo> result) {
+                super.onPostExecute(result);
                 hideLoading();
+                if(mShowModelType == MEDIA_SHOW_TYPE.CHART) {
+                    // 图表模式
+                    mChartAdapter.clear();
+                    mChartAdapter.appendToList(result);
+                    mChartAdapter.notifyDataSetChanged();
+                } else {
+                    // 列表模式
+
+                }
             }
         }.execute();
-    }
-
-    private void showModel(MEDIA_SHOW_TYPE type) {
-        if (type == MEDIA_SHOW_TYPE.CHART) {
-            // 图表模式
-            mListLayout.setVisibility(View.GONE);
-            mChartRecyclerView.setVisibility(View.VISIBLE);
-            mModelTypeImage.setImageResource(R.drawable.mode_chrat_icon);
-        } else if (type == MEDIA_SHOW_TYPE.LIST) {
-            // 列表模式
-            mChartRecyclerView.setVisibility(View.GONE);
-            mListLayout.setVisibility(View.VISIBLE);
-            mModelTypeImage.setImageResource(R.drawable.mode_list_icon);
-        }
-        showFiles(MEDIA_FILE_TYPE.IMAGE);
     }
 
     private void setSelectTab(int id) {
@@ -385,4 +442,9 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         }
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
 }

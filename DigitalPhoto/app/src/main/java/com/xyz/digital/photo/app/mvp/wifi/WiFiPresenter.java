@@ -60,7 +60,7 @@ public class WiFiPresenter implements WiFiContract.Presenter {
 
             @Override
             protected Boolean doInBackground(Void... voids) {
-                boolean success = mWifiUtils.connectWifiTest(wifi.SSID, "qwer1234");
+                boolean success = mWifiUtils.connectWifiTest(wifi.SSID, "12345678");
                 return success;
             }
 
@@ -70,7 +70,9 @@ public class WiFiPresenter implements WiFiContract.Presenter {
                 ToastUtil.showToast(mView._getActivity(), success ? "连接成功" : "连接失败");
 
                 mView.hideLoading();
-                mView.onCallbackConnect();
+                if(success) {
+                    mView.onCallbackConnect();
+                }
             }
         };
         mConnectTask.execute();
@@ -101,6 +103,10 @@ public class WiFiPresenter implements WiFiContract.Presenter {
                         break;
                 }
             }
+            else if(action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
+                // wifi连接状态更改
+                mView.notifyDataSetChanged();
+            }
         }
     };
 
@@ -111,6 +117,7 @@ public class WiFiPresenter implements WiFiContract.Presenter {
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         mView._getActivity().registerReceiver(mReceiver, filter);
     }
 

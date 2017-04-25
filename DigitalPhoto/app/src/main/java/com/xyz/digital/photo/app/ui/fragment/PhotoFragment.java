@@ -9,7 +9,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,9 +17,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import com.actions.actcommunication.ActCommunication;
-import com.actions.actfilemanager.ACTFileEventListener;
-import com.actions.actfilemanager.ActFileManager;
+
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.FolderAdapter;
 import com.xyz.digital.photo.app.adapter.LocalMediaAdapter;
@@ -29,11 +26,11 @@ import com.xyz.digital.photo.app.bean.FolderBean;
 import com.xyz.digital.photo.app.bean.MediaFileBean;
 import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 import com.xyz.digital.photo.app.bean.e.MEDIA_SHOW_TYPE;
+import com.xyz.digital.photo.app.manager.DeviceManager;
 import com.xyz.digital.photo.app.mvp.Photo.PhotoContract;
 import com.xyz.digital.photo.app.mvp.Photo.PhotoPresenter;
 import com.xyz.digital.photo.app.ui.BaseFragment;
 import com.xyz.digital.photo.app.ui.activity.PhotoViewActivity;
-import com.xyz.digital.photo.app.util.Constants;
 import com.xyz.digital.photo.app.util.FileUtil;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
 import com.xyz.digital.photo.app.util.ToastUtil;
@@ -42,9 +39,11 @@ import com.xyz.digital.photo.app.view.DialogTips;
 import com.xyz.digital.photo.app.view.DividerItemDecoration;
 import com.xyz.digital.photo.app.view.LoadingView;
 import com.xyz.digital.photo.app.view.PhotoUploadPopView;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
@@ -76,9 +75,6 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
     private FolderAdapter mListAdapter;
     private int firstItemPosition;
 
-    /**    上传管理    */
-    private ActFileManager actFileManager = new ActFileManager();
-    private static String mRemoteCurrentPath = "/";
     private boolean isUpload;
 
     @Override
@@ -122,10 +118,6 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
         mPresenter = new PhotoPresenter(this);
         // 默认图表模式
         mPresenter.showType(MEDIA_SHOW_TYPE.CHART);
-        // 上传管理
-        actFileManager.registerEventListener(new MyACTFileEventListener());
-        actFileManager.connect(Constants.HOST_IP);
-        actFileManager.browseFiles(mRemoteCurrentPath);
 
         // 图表模式
         mChartAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
@@ -466,8 +458,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                 FolderBean bean = uploads.get(i);
                 if(!mListAdapter.isUpload(bean.getTopImagePath())) {
                     // 执行上传
-                    actFileManager.uploadFile(bean.getTopImagePath(), mRemoteCurrentPath + bean.getFolderName());
-
+                    DeviceManager.getInstance().uploadFile(bean.getTopImagePath(), "/" + bean.getFolderName());
                     mListAdapter.addUpload(bean.getPosition());
                 }
             }
@@ -478,8 +469,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                 MediaFileBean bean = uploads.get(i);
                 if(!mChartAdapter.isUpload(bean.getFilePath())) {
                     // 执行上传
-                    actFileManager.uploadFile(bean.getFilePath(), mRemoteCurrentPath + bean.getFileName());
-
+                    DeviceManager.getInstance().uploadFile(bean.getFilePath(), "/" + bean.getFileName());
                     mChartAdapter.addUpload(bean.getPosition());
                 }
             }
@@ -527,6 +517,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
     }
 
     private void showSelect() {
+        mChartAdapter.setShowSelectType(true);
         mTabBarLayout.setVisibility(View.GONE);
         mSelectLayout.setVisibility(View.VISIBLE);
 
@@ -538,6 +529,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
     }
 
     private void hideSelect() {
+        mChartAdapter.setShowSelectType(false);
         mTabBarLayout.setVisibility(View.VISIBLE);
         mSelectLayout.setVisibility(View.GONE);
 
@@ -641,50 +633,6 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
 //            }
 //        }
 //    }
-
-    private static final String LOG_TAG = "=======upload=======";
-
-    public class MyACTFileEventListener implements ACTFileEventListener {
-        @Override
-        public void onOperationProgression(int opcode, int processed, int total) {
-            Log.d(LOG_TAG, "opcode = " + opcode + " and processed " + processed + " among " + total);
-        }
-
-        @Override
-        public void onUploadCompleted(String remotePath, String localPath, int result) {
-            if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
-                ActCommunication.getInstance().onUploadFile(remotePath);
-                Log.d(LOG_TAG, "upload success: " + remotePath);
-//                refresh(null);
-            } else {
-                ToastUtil.showToast(getActivity(), "上传失败");
-            }
-        }
-
-        @Override
-        public void onDownloadCompleted(String remotePath, String localPath, int result) {
-        }
-
-        @Override
-        public void onDeleteCompleted(String parentPath, int result) {
-        }
-
-        @Override
-        public void onBrowseCompleted(Object filelist, String currentPath, int result) {
-        }
-
-        @Override
-        public void onDeleteDirectoryCompleted(String parentPath, int result) {
-        }
-
-        @Override
-        public void onCreateDirectoryCompleted(String parentPath, int result) {
-        }
-
-        @Override
-        public void onDisconnectCompleted(int result) {
-        }
-    }
 
     @Override
     public void onDestroyView() {

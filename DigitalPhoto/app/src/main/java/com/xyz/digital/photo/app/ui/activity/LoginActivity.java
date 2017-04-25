@@ -9,13 +9,17 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 
-import com.actions.actcommunication.AcEventListener;
-import com.actions.actcommunication.ActCommunication;
 import com.xyz.digital.photo.app.R;
+import com.xyz.digital.photo.app.bean.EventBase;
+import com.xyz.digital.photo.app.manager.DeviceManager;
 import com.xyz.digital.photo.app.ui.BaseActivity;
 import com.xyz.digital.photo.app.util.Constants;
 import com.xyz.digital.photo.app.util.ToastUtil;
 import com.xyz.digital.photo.app.view.LoadingView;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import butterknife.Bind;
 
@@ -25,7 +29,8 @@ import butterknife.Bind;
 
 public class LoginActivity extends BaseActivity implements View.OnClickListener {
 
-    @Bind(R.id.view_loading) LoadingView mLoadingView;
+    @Bind(R.id.view_loading)
+    LoadingView mLoadingView;
 
     private ImageView mLogoImage;
     private CheckBox mCheckBox;
@@ -36,6 +41,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         setContentView(R.layout.activity_login);
 
         initView();
+        initData();
     }
 
     private void initView() {
@@ -44,9 +50,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         mLogoImage = (ImageView) findViewById(R.id.login_logo_icon_image);
         mCheckBox = (CheckBox) findViewById(R.id.login_is_save_pwd);
 
-        // 连接监听
-        ActCommunication.getInstance().setEventListener(mAcEventListener);
-
         findViewById(R.id.login_login_bt).setOnClickListener(this);
         mCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -54,6 +57,32 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
             }
         });
+    }
+
+    private void initData() {
+        EventBus.getDefault().register(this);
+        if(DeviceManager.getInstance().isConnect()) {
+            // 如果已经连接成功，则自动到详情页面
+            if(DeviceManager.getInstance().getRemoteDeviceFiles().size() == 0) {
+                DeviceManager.getInstance().connect();
+            }
+            goMain();
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEventMainThread(EventBase eventBase) {
+        String action = eventBase.getAction();
+        if (action.equals(Constants.SEND_CONNECT_STATE)) {
+            boolean success = (boolean) eventBase.getData();
+            mLoadingView.hide();
+            if (success) {
+                ToastUtil.showToast(LoginActivity.this, "连接成功");
+                goMain();
+            } else {
+                ToastUtil.showToast(LoginActivity.this, "连接失败");
+            }
+        }
     }
 
     @Override
@@ -71,8 +100,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         switch (view.getId()) {
             case R.id.login_login_bt:
                 mLoadingView.show();
-                ActCommunication.getInstance().connect(Constants.HOST_IP);
-                goMain();
+                DeviceManager.getInstance().connect();
                 break;
         }
     }
@@ -82,51 +110,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         finish();
     }
 
-    private AcEventListener mAcEventListener = new AcEventListener() {
-
-        @Override
-        public void onDeviceConnected() {
-            mLoadingView.hide();
-            ToastUtil.showToast(LoginActivity.this, "连接成功");
-            goMain();
-        }
-
-        @Override
-        public void onDeviceDisconnect() {
-            mLoadingView.hide();
-            ToastUtil.showToast(LoginActivity.this, "连接失败");
-            goMain();
-        }
-
-        @Override
-        public void onRecvVolume(int volume) {
-
-        }
-
-        @Override
-        public void onRecvTotalTime(int timeMs) {
-
-        }
-
-        @Override
-        public void onRecvCurrentTime(int timeMs) {
-
-        }
-
-        @Override
-        public void onRecvPlayerStatus(int status) {
-
-        }
-
-        @Override
-        public void onRecvPlaySequence(int seq) {
-
-        }
-
-        @Override
-        public void onRecvThumbnail(String url, byte[] data) {
-
-        }
-    };
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
 }

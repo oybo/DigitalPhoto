@@ -94,6 +94,7 @@ public class WiFiDeviceFragment extends BaseFragment implements WiFiContract.Vie
                 mPresenter.connect(scanResult);
             }
         });
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -120,6 +121,13 @@ public class WiFiDeviceFragment extends BaseFragment implements WiFiContract.Vie
             });
         }
         mLoadingView.hide();
+    }
+
+    @Override
+    public void notifyDataSetChanged() {
+        if(mAdapter != null) {
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override

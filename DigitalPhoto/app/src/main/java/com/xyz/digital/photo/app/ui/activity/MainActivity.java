@@ -115,7 +115,7 @@ public class MainActivity extends BaseActivity {
 
         fragments = new Fragment[]{ mWiFiDeviceFragment, mPhotoFragment, mRemoteControlFragment, mSetFragment, mDevicePhotoFragment };
 
-        currentTab(2);
+        currentTab(tab_index);
         currentFragment(fgrament_index);
     }
 
@@ -169,6 +169,10 @@ public class MainActivity extends BaseActivity {
             }
             if (!fragments[index].isAdded()) {
                 trx.add(R.id.fragment_container, fragments[index], fragments[index].getClass().getName());
+            } else {
+                if(mLoginMain && fragments[index] == mDevicePhotoFragment) {
+                    mDevicePhotoFragment.refresh();
+                }
             }
             trx.show(fragments[index]).commit();
         }

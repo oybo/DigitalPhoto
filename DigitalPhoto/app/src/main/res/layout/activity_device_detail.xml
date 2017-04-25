@@ -99,7 +99,7 @@
                         android:layout_height="4dip"
                         android:layout_marginTop="5dip"
                         android:max="100"
-                        android:progress="70"
+                        android:progress="0"
                         android:progressDrawable="@drawable/seekbar_disk_size_style"/>
 
                 </LinearLayout>
@@ -151,7 +151,7 @@
                         android:layout_height="4dip"
                         android:layout_marginTop="5dip"
                         android:max="100"
-                        android:progress="70"
+                        android:progress="0"
                         android:progressDrawable="@drawable/seekbar_disk_size_style"/>
 
                 </LinearLayout>

@@ -155,8 +155,7 @@ public class WifiUtils {
      * @param Type
      * @return
      */
-    public WifiConfiguration CreateWifiInfo(String SSID, String Password,
-                                            int Type) {
+    public WifiConfiguration CreateWifiInfo(String SSID, String Password, int Type) {
         WifiConfiguration config = new WifiConfiguration();
         config.allowedAuthAlgorithms.clear();
         config.allowedGroupCiphers.clear();

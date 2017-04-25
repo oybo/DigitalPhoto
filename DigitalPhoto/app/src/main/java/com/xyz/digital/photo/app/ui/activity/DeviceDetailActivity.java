@@ -6,21 +6,24 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.text.Spanned;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.actions.actfilemanager.ACTFileEventListener;
-import com.actions.actfilemanager.ActFileInfo;
-import com.actions.actfilemanager.ActFileManager;
+import com.actions.actcommunication.ActCommunication;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.DeviceImageAdapter;
+import com.xyz.digital.photo.app.bean.EventBase;
+import com.xyz.digital.photo.app.manager.DeviceManager;
 import com.xyz.digital.photo.app.ui.BaseActivity;
 import com.xyz.digital.photo.app.util.Constants;
+import com.xyz.digital.photo.app.util.PubUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -34,18 +37,15 @@ public class DeviceDetailActivity extends BaseActivity implements View.OnClickLi
     @Bind(R.id.device_detail_image_count_txt) TextView deviceDetailImageCountTxt;
     @Bind(R.id.device_detail_photo_rview) RecyclerView deviceDetailPhotoRview;
 
-    @Bind(R.id.device_detail_disk_size_txt) TextView deviceDiskAllSize;
-    @Bind(R.id.device_detail_disk_used_size_txt) TextView deviceDiskUsedSize;
-    @Bind(R.id.device_detail_disk_usable_size_txt) TextView deviceDiskUsableSize;
+    @Bind(R.id.device_detail_disk_size_txt) TextView deviceDiskAllSizeTxt;
+    @Bind(R.id.device_detail_disk_used_size_txt) TextView deviceDiskUsedSizeTxt;
+    @Bind(R.id.device_detail_disk_usable_size_txt) TextView deviceDiskUsableSizeTxt;
     @Bind(R.id.device_detail_disk_usable_size_progressbar) ProgressBar deviceProgressBar;
 
-    @Bind(R.id.device_u_detail_disk_size_txt) TextView usbDiskAllSize;
-    @Bind(R.id.device_detail_u_disk_used_size_txt) TextView usbDiskUsedSize;
-    @Bind(R.id.device_detail_u_disk_usable_size_txt) TextView usbDiskUsableSize;
+    @Bind(R.id.device_u_detail_disk_size_txt) TextView usbDiskAllSizeTxt;
+    @Bind(R.id.device_detail_u_disk_used_size_txt) TextView usbDiskUsedSizeTxt;
+    @Bind(R.id.device_detail_u_disk_usable_size_txt) TextView usbDiskUsableSizeTxt;
     @Bind(R.id.device_detail_u_disk_usable_size_progressbar) ProgressBar usbProgressBar;
-
-    private ActFileManager actFileManager = new ActFileManager();
-    private static String mRemoteCurrentPath = "/";
 
     private DeviceImageAdapter mAdapter;
 
@@ -70,17 +70,53 @@ public class DeviceDetailActivity extends BaseActivity implements View.OnClickLi
 
     private void initData() {
         setRemoteCount(0);
-
-        actFileManager.registerEventListener(new MyACTFileEventListener());
-        actFileManager.connect(Constants.HOST_IP);
-        actFileManager.browseFiles(mRemoteCurrentPath);
+        setDiskSize("0", "0", "online");
+        setUDiskSize("0", "0", "online");
 
         mAdapter = new DeviceImageAdapter(this);
         deviceDetailPhotoRview.setAdapter(mAdapter);
+
+        // 请求内部存储剩余空间
+        String[] msg = new String[]{"cmd", "reqNandInfo"};
+        ActCommunication.getInstance().sendMsg(msg);
+        // 请求U盘存储剩余空间
+        msg = new String[]{"cmd", "reqUdiskInfo"};
+        ActCommunication.getInstance().sendMsg(msg);
+
+        EventBus.getDefault().register(this);
+
+        EventBase eventBase = new EventBase();
+        eventBase.setAction(Constants.REFRESH_DEVICE_FILE);
+        EventBus.getDefault().post(eventBase);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEventMainThread(EventBase eventBase) {
+        String action = eventBase.getAction();
+        if (action.equals(Constants.REFRESH_DEVICE_FILE)) {
+            mAdapter.clear();
+            mAdapter.appendToList(DeviceManager.getInstance().getRemoteDeviceFiles());
+            mAdapter.notifyDataSetChanged();
+            setRemoteCount(DeviceManager.getInstance().getRemoteDeviceFiles().size());
+        } else if (action.equals(Constants.SEND_MNAD_INFO_ACTION)) {
+            // 内部存储信息
+            String[] result = (String[]) eventBase.getData();
+            String allSizeStr = result[3];
+            String usableSizeStr = result[4];
+            String stateStr = result[5];
+            setDiskSize(allSizeStr, usableSizeStr, stateStr);
+        } else if (action.equals(Constants.SEND_UDISK_INFO_ACTION)) {
+            // U盘存储信息
+            String[] result = (String[]) eventBase.getData();
+            String allSizeStr = result[3];
+            String usableSizeStr = result[4];
+            String stateStr = result[5];
+            setUDiskSize(allSizeStr, usableSizeStr, stateStr);
+        }
     }
 
     private void setRemoteCount(int size) {
-        String imangeCount = "共有<font color=\"#12B7F5\"> "+ size +" </font>个媒体文件";
+        String imangeCount = "共有<font color=\"#12B7F5\"> " + size + " </font>个媒体文件";
         deviceDetailImageCountTxt.setText(Html.fromHtml(imangeCount));
     }
 
@@ -105,47 +141,62 @@ public class DeviceDetailActivity extends BaseActivity implements View.OnClickLi
         }
     }
 
-    public class MyACTFileEventListener implements ACTFileEventListener {
-        @Override
-        public void onOperationProgression(int opcode, int processed, int total) {
-        }
-
-        @Override
-        public void onUploadCompleted(String remotePath, String localPath, int result) {
-        }
-
-        @Override
-        public void onDownloadCompleted(String remotePath, String localPath, int result) {
-        }
-
-        @Override
-        public void onDeleteCompleted(String parentPath, int result) {
-        }
-
-        @Override
-        public void onBrowseCompleted(Object filelist, String currentPath, int result) {
-            if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
-                List<ActFileInfo> remoteFileList = (ArrayList) filelist;
-                if(remoteFileList != null) {
-                    setRemoteCount(remoteFileList.size());
-                    mAdapter.clear();
-                    mAdapter.appendToList(remoteFileList);
-                    mAdapter.notifyDataSetChanged();
-                }
+    private void setDiskSize(String allSizeStr, String usableSizeStr, String stateStr) {
+        // 内部存储信息
+        try {
+            if ("online".equals(stateStr)) {
+                long allSize = PubUtils.conversionSize(allSizeStr);
+                long usableSize = PubUtils.conversionSize(usableSizeStr);
+                // 总空间
+                deviceDiskAllSizeTxt.setText(html2Str("本机存储容量:<font color=\"#DF6432\"> " + PubUtils.formatFileLen(allSize) + " </font>"));
+                // 已用空间
+                deviceDiskUsedSizeTxt.setText(html2Str("已用:<font color=\"#DF6432\"> " + PubUtils.formatFileLen(allSize - usableSize) + " </font>"));
+                // 可用空间
+                deviceDiskUsableSizeTxt.setText(html2Str("可用:<font color=\"#DF6432\"> " + PubUtils.formatFileLen(usableSize) + " </font>"));
+                // 百分比
+                deviceProgressBar.setMax((int) allSize);
+                deviceProgressBar.setProgress((int) (allSize - usableSize));
+            } else {
+                deviceDiskAllSizeTxt.setText(html2Str("本机存储容量:<font color=\"#DF6432\"> 未发现设备 </font>"));
+                deviceDiskUsedSizeTxt.setVisibility(View.GONE);
+                deviceDiskUsableSizeTxt.setVisibility(View.GONE);
+                deviceProgressBar.setVisibility(View.GONE);
             }
-        }
-
-        @Override
-        public void onDeleteDirectoryCompleted(String parentPath, int result) {
-        }
-
-        @Override
-        public void onCreateDirectoryCompleted(String parentPath, int result) {
-        }
-
-        @Override
-        public void onDisconnectCompleted(int result) {
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
+    private void setUDiskSize(String allSizeStr, String usableSizeStr, String stateStr) {
+        // U盘内部存储信息
+        try {
+            if ("online".equals(stateStr)) {
+                long allSize = PubUtils.conversionSize(allSizeStr);
+                long usableSize = PubUtils.conversionSize(usableSizeStr);
+                // 总空间
+                usbDiskAllSizeTxt.setText(html2Str("U盘存储容量:<font color=\"#DF6432\"> " + PubUtils.formatFileLen(allSize) + " </font>"));
+                // 已用空间
+                usbDiskUsedSizeTxt.setText(html2Str("已用:<font color=\"#DF6432\"> " + PubUtils.formatFileLen(allSize - usableSize) + " </font>"));
+                // 可用空间
+                usbDiskUsableSizeTxt.setText(html2Str("可用:<font color=\"#DF6432\"> " + PubUtils.formatFileLen(usableSize) + " </font>"));
+            } else {
+                usbDiskAllSizeTxt.setText(html2Str("U盘存储容量:<font color=\"#DF6432\"> 未插入U盘 </font>"));
+                usbDiskUsedSizeTxt.setVisibility(View.GONE);
+                usbDiskUsableSizeTxt.setVisibility(View.GONE);
+                usbProgressBar.setVisibility(View.GONE);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Spanned html2Str(String str) {
+        return Html.fromHtml(str);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
 }

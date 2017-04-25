@@ -3,11 +3,10 @@ package com.xyz.digital.photo.app.adapter;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
+
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.adapter.base.RecyclerViewHolder;
@@ -17,6 +16,7 @@ import com.xyz.digital.photo.app.manager.ImageLoadManager;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
 import com.xyz.digital.photo.app.view.ProgressPieView;
 import com.xyz.digital.photo.app.view.RoundAngleImageView;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +37,12 @@ public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
         return R.layout.item_grid_child_layout;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+    private boolean isShowSelect;
+
+    public void setShowSelectType(boolean isShowSelect) {
+        this.isShowSelect = isShowSelect;
+    }
+
     @Override
     public void bindData(RecyclerViewHolder holder, int position, MediaFileBean item) {
 
@@ -69,7 +74,7 @@ public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
         }
 
         // 判断是否处于选中
-        if (mSelectMaps.containsKey(item.getFilePath())) {
+        if (isShowSelect && mSelectMaps.containsKey(item.getFilePath())) {
             imageView.setColorFilter(Color.parseColor("#77000000"));
             holder.getView(R.id.item_child_select_image).setVisibility(View.VISIBLE);
         } else {

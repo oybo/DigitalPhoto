@@ -26,7 +26,7 @@ public class DeviceImageAdapter extends BaseRecyclerAdapter<ActFileInfo> {
     @Override
     public void bindData(RecyclerViewHolder holder, int position, ActFileInfo item) {
 
-        ImageLoadManager.setImage(item.getFileName(), holder.getImageView(R.id.item_device_photo_image));
+        ImageLoadManager.setImage("ftp://192.168.1.1/FBA96FF8592B259FED6B13D824A160C3.jpg", holder.getImageView(R.id.item_device_photo_image));
 
     }
 

@@ -50,12 +50,6 @@ android {
     }
 }
 
-repositories {
-    flatDir {
-        dirs 'aar_libs'
-    }
-}
-
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:design:24.2.1'
@@ -63,7 +57,7 @@ dependencies {
     compile 'com.github.bumptech.glide:glide:+'
     // findviewbyid插件
     compile 'com.jakewharton:butterknife:7.0.1'
-    compile(name: 'actcommunication-release', ext: 'aar')
+    compile 'org.greenrobot:eventbus:3.0.0'
     compile project(':library_pullrefresh')
     compile project(':actfilemanager')
 }

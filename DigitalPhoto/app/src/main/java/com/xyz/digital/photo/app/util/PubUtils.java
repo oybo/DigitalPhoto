@@ -35,6 +35,27 @@ public class PubUtils {
         return size;
     }
 
+    public static long conversionSize(String sizeStr) {
+        long size = 0;
+        if(sizeStr.contains("G")) {
+            sizeStr = sizeStr.replace("G", "").replace(" ", "");
+            size = Integer.parseInt(sizeStr);
+            size = size * 1024 * 1024 * 1024;
+        } else if(sizeStr.contains("M")) {
+            sizeStr = sizeStr.replace("M", "").replace(" ", "");
+            size = Integer.parseInt(sizeStr);
+            size = size * 1024 * 1024;
+        } else if(sizeStr.contains("K")) {
+            sizeStr = sizeStr.replace("K", "").replace(" ", "");
+            size = Integer.parseInt(sizeStr);
+            size = size * 1024;
+        } else {
+            size = Integer.parseInt(sizeStr);
+            size = size * 1024;
+        }
+        return size;
+    }
+
     /**
      * 格式化文件大小
      *
