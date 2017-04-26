@@ -327,9 +327,9 @@ public class DeviceManager {
     public void connect() {
         // 连接监听
         ActCommunication.getInstance().setEventListener(mAcEventListener);
+        ActCommunication.getInstance().connect(Constants.HOST_IP);
         actFileManager.registerEventListener(actFileEventListener);
         actFileManager.connect(Constants.HOST_IP);
-        ActCommunication.getInstance().connect(Constants.HOST_IP);
         actFileManager.browseFiles(mRemoteCurrentPath);
     }
 

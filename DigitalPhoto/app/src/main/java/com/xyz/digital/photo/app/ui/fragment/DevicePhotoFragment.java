@@ -471,6 +471,9 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
 
             }
             if (pieView != null) {
+                if(pieView.getVisibility() == View.GONE) {
+                    pieView.setVisibility(View.VISIBLE);
+                }
                 int state = downloadInfo.getState();
                 if(state == 0) {
                     // 等待下载

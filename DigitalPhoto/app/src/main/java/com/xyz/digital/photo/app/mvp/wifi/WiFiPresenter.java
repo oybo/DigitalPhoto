@@ -22,29 +22,27 @@ import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
 public class WiFiPresenter implements WiFiContract.Presenter {
 
     private WiFiContract.View mView;
-    // WifiManager对象
-    private WifiManager mWifiManager;
-    private WifiUtils mWifiUtils;
     private AsyncTask<Void, Void, Boolean> mConnectTask;
+
+    private WifiUtils mWifiUtils;
 
     public WiFiPresenter(WiFiContract.View view) {
         mView = view;
         mView.setPresenter(this);
 
-        mWifiManager = (WifiManager) mView._getActivity().getSystemService(Context.WIFI_SERVICE);
-        mWifiUtils = new WifiUtils(mView._getActivity());
+        mWifiUtils = new WifiUtils();
         registerBroadcast();
     }
 
     @Override
     public void scanWiFi() {
-        openWifi();
-        mWifiManager.startScan();
+        WifiUtils.openWifi();
+        WifiUtils.startScan();
     }
 
     @Override
     public void connect(final ScanResult wifi) {
-        if(mWifiUtils.isConnect(wifi)) {
+        if(WifiUtils.isConnectTheWifi(wifi)) {
             mView.onCallbackConnect();
             return;
         }
@@ -60,7 +58,7 @@ public class WiFiPresenter implements WiFiContract.Presenter {
 
             @Override
             protected Boolean doInBackground(Void... voids) {
-                boolean success = mWifiUtils.connectWifiTest(wifi.SSID, "12345678");
+                boolean success = WifiUtils.connectWifi(wifi.SSID, "12345678", WifiUtils.WifiCipherType.WIFICIPHER_WPA);
                 return success;
             }
 
@@ -88,15 +86,19 @@ public class WiFiPresenter implements WiFiContract.Presenter {
             final String action = intent.getAction();
             // wifi已成功扫描到可用wifi。
             if (action.equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
-                List<ScanResult> wiFiResult = mWifiManager.getScanResults();
+                List<ScanResult> wiFiResult = WifiUtils.getScanResults();
                 mView.onCallbackDevice(wiFiResult);
+                if(wiFiResult.size() == 0) {
+                    // 重新扫描
+                    scanWiFi();
+                }
             } //系统wifi的状态
             else if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
                 int wifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, 0);
                 switch (wifiState) {
                     case WifiManager.WIFI_STATE_ENABLED:
                         Log.d(TAG, "WiFi已启用");
-                        mWifiManager.startScan();
+                        WifiUtils.startScan();
                         break;
                     case WifiManager.WIFI_STATE_DISABLED:
                         Log.d(TAG, "Wifi已关闭");
@@ -123,31 +125,6 @@ public class WiFiPresenter implements WiFiContract.Presenter {
 
     public void unRegisterBroadcast() {
         mView._getActivity().unregisterReceiver((mReceiver));
-    }
-
-    /**
-     * 打开wifi功能
-     * true:打开成功；
-     * false:打开失败
-     */
-    public boolean openWifi() {
-        boolean bRet = true;
-        if (!mWifiManager.isWifiEnabled()) {
-            bRet = mWifiManager.setWifiEnabled(true);
-        }
-        return bRet;
-    }
-
-    /**
-     * Function:关闭wifi
-     *
-     * @return<br>
-     */
-    public boolean closeWifi() {
-        if (mWifiManager.isWifiEnabled()) {
-            return mWifiManager.setWifiEnabled(false);
-        }
-        return false;
     }
 
 }

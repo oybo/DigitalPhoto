@@ -11,6 +11,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.xyz.digital.photo.app.R;
+import com.xyz.digital.photo.app.manager.DeviceManager;
 import com.xyz.digital.photo.app.ui.BaseActivity;
 import com.xyz.digital.photo.app.ui.fragment.DeviceFragment;
 import com.xyz.digital.photo.app.ui.fragment.DevicePhotoFragment;
@@ -141,6 +142,10 @@ public class MainActivity extends BaseActivity {
             // 设置
             tabIndex = 3;
             fragmentIndex = 3;
+        }
+        if(tabIndex > 0 && !DeviceManager.getInstance().isConnect()) {
+            ToastUtil.showToast(MainActivity.this, "请您先连接设备");
+            return;
         }
         currentTab(tabIndex);
         currentFragment(fragmentIndex);

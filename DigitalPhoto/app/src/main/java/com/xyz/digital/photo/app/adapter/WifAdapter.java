@@ -16,11 +16,8 @@ import com.xyz.digital.photo.app.mvp.wifi.WifiUtils;
 
 public class WifAdapter extends BaseRecyclerAdapter<ScanResult> {
 
-    private WifiUtils mWifiUtils;
-
     public WifAdapter(Context ctx) {
         super(ctx);
-        mWifiUtils = new WifiUtils(ctx);
     }
 
     @Override
@@ -36,7 +33,7 @@ public class WifAdapter extends BaseRecyclerAdapter<ScanResult> {
         holder.setText(R.id.item_wifi_device_name_txt, item.SSID);
 
         ImageView connectState = holder.getImageView(R.id.item_wifi_device_status_txt);
-        if(mWifiUtils.isConnect(item)) {
+        if(WifiUtils.isConnectTheWifi(item)) {
             connectState.setImageResource(R.drawable.green_icon);
             connectState.setVisibility(View.VISIBLE);
         } else {
