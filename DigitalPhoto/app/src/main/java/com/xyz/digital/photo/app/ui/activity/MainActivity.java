@@ -169,10 +169,6 @@ public class MainActivity extends BaseActivity {
             }
             if (!fragments[index].isAdded()) {
                 trx.add(R.id.fragment_container, fragments[index], fragments[index].getClass().getName());
-            } else {
-                if(mLoginMain && fragments[index] == mDevicePhotoFragment) {
-                    mDevicePhotoFragment.refresh();
-                }
             }
             trx.show(fragments[index]).commit();
         }

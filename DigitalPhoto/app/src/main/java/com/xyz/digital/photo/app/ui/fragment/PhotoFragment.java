@@ -463,13 +463,16 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
         if(mListLayout.getVisibility() == View.VISIBLE) {
             // 列表模式
             List<FolderBean> uploads = mListAdapter.getSelectFiles();
+            boolean isUploading = DeviceManager.getInstance().isUploading();
             for (int i = 0; i < uploads.size(); i++) {
                 FolderBean bean = uploads.get(i);
                 if(!mListAdapter.isUpload(bean.getTopImagePath())) {
                     // 执行上传
-//                    DeviceManager.getInstance().uploadFile(bean.getTopImagePath(), "/" + bean.getFolderName());
                     mListAdapter.addUpload(bean.getPosition());
                 }
+            }
+            if(!isUploading) {
+                DeviceManager.getInstance().startUpload();
             }
         } else {
             // 图表模式

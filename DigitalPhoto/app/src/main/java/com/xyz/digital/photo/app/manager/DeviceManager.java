@@ -1,6 +1,6 @@
 package com.xyz.digital.photo.app.manager;
 
-import android.util.Log;
+import android.widget.Toast;
 
 import com.actions.actcommunication.AcEventListener;
 import com.actions.actcommunication.ActCommunication;
@@ -8,9 +8,12 @@ import com.actions.actfilemanager.ACTFileEventListener;
 import com.actions.actfilemanager.ActFileInfo;
 import com.actions.actfilemanager.ActFileManager;
 import com.xyz.digital.photo.app.AppContext;
+import com.xyz.digital.photo.app.bean.DownloadInfo;
 import com.xyz.digital.photo.app.bean.EventBase;
 import com.xyz.digital.photo.app.bean.UploadInfo;
+import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 import com.xyz.digital.photo.app.util.Constants;
+import com.xyz.digital.photo.app.util.PubUtils;
 import com.xyz.digital.photo.app.util.ToastUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -26,13 +29,12 @@ import java.util.Map;
 
 public class DeviceManager {
 
-    private static final String LOG_TAG = "=======DeviceManager=======";
-
     private static DeviceManager mInstance;
 
     private List<ActFileInfo> mRemoteFileList;
     private ActFileManager actFileManager;
-    private static String mRemoteCurrentPath = "/";
+
+    public static String mRemoteCurrentPath = "/";
 
     public static DeviceManager getInstance() {
         if(mInstance == null) {
@@ -50,21 +52,26 @@ public class DeviceManager {
         actFileManager = new ActFileManager();
     }
 
-    /**         设备的IP连接 管理文件                */
-    public void connectIP() {
-        actFileManager.registerEventListener(new MyACTFileEventListener());
-        actFileManager.connect(Constants.HOST_IP);
-        actFileManager.browseFiles(mRemoteCurrentPath);
-    }
-
+    /**
+     * 返回当前相框所有文件
+     * @return
+     */
     public List<ActFileInfo> getRemoteDeviceFiles() {
         return mRemoteFileList;
     }
 
+    public void removeFile(int position) {
+        mRemoteFileList.remove(position);
+    }
+
+    //=====================1上传相关==开始=======================================
+
     private Map<String, UploadInfo> mUploadInfos = new HashMap<>();
+    private UploadInfo mUploadInfo;
+    private boolean isUpload;
 
     public boolean isUploading() {
-        return mUploadInfos.size() > 0;
+        return isUpload;
     }
 
     public void addUpload(String filePath, String fileName) {
@@ -89,16 +96,21 @@ public class DeviceManager {
         return null;
     }
 
-    private UploadInfo mUploadInfo;
-
     public void startUpload() {
         if(mUploadInfos.size() == 0) {
             mUploadInfo = null;
+            // 这里刷新下服务器文件列表
+            refreshRemoteFiles();
             return;
         }
         for(Map.Entry<String, UploadInfo> entry : mUploadInfos.entrySet()) {
+            isUpload = true;
             mUploadInfo = entry.getValue();
-            actFileManager.uploadFile(mUploadInfo.getFilePath(), "/" + mUploadInfo.getFileName());
+            if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
+                actFileManager.uploadFile(mUploadInfo.getFilePath(), mRemoteCurrentPath + mUploadInfo.getFileName());
+            } else {
+                actFileManager.uploadFile(mUploadInfo.getFilePath(), mRemoteCurrentPath + "/" + mUploadInfo.getFileName());
+            }
             return;
         }
     }
@@ -110,21 +122,110 @@ public class DeviceManager {
         EventBus.getDefault().post(eventBase);
     }
 
-    public class MyACTFileEventListener implements ACTFileEventListener {
+    private void sendDownloadMessage(DownloadInfo downloadInfo) {
+        EventBase eventBase = new EventBase();
+        eventBase.setAction(Constants.SEND_DOWNLOAD_FILE_RESULT);
+        eventBase.setData(downloadInfo);
+        EventBus.getDefault().post(eventBase);
+    }
+
+    //=====================1上传相关==结束=======================================
+
+    //=====================2下载相关==开始=======================================
+
+    private Map<String, DownloadInfo> mDownloadInfos = new HashMap<>();
+    private DownloadInfo mDownloadInfo;
+    private boolean isDownload;
+
+    public boolean isDownloading() {
+        return isDownload;
+    }
+
+    public void addDownload(String fileName, MEDIA_FILE_TYPE type) {
+       String localPath = PubUtils.getDonwloadLocalPath(fileName, type);
+
+        DownloadInfo downloadInfo = new DownloadInfo(localPath, fileName);
+        mDownloadInfos.put(localPath, downloadInfo);
+        // 这里刷新下载状态
+        sendDownloadMessage(downloadInfo);
+    }
+
+    public boolean isDownload(String filePath) {
+        return mDownloadInfos.containsKey(filePath);
+    }
+
+    public DownloadInfo getDownloadInfo(String filePath) {
+        if(isDownload(filePath)) {
+            return mDownloadInfos.get(filePath);
+        }
+        return null;
+    }
+
+    public void startDownload() {
+        if(mDownloadInfos.size() == 0) {
+            mDownloadInfo = null;
+            return;
+        }
+        for(Map.Entry<String, DownloadInfo> entry : mDownloadInfos.entrySet()) {
+            isDownload = true;
+            mDownloadInfo = entry.getValue();
+            if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
+                actFileManager.downloadFile(mRemoteCurrentPath + mDownloadInfo.getFileName(), mDownloadInfo.getFilePath());
+            } else {
+                actFileManager.downloadFile(mRemoteCurrentPath + "/" + mDownloadInfo.getFileName(), mDownloadInfo.getFilePath());
+            }
+            return;
+        }
+    }
+
+    //=====================2下载相关==结束=======================================
+
+    //=====================3删除相关==开始=======================================
+
+    public void deleteFile(String fileName) {
+        if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
+            actFileManager.deleteFile(mRemoteCurrentPath + fileName);
+        } else {
+            actFileManager.deleteFile(mRemoteCurrentPath + "/" + fileName);
+        }
+    }
+
+    //=====================3删除相关==结束=======================================
+
+    private boolean isResposeFiles;
+
+    public boolean isResposeFiles() {
+        return isResposeFiles;
+    }
+
+    private ACTFileEventListener actFileEventListener = new ACTFileEventListener() {
         @Override
         public void onOperationProgression(int opcode, int processed, int total) {
-            Log.d(LOG_TAG, "opcode = " + opcode + " and processed " + processed + " among " + total);
-            mUploadInfo.setState(1);
-            mUploadInfo.setProcessed(processed);
-            mUploadInfo.setTotal(total);
-            sendUploadMessage(mUploadInfo);
+            if(opcode == 1) {
+                // 上传
+                isUpload = true;
+                if(mUploadInfo != null) {
+                    mUploadInfo.setState(1);
+                    mUploadInfo.setProcessed(processed);
+                    mUploadInfo.setTotal(total);
+                    sendUploadMessage(mUploadInfo);
+                }
+            } else if(opcode == 2) {
+                // 下载
+                isDownload = true;
+                if(mDownloadInfo != null) {
+                    mDownloadInfo.setState(1);
+                    mDownloadInfo.setProcessed(processed);
+                    mDownloadInfo.setTotal(total);
+                    sendDownloadMessage(mDownloadInfo);
+                }
+            }
         }
 
         @Override
         public void onUploadCompleted(String remotePath, String localPath, int result) {
             if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
                 ActCommunication.getInstance().onUploadFile(remotePath);
-                Log.d(LOG_TAG, "upload success: " + remotePath);
                 mUploadInfo.setState(2);
                 sendUploadMessage(mUploadInfo);
                 mUploadInfos.remove(mUploadInfo.getFilePath());
@@ -135,18 +236,46 @@ public class DeviceManager {
                 mUploadInfos.remove(mUploadInfo.getFilePath());
                 ToastUtil.showToast(AppContext.getInstance(), mUploadInfo.getFileName() + "上传失败");
             }
+            isUpload = false;
         }
 
         @Override
         public void onDownloadCompleted(String remotePath, String localPath, int result) {
+            if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
+                ActCommunication.getInstance().onUploadFile(remotePath);
+                mDownloadInfo.setState(2);
+                sendDownloadMessage(mDownloadInfo);
+                 mDownloadInfos.remove(mDownloadInfo.getFilePath());
+                startDownload();
+            } else {
+                mDownloadInfo.setState(-1);
+                sendDownloadMessage(mDownloadInfo);
+                mDownloadInfos.remove(mDownloadInfo.getFilePath());
+                ToastUtil.showToast(AppContext.getInstance(), mDownloadInfo.getFileName() + "下载失败");
+            }
+            isDownload = false;
         }
 
         @Override
         public void onDeleteCompleted(String parentPath, int result) {
+            boolean success;
+            if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
+                success = true;
+                refreshRemoteFiles();
+            } else {
+                success = false;
+            }
+            EventBase eventBase = new EventBase();
+            eventBase.setAction(Constants.SEND_DELETE_FILE_RESULT);
+            eventBase.setData(success);
+            EventBus.getDefault().post(eventBase);
+
+            Toast.makeText(AppContext.getInstance(), success ? "删除成功" : "删除失败", Toast.LENGTH_SHORT).show();
         }
 
         @Override
         public void onBrowseCompleted(Object filelist, String currentPath, int result) {
+            isResposeFiles = true;
             if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
                 List<ActFileInfo> remoteFileList = (ArrayList) filelist;
                 if(remoteFileList != null) {
@@ -170,6 +299,19 @@ public class DeviceManager {
 
         @Override
         public void onDisconnectCompleted(int result) {
+            if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
+                Toast.makeText(AppContext.getInstance(), "连接已断开", Toast.LENGTH_SHORT).show();
+                connect();
+            } else {
+            }
+        }
+    };
+
+    private void refreshRemoteFiles() {
+        if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
+            actFileManager.browseFiles(mRemoteCurrentPath);
+        } else {
+            actFileManager.browseFiles(mRemoteCurrentPath + "/");
         }
     }
 
@@ -185,7 +327,10 @@ public class DeviceManager {
     public void connect() {
         // 连接监听
         ActCommunication.getInstance().setEventListener(mAcEventListener);
+        actFileManager.registerEventListener(actFileEventListener);
+        actFileManager.connect(Constants.HOST_IP);
         ActCommunication.getInstance().connect(Constants.HOST_IP);
+        actFileManager.browseFiles(mRemoteCurrentPath);
     }
 
     private boolean isConnect;
@@ -205,7 +350,6 @@ public class DeviceManager {
 
         @Override
         public void onDeviceConnected() {
-            DeviceManager.getInstance().connectIP();
             isConnect = true;
             sendConnectState(true);
         }
@@ -218,6 +362,9 @@ public class DeviceManager {
 
         @Override
         public void onRecvVolume(int volume) {
+            for(OnCmdBackListener listener : mCmdListeners) {
+                listener.onVolume(volume);
+            }
         }
 
         @Override
@@ -256,5 +403,17 @@ public class DeviceManager {
             }
         }
     };
+
+    private List<OnCmdBackListener> mCmdListeners = new ArrayList<>();
+
+    public void addOnCmdBackListener(OnCmdBackListener listener) {
+        if(listener != null) {
+            mCmdListeners.add(listener);
+        }
+    }
+
+    public interface OnCmdBackListener {
+        void onVolume(int value);
+    }
 
 }

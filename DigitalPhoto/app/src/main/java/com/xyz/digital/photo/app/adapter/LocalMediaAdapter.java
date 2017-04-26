@@ -29,6 +29,7 @@ import java.util.Map;
 public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
 
     private static final int selectColor = Color.parseColor("#77000000");
+    private boolean isShowSelect;
 
     public LocalMediaAdapter(Context ctx) {
         super(ctx);
@@ -38,8 +39,6 @@ public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
     public int getItemLayoutId(int viewType) {
         return R.layout.item_grid_child_layout;
     }
-
-    private boolean isShowSelect;
 
     public void setShowSelectType(boolean isShowSelect) {
         this.isShowSelect = isShowSelect;
@@ -87,30 +86,33 @@ public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
         // 判断是否处于上传
         ProgressPieView pieView = (ProgressPieView) holder.getView(R.id.item_child_upload_progress);
         pieView.setTag("ProgressPieView" + item.getFilePath());
-        if (DeviceManager.getInstance().isUpload(item.getFilePath())) {
+        if (isUpload(item.getFilePath())) {
             if(imageView.getColorFilter() == null) {
                 imageView.setColorFilter(selectColor);
             }
             holder.getView(R.id.item_child_upload_cancel).setVisibility(View.VISIBLE);
             pieView.setVisibility(View.VISIBLE);
             UploadInfo uploadInfo = DeviceManager.getInstance().getUploadInfo(item.getFilePath());
-            switch (uploadInfo.getState()) {
-                case 0:
-                    pieView.setText("等待");
-                    break;
+            if(uploadInfo != null) {
+                switch (uploadInfo.getState()) {
+                    case 0:
+                        pieView.setText("等待");
+                        break;
+                }
             }
         } else {
             holder.getView(R.id.item_child_upload_cancel).setVisibility(View.GONE);
             pieView.setVisibility(View.GONE);
         }
 
+        // 判断是否上传完成
         TextView isUoloadTxt = holder.getTextView(R.id.item_child_isupload_txt);
         boolean isUpload = PreferenceUtils.getInstance().getBoolean(item.getFilePath(), false);
         if (isUpload) {
             holder.getView(R.id.item_child_isupload_txt).setVisibility(View.VISIBLE);
             holder.getView(R.id.item_child_upload_cancel).setVisibility(View.GONE);
             pieView.setText("成功");
-            if(!DeviceManager.getInstance().isUpload(item.getFilePath())) {
+            if(!isUpload(item.getFilePath())) {
                 pieView.setVisibility(View.GONE);
             }
 

@@ -1,18 +1,25 @@
 package com.xyz.digital.photo.app.adapter;
 
 import android.content.Context;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
-import com.actions.actfilemanager.ActFileInfo;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.adapter.base.RecyclerViewHolder;
+import com.xyz.digital.photo.app.bean.DownloadInfo;
+import com.xyz.digital.photo.app.bean.FileInfo;
+import com.xyz.digital.photo.app.manager.DeviceManager;
+import com.xyz.digital.photo.app.util.PreferenceUtils;
+import com.xyz.digital.photo.app.util.PubUtils;
+import com.xyz.digital.photo.app.view.ProgressPieView;
 
 /**
  * Created by O on 2017/3/18.
  */
 
-public class DeviceMediaAdapter extends BaseRecyclerAdapter<ActFileInfo> {
+public class DeviceMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
 
     public DeviceMediaAdapter(Context ctx) {
         super(ctx);
@@ -24,7 +31,7 @@ public class DeviceMediaAdapter extends BaseRecyclerAdapter<ActFileInfo> {
     }
 
     @Override
-    public void bindData(RecyclerViewHolder holder, int position, ActFileInfo item) {
+    public void bindData(RecyclerViewHolder holder, int position, FileInfo item) {
 
         holder.setText(R.id.item_device_media_title_txt, item.getFileName());
 
@@ -36,11 +43,59 @@ public class DeviceMediaAdapter extends BaseRecyclerAdapter<ActFileInfo> {
 
         // 图片
 //        if(item.getFileType() == MEDIA_FILE_TYPE.AUDIO) {
-            imageView.setImageResource(R.drawable.defult_audio_icon);
+        imageView.setImageResource(R.drawable.defult_audio_icon);
 //        } else {
 //            ImageLoadManager.setImage(item.getFilePath(), imageView);
 //        }
 
+        // 是否在下载
+        ProgressPieView pieView = (ProgressPieView) holder.getView(R.id.item_child_download_progress);
+        pieView.setTag("ProgressPieView" + PubUtils.getDonwloadLocalPath(item.getFileName(), item.getType()));
+
+        String localPath = PubUtils.getDonwloadLocalPath(item.getFileName(), item.getType());
+        if (isDownload(localPath)) {
+            pieView.setVisibility(View.VISIBLE);
+            DownloadInfo downloadInfo = DeviceManager.getInstance().getDownloadInfo(localPath);
+            if (downloadInfo != null) {
+                switch (downloadInfo.getState()) {
+                    case 0:
+                        pieView.setText("等待");
+                        break;
+                }
+            }
+        } else {
+            pieView.setVisibility(View.GONE);
+        }
+
+        // 判断是否下载完成
+        TextView download = holder.getTextView(R.id.item_device_media_download_txt);
+        boolean isUpload = PreferenceUtils.getInstance().getBoolean(localPath, false);
+        if (isUpload) {
+            pieView.setText("成功");
+            pieView.setVisibility(View.GONE);
+            download.setSelected(true);
+            download.setText("已下载");
+        } else {
+            download.setSelected(false);
+            download.setText("下载");
+        }
+
+    }
+
+    public boolean isDownload(String filePath) {
+        return DeviceManager.getInstance().isDownload(filePath);
+    }
+
+    public void addDownload(int pos) {
+        FileInfo bean = getItem(pos);
+        DeviceManager.getInstance().addDownload(bean.getFileName(), bean.getType());
+        notifyItemChanged(pos);
+    }
+
+    public void removeDownload(int pos) {
+        FileInfo bean = getItem(pos);
+        String localPath = PubUtils.getDonwloadLocalPath(bean.getFileName(), bean.getType());
+        DeviceManager.getInstance().removeUpload(localPath);
     }
 
 }

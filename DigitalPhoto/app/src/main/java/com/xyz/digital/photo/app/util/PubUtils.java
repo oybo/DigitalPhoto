@@ -1,5 +1,7 @@
 package com.xyz.digital.photo.app.util;
 
+import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
+
 import java.io.File;
 import java.math.BigDecimal;
 
@@ -116,4 +118,24 @@ public class PubUtils {
         return str;
     }
 
+    public static String getDonwloadLocalPath(String fileName, MEDIA_FILE_TYPE type) {
+        String localPath = "";
+        try {
+            if(type == MEDIA_FILE_TYPE.VIDEO) {
+                localPath = EnvironmentUtil.getVideoPath();
+            } else if(type == MEDIA_FILE_TYPE.AUDIO) {
+                localPath = EnvironmentUtil.getAudioPath();
+            } else {
+                localPath = EnvironmentUtil.getImagePath();
+            }
+            localPath = localPath + "/" + fileName;
+            File file = new File(localPath);
+            if(file.exists()) {
+                file.delete();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return localPath;
+    }
 }

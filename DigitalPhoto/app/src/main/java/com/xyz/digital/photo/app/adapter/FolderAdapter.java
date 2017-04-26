@@ -3,15 +3,19 @@ package com.xyz.digital.photo.app.adapter;
 import android.content.Context;
 import android.view.View;
 import android.widget.TextView;
+
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.adapter.base.RecyclerViewHolder;
 import com.xyz.digital.photo.app.bean.FolderBean;
+import com.xyz.digital.photo.app.bean.UploadInfo;
 import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
+import com.xyz.digital.photo.app.manager.DeviceManager;
 import com.xyz.digital.photo.app.manager.ImageLoadManager;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
 import com.xyz.digital.photo.app.view.ProgressPieView;
 import com.xyz.digital.photo.app.view.RoundAngleImageView;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -77,9 +81,15 @@ public class FolderAdapter extends BaseRecyclerAdapter<FolderBean> {
                 TextView isUoloadTxt = holder.getTextView(R.id.item_child_isupload_txt);
 
                 // 判断是否处于上传
-                if (mUploadMaps.containsKey(item.getTopImagePath())) {
+                if (DeviceManager.getInstance().isUpload(item.getTopImagePath())) {
                     isUoloadTxt.setVisibility(View.INVISIBLE);
                     pieView.setVisibility(View.VISIBLE);
+                    UploadInfo uploadInfo = DeviceManager.getInstance().getUploadInfo(item.getTopImagePath());
+                    switch (uploadInfo.getState()) {
+                        case 0:
+                            pieView.setText("等待");
+                            break;
+                    }
                 } else {
                     pieView.setVisibility(View.INVISIBLE);
                 }
@@ -88,14 +98,14 @@ public class FolderAdapter extends BaseRecyclerAdapter<FolderBean> {
                 if (isUpload) {
                     isUoloadTxt.setVisibility(View.VISIBLE);
                     pieView.setText("成功");
-                    if(!mUploadMaps.containsKey(item.getTopImagePath())) {
+                    if(!DeviceManager.getInstance().isUpload(item.getTopImagePath())) {
                         pieView.setVisibility(View.INVISIBLE);
                     }
 
                     isUoloadTxt.setText("已上传");
                     isUoloadTxt.setSelected(false);
                 } else {
-                    if (mUploadMaps.containsKey(item.getTopImagePath())) {
+                    if (DeviceManager.getInstance().isUpload(item.getTopImagePath())) {
                         isUoloadTxt.setVisibility(View.INVISIBLE);
                     } else {
                         isUoloadTxt.setVisibility(View.VISIBLE);
@@ -170,36 +180,20 @@ public class FolderAdapter extends BaseRecyclerAdapter<FolderBean> {
         return lists;
     }
 
-    private HashMap<String, FolderBean> mUploadMaps = new HashMap<>();
-
     public boolean isUpload(String key) {
-        return mUploadMaps.containsKey(key);
+        return DeviceManager.getInstance().isUpload(key);
     }
 
     public void addUpload(int pos) {
         FolderBean bean = getItem(pos);
-        if (mUploadMaps.containsKey(bean.getTopImagePath())) {
-            mUploadMaps.remove(bean.getTopImagePath());
-        } else {
-            mUploadMaps.put(bean.getTopImagePath(), bean);
-        }
+        DeviceManager.getInstance().addUpload(bean.getTopImagePath(), bean.getFolderName());
         notifyItemChanged(pos);
     }
 
     public void removeUpload(int pos) {
         FolderBean bean = getItem(pos);
-        mUploadMaps.remove(bean.getTopImagePath());
+        DeviceManager.getInstance().removeUpload(bean.getTopImagePath());
         mSelectMaps.remove(bean.getTopImagePath());
-    }
-
-    public void clearUpload() {
-        if (mUploadMaps.size() > 0) {
-            mSelectMaps.clear();
-            mUploadMaps.clear();
-            for (Map.Entry<String, FolderBean> entry : mUploadMaps.entrySet()) {
-                notifyItemChanged(entry.getValue().getPosition());
-            }
-        }
     }
 
 }

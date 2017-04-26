@@ -8,6 +8,8 @@ public class Constants {
 
     public static final String HOST_IP = "192.168.1.1";
 
+    public static final int MAX_VOLUME = 10;
+
     public static final String MAIN_DEVICE_POHOTO_MANAGER = "main_device_photo_manager";
 
     public static final String MAIN_DEVICE_LIST = "main_device_list";
@@ -26,5 +28,11 @@ public class Constants {
 
     /**    刷新上传状态和进度     */
     public static final String SEND_REFRESH_UPLOAD_STATE = "SEND_REFRESH_UPLOAD_STATE";
+
+    /**    发送删除结果     */
+    public static final String SEND_DELETE_FILE_RESULT = "SEND_DELETE_FILE_RESULT";
+
+    /**    发送下载结果     */
+    public static final String SEND_DOWNLOAD_FILE_RESULT = "SEND_DOWNLOAD_FILE_RESULT";
 
 }

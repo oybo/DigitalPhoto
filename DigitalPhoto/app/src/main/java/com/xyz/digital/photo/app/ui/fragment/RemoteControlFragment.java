@@ -6,13 +6,16 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.actions.actcommunication.ActCommunication;
 import com.touchmenotapps.widget.radialmenu.menu.v1.RadialMenuItem;
 import com.touchmenotapps.widget.radialmenu.menu.v1.RadialMenuWidget;
 import com.xyz.digital.photo.app.R;
+import com.xyz.digital.photo.app.manager.DeviceManager;
 import com.xyz.digital.photo.app.ui.BaseFragment;
-import com.xyz.digital.photo.app.util.ToastUtil;
+import com.xyz.digital.photo.app.util.Constants;
 import com.xyz.digital.photo.app.view.MyNestedScrollView;
 import com.xyz.digital.photo.app.view.VerticalSeekBar;
 
@@ -29,6 +32,7 @@ public class RemoteControlFragment extends BaseFragment implements View.OnClickL
 
     private MyNestedScrollView mScrollView;
     private VerticalSeekBar mVoiceSeekBar, mBrightnessSeekBar;
+    private ImageView mPlayOrStopBt;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -40,13 +44,12 @@ public class RemoteControlFragment extends BaseFragment implements View.OnClickL
         super.onActivityCreated(savedInstanceState);
 
         initView();
+        initData();
     }
 
     private void initView() {
         mScrollView = (MyNestedScrollView) getView().findViewById(R.id.fragment_control_scrollview);
         mVoiceSeekBar = (VerticalSeekBar) getView().findViewById(R.id.book_read_menu_voice_seekbar);
-        mVoiceSeekBar.setMax(100);
-        mVoiceSeekBar.setProgress(50);
         mBrightnessSeekBar = (VerticalSeekBar) getView().findViewById(R.id.book_read_menu_brightness_seekbar);
         mScrollView.addInterceptTouchView(mVoiceSeekBar);
         mScrollView.addInterceptTouchView(mBrightnessSeekBar);
@@ -116,7 +119,41 @@ public class RemoteControlFragment extends BaseFragment implements View.OnClickL
         // 下一首
         getView().findViewById(R.id.fragment_control_next_bt).setOnClickListener(this);
         // 播放暂停
-        getView().findViewById(R.id.fragment_control_play_bt).setOnClickListener(this);
+        mPlayOrStopBt = (ImageView) getView().findViewById(R.id.fragment_control_play_bt);
+        mPlayOrStopBt.setOnClickListener(this);
+        mVoiceSeekBar.setOnSeekBarChangeListener(new VerticalSeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(VerticalSeekBar seekBar, int progress, boolean fromUser) {
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(VerticalSeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(VerticalSeekBar seekBar) {
+                int progress = seekBar.getProgress();
+                ActCommunication.getInstance().setVolume(progress);
+            }
+
+            @Override
+            public void onrequestDisallowInterceptTouchEvent(boolean enable) {
+
+            }
+        });
+    }
+
+    private void initData() {
+        DeviceManager.getInstance().addOnCmdBackListener(new DeviceManager.OnCmdBackListener() {
+            @Override
+            public void onVolume(int value) {
+                mVoiceSeekBar.setMax(Constants.MAX_VOLUME);
+                mVoiceSeekBar.setProgress(value);
+            }
+        });
+        ActCommunication.getInstance().requestVolume();
     }
 
     private RadialMenuItem createRadialMenuItem(int type, int resouceId) {
@@ -126,16 +163,22 @@ public class RemoteControlFragment extends BaseFragment implements View.OnClickL
         return menuItem;
     }
 
+    private void sendCmd(String[] cmd) {
+        ActCommunication.getInstance().sendMsg(cmd);
+    }
+
+    private boolean isPlay;
+
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.fragment_control_tab_power_layout:
                 // 电源
-
+                ActCommunication.getInstance().powerOff();
                 break;
             case R.id.fragment_control_tab_set_layou:
                 // 设置
-
+                sendCmd(new String[]{"cmd", "setting"});
                 break;
             case R.id.fragment_control_tab_music_layout:
                 // 背景音乐
@@ -143,7 +186,7 @@ public class RemoteControlFragment extends BaseFragment implements View.OnClickL
                 break;
             case R.id.fragment_control_tab_mute_layout:
                 // 静音
-
+                sendCmd(new String[]{"cmd", "noVolume"});
                 break;
             case R.id.fragment_control_menu_image_layout:
                 // 图片
@@ -167,11 +210,11 @@ public class RemoteControlFragment extends BaseFragment implements View.OnClickL
                 break;
             case R.id.fragment_control_back_layout:
                 // 返回
-
+                sendCmd(new String[]{"cmd", "return"});
                 break;
             case R.id.fragment_control_main_layout:
                 // 主页
-
+                sendCmd(new String[]{"cmd", "home"});
                 break;
             case R.id.fragment_control_magnify_bt:
                 // 放大
@@ -183,15 +226,24 @@ public class RemoteControlFragment extends BaseFragment implements View.OnClickL
                 break;
             case R.id.fragment_control_previou_bt:
                 // 上一首
-
+                sendCmd(new String[]{"cmd", "up"});
                 break;
             case R.id.fragment_control_next_bt:
                 // 下一首
-
+                sendCmd(new String[]{"cmd", "down"});
                 break;
             case R.id.fragment_control_play_bt:
                 // 播放暂停
-
+                isPlay = !isPlay;
+                if(isPlay) {
+                    // 播放
+                    sendCmd(new String[]{"cmd", "stop"});
+                    mPlayOrStopBt.setImageResource(R.drawable.control_stop_src_icon);
+                } else {
+                    // 暂停
+                    sendCmd(new String[]{"cmd", "playFile"});
+                    mPlayOrStopBt.setImageResource(R.drawable.control_play_src_icon);
+                }
                 break;
         }
     }
@@ -208,19 +260,24 @@ public class RemoteControlFragment extends BaseFragment implements View.OnClickL
         public void execute() {
             switch (type) {
                 case 0:
-                    ToastUtil.showToast(getActivity(), "确定");
+                    // 确定
+                    sendCmd(new String[]{"cmd", "ok"});
                     break;
                 case 1:
-                    ToastUtil.showToast(getActivity(), "上");
+                    // 上
+                    sendCmd(new String[]{"cmd", "up"});
                     break;
                 case 2:
-                    ToastUtil.showToast(getActivity(), "下");
+                    // 下
+                    sendCmd(new String[]{"cmd", "down"});
                     break;
                 case 3:
-                    ToastUtil.showToast(getActivity(), "左");
+                    // 左
+                    sendCmd(new String[]{"cmd", "prev"});
                     break;
                 case 4:
-                    ToastUtil.showToast(getActivity(), "右");
+                    // 右
+                    sendCmd(new String[]{"cmd", "next"});
                     break;
             }
         }

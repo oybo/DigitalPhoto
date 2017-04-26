@@ -43,14 +43,29 @@
 
                 <View style="@style/view_line"/>
 
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/device_detail_photo_rview"
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dip"
                     android:layout_marginTop="10dip"
-                    android:padding="10dip"
-                    android:scrollbars="none"/>
+                    android:padding="10dip">
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/device_detail_photo_rview"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="none"/>
+
+                    <ProgressBar
+                        android:id="@+id/device_detail_photo_loadingview"
+                        android:layout_width="35dip"
+                        android:layout_height="35dip"
+                        android:layout_centerInParent="true"
+                        android:indeterminateBehavior="repeat"
+                        android:indeterminateDrawable="@drawable/dialog_loading_progress"
+                        android:indeterminateOnly="true"/>
+
+                </RelativeLayout>
 
                 <View style="@style/view_line"/>
 

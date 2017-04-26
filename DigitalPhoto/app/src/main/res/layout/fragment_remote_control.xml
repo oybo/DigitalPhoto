@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <View
         android:layout_width="match_parent"
@@ -405,7 +406,6 @@
                             android:layout_height="wrap_content"
                             android:layout_centerInParent="true"
                             android:background="@drawable/selector_control_play_bg"
-                            android:paddingLeft="5dip"
                             android:scaleType="center"
                             android:src="@drawable/control_play_src_icon"/>
 
@@ -462,14 +462,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
-                        android:src="@drawable/control_tab_power"/>
+                        android:src="@drawable/control_voice_up_icon"/>
 
                     <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"
                         android:layout_centerHorizontal="true"
-                        android:src="@drawable/control_tab_power"/>
+                        android:src="@drawable/control_voice_down_icon"/>
 
                     <com.xyz.digital.photo.app.view.VerticalSeekBar
                         android:id="@+id/book_read_menu_voice_seekbar"
@@ -493,14 +493,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
-                        android:src="@drawable/control_tab_power"/>
+                        android:src="@drawable/control_liang_up_icon"/>
 
                     <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"
                         android:layout_centerHorizontal="true"
-                        android:src="@drawable/control_tab_power"/>
+                        android:src="@drawable/control_liang_down_icon"/>
 
                     <com.xyz.digital.photo.app.view.VerticalSeekBar
                         android:id="@+id/book_read_menu_brightness_seekbar"

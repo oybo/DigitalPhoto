@@ -7,6 +7,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -36,6 +37,7 @@ public class DeviceDetailActivity extends BaseActivity implements View.OnClickLi
 
     @Bind(R.id.device_detail_image_count_txt) TextView deviceDetailImageCountTxt;
     @Bind(R.id.device_detail_photo_rview) RecyclerView deviceDetailPhotoRview;
+    @Bind(R.id.device_detail_photo_loadingview) ProgressBar mLoadingView;
 
     @Bind(R.id.device_detail_disk_size_txt) TextView deviceDiskAllSizeTxt;
     @Bind(R.id.device_detail_disk_used_size_txt) TextView deviceDiskUsedSizeTxt;
@@ -69,6 +71,8 @@ public class DeviceDetailActivity extends BaseActivity implements View.OnClickLi
     }
 
     private void initData() {
+        EventBus.getDefault().register(this);
+
         setRemoteCount(0);
         setDiskSize("0", "0", "online");
         setUDiskSize("0", "0", "online");
@@ -83,10 +87,9 @@ public class DeviceDetailActivity extends BaseActivity implements View.OnClickLi
         msg = new String[]{"cmd", "reqUdiskInfo"};
         ActCommunication.getInstance().sendMsg(msg);
 
-        EventBus.getDefault().register(this);
-
         EventBase eventBase = new EventBase();
         eventBase.setAction(Constants.REFRESH_DEVICE_FILE);
+        eventBase.setData("first");
         EventBus.getDefault().post(eventBase);
     }
 
@@ -94,6 +97,9 @@ public class DeviceDetailActivity extends BaseActivity implements View.OnClickLi
     public void onEventMainThread(EventBase eventBase) {
         String action = eventBase.getAction();
         if (action.equals(Constants.REFRESH_DEVICE_FILE)) {
+            if (TextUtils.isEmpty((String) eventBase.getData())) {
+                mLoadingView.setVisibility(View.GONE);
+            }
             mAdapter.clear();
             mAdapter.appendToList(DeviceManager.getInstance().getRemoteDeviceFiles());
             mAdapter.notifyDataSetChanged();
