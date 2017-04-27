@@ -24,13 +24,10 @@ public class WiFiPresenter implements WiFiContract.Presenter {
     private WiFiContract.View mView;
     private AsyncTask<Void, Void, Boolean> mConnectTask;
 
-    private WifiUtils mWifiUtils;
-
     public WiFiPresenter(WiFiContract.View view) {
         mView = view;
         mView.setPresenter(this);
 
-        mWifiUtils = new WifiUtils();
         registerBroadcast();
     }
 
@@ -98,7 +95,7 @@ public class WiFiPresenter implements WiFiContract.Presenter {
                 switch (wifiState) {
                     case WifiManager.WIFI_STATE_ENABLED:
                         Log.d(TAG, "WiFi已启用");
-                        WifiUtils.startScan();
+                        scanWiFi();
                         break;
                     case WifiManager.WIFI_STATE_DISABLED:
                         Log.d(TAG, "Wifi已关闭");
@@ -106,8 +103,8 @@ public class WiFiPresenter implements WiFiContract.Presenter {
                 }
             }
             else if(action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
-                // wifi连接状态更改
-                mView.notifyDataSetChanged();
+                // wifi连接状态更改 重新扫描
+                scanWiFi();
             }
         }
     };

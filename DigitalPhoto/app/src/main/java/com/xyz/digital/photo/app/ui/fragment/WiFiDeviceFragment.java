@@ -14,7 +14,7 @@ import com.chanven.lib.cptr.PtrClassicFrameLayout;
 import com.chanven.lib.cptr.PtrDefaultHandler;
 import com.chanven.lib.cptr.PtrFrameLayout;
 import com.xyz.digital.photo.app.R;
-import com.xyz.digital.photo.app.adapter.WifAdapter;
+import com.xyz.digital.photo.app.adapter.WifiAdapter;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.mvp.wifi.WiFiContract;
 import com.xyz.digital.photo.app.mvp.wifi.WiFiPresenter;
@@ -38,7 +38,7 @@ public class WiFiDeviceFragment extends BaseFragment implements WiFiContract.Vie
 
     private WiFiContract.Presenter mPresenter;
 
-    private WifAdapter mAdapter;
+    private WifiAdapter mAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -72,7 +72,7 @@ public class WiFiDeviceFragment extends BaseFragment implements WiFiContract.Vie
 
     private void initData() {
         mPresenter = new WiFiPresenter(this);
-        mAdapter = new WifAdapter(getActivity());
+        mAdapter = new WifiAdapter(getActivity());
         fragmentDeviceRecyclerview.setAdapter(mAdapter);
 
         mLoadingView.show();
@@ -118,13 +118,6 @@ public class WiFiDeviceFragment extends BaseFragment implements WiFiContract.Vie
             });
         }
         mLoadingView.hide();
-    }
-
-    @Override
-    public void notifyDataSetChanged() {
-        if(mAdapter != null) {
-            mAdapter.notifyDataSetChanged();
-        }
     }
 
     @Override

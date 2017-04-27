@@ -193,7 +193,6 @@ public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
 
     public void removeUpload(int pos) {
         MediaFileBean bean = getItem(pos);
-        DeviceManager.getInstance().removeUpload(bean.getFilePath());
         mSelectMaps.remove(bean.getFilePath());
     }
 

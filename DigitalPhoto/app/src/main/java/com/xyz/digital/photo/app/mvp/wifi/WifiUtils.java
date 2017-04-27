@@ -10,6 +10,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import com.xyz.digital.photo.app.AppContext;
 
@@ -19,12 +20,13 @@ import java.lang.reflect.Method;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
 /**
  * Wifi 工具类
- *
+ * <p>
  * 封装了Wifi的基础操作方法，方便获取Wifi连接信息以及操作Wifi
  */
 
@@ -55,8 +57,7 @@ public class WifiUtils {
                     Message msg = handler.obtainMessage(WifiApConst.ApCreateApSuccess);
                     handler.sendMessage(msg);
                     this.exit();
-                }
-                else {
+                } else {
                     // LogUtils.v("WifiAp enabled failed!");
                 }
             }
@@ -92,24 +93,19 @@ public class WifiUtils {
 
             method1.invoke(mWifiManager, netConfig, true);
 
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        }
-        catch (IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        }
-        catch (InvocationTargetException e) {
+        } catch (InvocationTargetException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        }
-        catch (SecurityException e) {
+        } catch (SecurityException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        }
-        catch (NoSuchMethodException e) {
+        } catch (NoSuchMethodException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -126,20 +122,16 @@ public class WifiUtils {
                 Method method2 = mWifiManager.getClass().getMethod("setWifiApEnabled",
                         WifiConfiguration.class, boolean.class);
                 method2.invoke(mWifiManager, config, false);
-            }
-            catch (NoSuchMethodException e) {
+            } catch (NoSuchMethodException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-            }
-            catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-            }
-            catch (IllegalAccessException e) {
+            } catch (IllegalAccessException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-            }
-            catch (InvocationTargetException e) {
+            } catch (InvocationTargetException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
@@ -152,12 +144,10 @@ public class WifiUtils {
             method.setAccessible(true);
             return (Boolean) method.invoke(mWifiManager);
 
-        }
-        catch (NoSuchMethodException e) {
+        } catch (NoSuchMethodException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -169,8 +159,7 @@ public class WifiUtils {
             int i = ((Integer) mWifiManager.getClass().getMethod("getWifiApState", new Class[0])
                     .invoke(mWifiManager, new Object[0])).intValue();
             return i;
-        }
-        catch (Exception localException) {
+        } catch (Exception localException) {
         }
         return 4;
     }
@@ -178,7 +167,7 @@ public class WifiUtils {
     /**
      * 判断是否连接上wifi
      *
-     * @return boolean值(isConnect),对应已连接(true)和未连接(false)
+     * @return boolean值(isConnect), 对应已连接(true)和未连接(false)
      */
     public static boolean isWifiConnect() {
         NetworkInfo mNetworkInfo = ((ConnectivityManager) mContext
@@ -190,10 +179,10 @@ public class WifiUtils {
     public static boolean isConnectTheWifi(ScanResult wifi) {
         boolean connect = false;
         try {
-            if(isWifiConnect()) {
+            if (isWifiConnect()) {
                 WifiInfo wifiInfo = getWifiInfo();
-                if(wifiInfo != null) {
-                    if((wifiInfo.getSSID().toString().replace("\"", "")).equals(wifi.SSID.toString().replace("\"", "")) &&
+                if (wifiInfo != null) {
+                    if ((wifiInfo.getSSID().toString().replace("\"", "")).equals(wifi.SSID.toString().replace("\"", "")) &&
                             (wifiInfo.getBSSID().toString().replace("\"", "")).equals(wifi.BSSID.toString().replace("\"", ""))) {
                         return true;
                     }
@@ -233,17 +222,16 @@ public class WifiUtils {
     /**
      * Function: 连接Wifi热点 <br>
      *
+     * @param SSID
+     * @param Password
+     * @param Type     <br>
+     *                 没密码： {@linkplain WifiCipherType#WIFICIPHER_NOPASS}<br>
+     *                 WEP加密: {@linkplain WifiCipherType#WIFICIPHER_WEP}<br>
+     *                 WPA加密： {@linkplain WifiCipherType#WIFICIPHER_WPA}<br>
+     * @return true:连接成功；false:连接失败
      * @date 2015年2月14日 上午11:17
      * @change hillfly
      * @version 1.0
-     * @param SSID
-     * @param Password
-     * @param Type
-     * <br>
-     *            没密码： {@linkplain WifiCipherType#WIFICIPHER_NOPASS}<br>
-     *            WEP加密: {@linkplain WifiCipherType#WIFICIPHER_WEP}<br>
-     *            WPA加密： {@linkplain WifiCipherType#WIFICIPHER_WPA}<br>
-     * @return true:连接成功；false:连接失败
      */
     public static boolean connectWifi(String SSID, String Password, WifiCipherType Type) {
         if (!isWifiEnabled()) {
@@ -255,8 +243,7 @@ public class WifiUtils {
                 // 避免程序不停循环
                 Thread.currentThread();
                 Thread.sleep(500);
-            }
-            catch (InterruptedException ie) {
+            } catch (InterruptedException ie) {
             }
         }
 
@@ -268,17 +255,49 @@ public class WifiUtils {
         WifiConfiguration tempConfig = isExsits(SSID);
 
         if (tempConfig != null) {
-            mWifiManager.removeNetwork(tempConfig.networkId);
+            boolean success = connectWifi(tempConfig.networkId);
+            if (success) {
+                return true;
+            } else {
+                mWifiManager.removeNetwork(tempConfig.networkId);
+            }
         }
 
         int netID = mWifiManager.addNetwork(wifiConfig);
 
         // 断开连接
         mWifiManager.disconnect();
+
         // 锁定设置为true,使其他的连接断开
-        boolean bRet = mWifiManager.enableNetwork(netID, true);
-        mWifiManager.reconnect();
+        mWifiManager.enableNetwork(netID, true);
+        boolean bRet = mWifiManager.reconnect();
         return bRet;
+    }
+
+    /**
+     * 链接到制定wifi
+     *
+     * @param wifiId
+     * @return
+     */
+    public static boolean connectWifi(int wifiId) {
+        List<WifiConfiguration> configurations = mWifiManager.getConfiguredNetworks();
+        boolean isConnect = false;
+        int len = configurations.size();
+        for (int i = 0; i < len; i++) {
+            WifiConfiguration wifi = configurations.get(i);
+            int id = wifi.networkId;
+            if (id == wifiId) {
+                while (!(mWifiManager.enableNetwork(wifiId, true))) {
+                    Log.i("ConnectWifi", String.valueOf(configurations.get(wifiId).status));
+                }
+
+                if (mWifiManager.enableNetwork(wifiId, true)) {
+                    isConnect = true;
+                }
+            }
+        }
+        return isConnect;
     }
 
     public static void disconnectWifi(int paramInt) {
@@ -289,8 +308,7 @@ public class WifiUtils {
         mWifiManager.startScan();
     }
 
-    private static WifiConfiguration createWifiInfo(String SSID, String Password,
-                                                    WifiCipherType Type) {
+    private static WifiConfiguration createWifiInfo(String SSID, String Password, WifiCipherType Type) {
         WifiConfiguration config = new WifiConfiguration();
         config.allowedAuthAlgorithms.clear();
         config.allowedGroupCiphers.clear();
@@ -326,8 +344,7 @@ public class WifiUtils {
             config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
             config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
 
-        }
-        else {
+        } else {
             return null;
         }
         return config;
@@ -361,8 +378,7 @@ public class WifiUtils {
             localField2.setAccessible(false);
             String str = (String) localObject3;
             return str;
-        }
-        catch (Exception localException) {
+        } catch (Exception localException) {
         }
         return null;
     }
@@ -391,7 +407,7 @@ public class WifiUtils {
         System.setProperty("java.net.preferIPv4Stack", "true");
         try {
             for (Enumeration<NetworkInterface> niEnum = NetworkInterface.getNetworkInterfaces(); niEnum
-                    .hasMoreElements();) {
+                    .hasMoreElements(); ) {
                 NetworkInterface ni = niEnum.nextElement();
                 if (!ni.isLoopback()) {
                     for (InterfaceAddress interfaceAddress : ni.getInterfaceAddresses()) {
@@ -401,12 +417,23 @@ public class WifiUtils {
                     }
                 }
             }
-        }
-        catch (SocketException e) {
+        } catch (SocketException e) {
             e.printStackTrace();
         }
 
         return null;
+    }
+
+    //将搜索到的wifi根据信号强度从强到弱进行排序
+    private static List<ScanResult> sortByLevel(List<ScanResult> resultList) {
+        java.util.Collections.sort(resultList, new java.util.Comparator() {
+
+            @Override
+            public int compare(Object t1, Object t2) {
+                return new Integer(((ScanResult) t2).level).compareTo(new Integer(((ScanResult) t1).level));
+            }
+        });
+        return resultList;
     }
 
     public static String getMacAddress() {
@@ -428,7 +455,22 @@ public class WifiUtils {
     }
 
     public static List<ScanResult> getScanResults() {
-        return mWifiManager.getScanResults();
+        List<ScanResult> scanResults = sortByLevel(mWifiManager.getScanResults());
+
+        String key = "ZXFAP";
+        boolean filtration = false;
+        if(filtration) {
+            List<ScanResult> temp = new ArrayList<>();
+             for(ScanResult scanResult : scanResults) {
+                 if(scanResult.SSID.startsWith(key)) {
+                     temp.add(scanResult);
+                 }
+             }
+            scanResults.clear();
+            scanResults.addAll(temp);
+        }
+
+        return scanResults;
     }
 
     // 查看以前是否也配置过这个网络

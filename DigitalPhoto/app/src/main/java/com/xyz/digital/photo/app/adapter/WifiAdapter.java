@@ -14,9 +14,9 @@ import com.xyz.digital.photo.app.mvp.wifi.WifiUtils;
  * Created by O on 2017/3/20.
  */
 
-public class WifAdapter extends BaseRecyclerAdapter<ScanResult> {
+public class WifiAdapter extends BaseRecyclerAdapter<ScanResult> {
 
-    public WifAdapter(Context ctx) {
+    public WifiAdapter(Context ctx) {
         super(ctx);
     }
 

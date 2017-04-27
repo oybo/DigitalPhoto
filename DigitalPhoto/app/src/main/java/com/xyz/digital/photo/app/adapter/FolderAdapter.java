@@ -192,7 +192,6 @@ public class FolderAdapter extends BaseRecyclerAdapter<FolderBean> {
 
     public void removeUpload(int pos) {
         FolderBean bean = getItem(pos);
-        DeviceManager.getInstance().removeUpload(bean.getTopImagePath());
         mSelectMaps.remove(bean.getTopImagePath());
     }
 

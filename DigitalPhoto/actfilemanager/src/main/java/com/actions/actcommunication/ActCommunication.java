@@ -10,7 +10,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
-import com.actions.actcommunication.AcEventListener;
 
 public class ActCommunication {
     public static final int FILE_TYPE_PHOTO = 1;
@@ -66,16 +65,16 @@ public class ActCommunication {
     private static final String MSG_CMD_DELETE_FILE = "deleteFile";
     private static final String LOGTAG = "ActCommunication";
     private static ActCommunication ac;
-    private ActCommunication.EventHandler mHandler;
+    private EventHandler mHandler;
     private AcEventListener mEventListener;
 
     private ActCommunication() {
         nativeSetup(this);
         Looper looper;
         if((looper = Looper.myLooper()) != null) {
-            this.mHandler = new ActCommunication.EventHandler(looper);
+            this.mHandler = new EventHandler(looper);
         } else if((looper = Looper.getMainLooper()) != null) {
-            this.mHandler = new ActCommunication.EventHandler(looper);
+            this.mHandler = new EventHandler(looper);
         } else {
             this.mHandler = null;
         }
@@ -143,8 +142,8 @@ public class ActCommunication {
     }
 
     public int setVolume(int volume) {
-        String[] cmd = new String[]{"cmd", "setVolume", null, "volume"};
-        cmd[4] = Integer.toString(volume);
+        String[] cmd = new String[]{"cmd", "setVolume", "volume", ""};
+        cmd[3] = Integer.toString(volume);
         return this.sendMsg(cmd);
     }
 

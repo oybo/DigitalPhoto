@@ -98,7 +98,7 @@ public class PubUtils {
      * @return
      */
     public static String getSHCollagen(int all, int pro) {
-        String str = "";
+        String str = "0";
         if (all < 0 || pro < 0 || all < pro) {
             return str;
         }
@@ -130,7 +130,7 @@ public class PubUtils {
             }
             localPath = localPath + "/" + fileName;
             File file = new File(localPath);
-            if(file.exists()) {
+            if(!file.exists()) {
                 file.delete();
             }
         } catch (Exception e) {

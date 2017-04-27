@@ -1,5 +1,6 @@
 package com.xyz.digital.photo.app.manager;
 
+import android.util.Log;
 import android.widget.Toast;
 
 import com.actions.actcommunication.AcEventListener;
@@ -31,15 +32,15 @@ public class DeviceManager {
 
     private static DeviceManager mInstance;
 
-    private List<ActFileInfo> mRemoteFileList;
-    private ActFileManager actFileManager;
+    private List<ActFileInfo> mRemoteFileList = new ArrayList<>();
+    private ActFileManager actFileManager = new ActFileManager();
 
     public static String mRemoteCurrentPath = "/";
 
     public static DeviceManager getInstance() {
-        if(mInstance == null) {
+        if (mInstance == null) {
             synchronized (DeviceManager.class) {
-                if(mInstance == null) {
+                if (mInstance == null) {
                     mInstance = new DeviceManager();
                 }
             }
@@ -47,13 +48,9 @@ public class DeviceManager {
         return mInstance;
     }
 
-    private DeviceManager() {
-        mRemoteFileList = new ArrayList<>();
-        actFileManager = new ActFileManager();
-    }
-
     /**
      * 返回当前相框所有文件
+     *
      * @return
      */
     public List<ActFileInfo> getRemoteDeviceFiles() {
@@ -90,20 +87,20 @@ public class DeviceManager {
     }
 
     public UploadInfo getUploadInfo(String filePath) {
-        if(isUpload(filePath)) {
+        if (isUpload(filePath)) {
             return mUploadInfos.get(filePath);
         }
         return null;
     }
 
     public void startUpload() {
-        if(mUploadInfos.size() == 0) {
+        if (mUploadInfos.size() == 0) {
             mUploadInfo = null;
             // 这里刷新下服务器文件列表
             refreshRemoteFiles();
             return;
         }
-        for(Map.Entry<String, UploadInfo> entry : mUploadInfos.entrySet()) {
+        for (Map.Entry<String, UploadInfo> entry : mUploadInfos.entrySet()) {
             isUpload = true;
             mUploadInfo = entry.getValue();
             if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
@@ -142,7 +139,7 @@ public class DeviceManager {
     }
 
     public void addDownload(String fileName, MEDIA_FILE_TYPE type) {
-       String localPath = PubUtils.getDonwloadLocalPath(fileName, type);
+        String localPath = PubUtils.getDonwloadLocalPath(fileName, type);
 
         DownloadInfo downloadInfo = new DownloadInfo(localPath, fileName);
         mDownloadInfos.put(localPath, downloadInfo);
@@ -150,23 +147,26 @@ public class DeviceManager {
         sendDownloadMessage(downloadInfo);
     }
 
+    public void removeDownload(String localPath) {
+        mDownloadInfos.remove(localPath);
+    }
+
     public boolean isDownload(String filePath) {
         return mDownloadInfos.containsKey(filePath);
     }
 
     public DownloadInfo getDownloadInfo(String filePath) {
-        if(isDownload(filePath)) {
+        if (isDownload(filePath)) {
             return mDownloadInfos.get(filePath);
         }
         return null;
     }
 
     public void startDownload() {
-        if(mDownloadInfos.size() == 0) {
-            mDownloadInfo = null;
+        if (mDownloadInfos.size() == 0) {
             return;
         }
-        for(Map.Entry<String, DownloadInfo> entry : mDownloadInfos.entrySet()) {
+        for (Map.Entry<String, DownloadInfo> entry : mDownloadInfos.entrySet()) {
             isDownload = true;
             mDownloadInfo = entry.getValue();
             if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
@@ -201,19 +201,19 @@ public class DeviceManager {
     private ACTFileEventListener actFileEventListener = new ACTFileEventListener() {
         @Override
         public void onOperationProgression(int opcode, int processed, int total) {
-            if(opcode == 1) {
+            if (opcode == 1) {
                 // 上传
                 isUpload = true;
-                if(mUploadInfo != null) {
+                if (mUploadInfo != null) {
                     mUploadInfo.setState(1);
                     mUploadInfo.setProcessed(processed);
                     mUploadInfo.setTotal(total);
                     sendUploadMessage(mUploadInfo);
                 }
-            } else if(opcode == 2) {
+            } else if (opcode == 2) {
                 // 下载
                 isDownload = true;
-                if(mDownloadInfo != null) {
+                if (mDownloadInfo != null) {
                     mDownloadInfo.setState(1);
                     mDownloadInfo.setProcessed(processed);
                     mDownloadInfo.setTotal(total);
@@ -227,13 +227,15 @@ public class DeviceManager {
             if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
                 ActCommunication.getInstance().onUploadFile(remotePath);
                 mUploadInfo.setState(2);
+                mUploadInfo.setFilePath(localPath);
                 sendUploadMessage(mUploadInfo);
-                mUploadInfos.remove(mUploadInfo.getFilePath());
+                removeUpload(mUploadInfo.getFilePath());
                 startUpload();
             } else {
                 mUploadInfo.setState(-1);
+                mUploadInfo.setFilePath(localPath);
                 sendUploadMessage(mUploadInfo);
-                mUploadInfos.remove(mUploadInfo.getFilePath());
+                removeUpload(mUploadInfo.getFilePath());
                 ToastUtil.showToast(AppContext.getInstance(), mUploadInfo.getFileName() + "上传失败");
             }
             isUpload = false;
@@ -244,13 +246,16 @@ public class DeviceManager {
             if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
                 ActCommunication.getInstance().onUploadFile(remotePath);
                 mDownloadInfo.setState(2);
+                mDownloadInfo.setFilePath(localPath);
                 sendDownloadMessage(mDownloadInfo);
-                 mDownloadInfos.remove(mDownloadInfo.getFilePath());
+                removeDownload(mDownloadInfo.getFilePath());
                 startDownload();
+                ToastUtil.showToast(AppContext.getInstance(), mDownloadInfo.getFileName() + "下载成功");
             } else {
                 mDownloadInfo.setState(-1);
+                mDownloadInfo.setFilePath(localPath);
                 sendDownloadMessage(mDownloadInfo);
-                mDownloadInfos.remove(mDownloadInfo.getFilePath());
+                removeDownload(mDownloadInfo.getFilePath());
                 ToastUtil.showToast(AppContext.getInstance(), mDownloadInfo.getFileName() + "下载失败");
             }
             isDownload = false;
@@ -278,7 +283,7 @@ public class DeviceManager {
             isResposeFiles = true;
             if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
                 List<ActFileInfo> remoteFileList = (ArrayList) filelist;
-                if(remoteFileList != null) {
+                if (remoteFileList != null) {
                     mRemoteFileList.clear();
                     mRemoteFileList.addAll(remoteFileList);
 
@@ -325,9 +330,10 @@ public class DeviceManager {
      * 登录那里的连接
      */
     public void connect() {
-        // 连接监听
+        // 连接服务器的消息通讯服务，连接成功后才能发送消息
         ActCommunication.getInstance().setEventListener(mAcEventListener);
         ActCommunication.getInstance().connect(Constants.HOST_IP);
+        // 连接服务区的文件服务
         actFileManager.registerEventListener(actFileEventListener);
         actFileManager.connect(Constants.HOST_IP);
         actFileManager.browseFiles(mRemoteCurrentPath);
@@ -362,7 +368,7 @@ public class DeviceManager {
 
         @Override
         public void onRecvVolume(int volume) {
-            for(OnCmdBackListener listener : mCmdListeners) {
+            for (OnCmdBackListener listener : mCmdListeners) {
                 listener.onVolume(volume);
             }
         }
@@ -385,17 +391,18 @@ public class DeviceManager {
 
         @Override
         public void onRecvThumbnail(String url, byte[] data) {
+            // 接收到图片缩略图
+            Log.e("sssssssssss=======", "url= " + url);
         }
 
         @Override
         public void onRecvResult(String action, String[] status) {
-            if(action.equals("NandInfo")) {
+            if (action.equals("NandInfo")) {
                 EventBase eventBase = new EventBase();
                 eventBase.setAction(Constants.SEND_MNAD_INFO_ACTION);
                 eventBase.setData(status);
                 EventBus.getDefault().post(eventBase);
-            }
-            else if(action.equals("UdiskInfo")) {
+            } else if (action.equals("UdiskInfo")) {
                 EventBase eventBase = new EventBase();
                 eventBase.setAction(Constants.SEND_UDISK_INFO_ACTION);
                 eventBase.setData(status);
@@ -407,7 +414,7 @@ public class DeviceManager {
     private List<OnCmdBackListener> mCmdListeners = new ArrayList<>();
 
     public void addOnCmdBackListener(OnCmdBackListener listener) {
-        if(listener != null) {
+        if (listener != null) {
             mCmdListeners.add(listener);
         }
     }

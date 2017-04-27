@@ -70,6 +70,15 @@
         <item name="android:layout_height">0.5dip</item>
     </style>
 
+    <!-- 分割线 -->
+    <style name="view_line_margin">
+        <item name="android:background">#E2E2E2</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">0.5dip</item>
+        <item name="android:layout_marginTop">5dip</item>
+        <item name="android:layout_marginBottom">5dip</item>
+    </style>
+
     <!-- pading -->
     <style name="style_padding">
         <item name="android:paddingBottom">15dip</item>

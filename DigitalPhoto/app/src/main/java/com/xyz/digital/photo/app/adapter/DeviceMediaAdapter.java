@@ -10,6 +10,7 @@ import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.adapter.base.RecyclerViewHolder;
 import com.xyz.digital.photo.app.bean.DownloadInfo;
 import com.xyz.digital.photo.app.bean.FileInfo;
+import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 import com.xyz.digital.photo.app.manager.DeviceManager;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
 import com.xyz.digital.photo.app.util.PubUtils;
@@ -42,11 +43,13 @@ public class DeviceMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
         ImageView imageView = holder.getImageView(R.id.item_device_media_imange);
 
         // 图片
-//        if(item.getFileType() == MEDIA_FILE_TYPE.AUDIO) {
-        imageView.setImageResource(R.drawable.defult_audio_icon);
-//        } else {
-//            ImageLoadManager.setImage(item.getFilePath(), imageView);
-//        }
+        if (item.getType() == MEDIA_FILE_TYPE.AUDIO) {
+            imageView.setImageResource(R.drawable.defult_audio_icon);
+        } else if (item.getType() == MEDIA_FILE_TYPE.VIDEO) {
+            imageView.setImageResource(R.drawable.defult_video_icon);
+        } else {
+            imageView.setImageResource(R.mipmap.ic_launcher);
+        }
 
         // 是否在下载
         ProgressPieView pieView = (ProgressPieView) holder.getView(R.id.item_child_download_progress);
@@ -90,12 +93,6 @@ public class DeviceMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
         FileInfo bean = getItem(pos);
         DeviceManager.getInstance().addDownload(bean.getFileName(), bean.getType());
         notifyItemChanged(pos);
-    }
-
-    public void removeDownload(int pos) {
-        FileInfo bean = getItem(pos);
-        String localPath = PubUtils.getDonwloadLocalPath(bean.getFileName(), bean.getType());
-        DeviceManager.getInstance().removeUpload(localPath);
     }
 
 }

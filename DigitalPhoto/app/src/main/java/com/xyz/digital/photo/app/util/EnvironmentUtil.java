@@ -22,32 +22,26 @@ public class EnvironmentUtil {
     }
 
     public static String getImagePath() {
-        String path = getMainFilePath();// + File.separator + IMAGE_STORAGE;
+        String path = getMainFilePath() + File.separator + IMAGE_STORAGE;
         mkdirs(path);
         return path;
     }
 
     public static String getVideoPath() {
-        String path = getMainFilePath();// + File.separator + VIDEO_STORAGE;
+        String path = getMainFilePath() + File.separator + VIDEO_STORAGE;
         mkdirs(path);
         return path;
     }
 
     public static String getAudioPath() {
-        String path = getMainFilePath();// + File.separator + AUDIO_STORAGE;
+        String path = getMainFilePath() + File.separator + AUDIO_STORAGE;
         mkdirs(path);
         return path;
     }
 
-    private static String mLocalCurrentPath = "/sdcard";
-
     public static String getMainFilePath() {
-//        String path = Environment.getExternalStorageDirectory()
-//                .getAbsolutePath() + File.separator + MAIN_STORAGE;
-//        mkdirs(path);
-//        return path;
-
-        String path = mLocalCurrentPath;
+        String path = Environment.getExternalStorageDirectory()
+                .getAbsolutePath() + File.separator + MAIN_STORAGE;
         mkdirs(path);
         return path;
     }

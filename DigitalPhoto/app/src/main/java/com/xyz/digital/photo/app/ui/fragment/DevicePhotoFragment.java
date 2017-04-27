@@ -201,6 +201,10 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
 
     @Override
     public void onClick(View view) {
+        if (DeviceManager.getInstance().isUploading()) {
+            ToastUtil.showToast(getActivity(), "正在上传,请稍后");
+            return;
+        }
         switch (view.getId()) {
             case R.id.fragment_photo_image_tab:
                 // 图片
@@ -325,25 +329,32 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
 
             @Override
             protected List<FileInfo> doInBackground(Void... voids) {
-                mRemoteFileList.clear();
+                // ActFileInfo to FileInfo
+                List<FileInfo> result = new ArrayList<FileInfo>();
                 int len = DeviceManager.getInstance().getRemoteDeviceFiles().size();
                 for (int i = 0; i < len; i++) {
                     ActFileInfo actFileInfo = DeviceManager.getInstance().getRemoteDeviceFiles().get(i);
-                    FileInfo fileInfo = new FileInfo();
-                    fileInfo.setFileName(actFileInfo.getFileName());
-                    fileInfo.setFileType(actFileInfo.getFileType());
-                    fileInfo.setPosition(i);
-                    fileInfo.setType(type);
-                    mRemoteFileList.add(fileInfo);
-                }
-
-                List<FileInfo> result = new ArrayList<FileInfo>();
-                for(FileInfo fileInfo : mRemoteFileList) {
-                    if(isTypeFile(fileInfo.getFileName(), type)) {
+                    if(isTypeFile(actFileInfo.getFileName(), type)) {
+                        FileInfo fileInfo = new FileInfo();
+                        fileInfo.setFileName(actFileInfo.getFileName());
+                        fileInfo.setFileType(actFileInfo.getFileType());
+                        fileInfo.setPosition(i);
+                        fileInfo.setType(type);
+                        if(type == MEDIA_FILE_TYPE.ALL) {
+                            fileInfo.setType(getFileType(fileInfo.getFileName()));
+                        }
                         result.add(fileInfo);
                     }
                 }
-                return result;
+
+                mRemoteFileList.clear();
+                len = result.size();
+                for (int i = 0; i < len; i++) {
+                    FileInfo fileInfo = result.get(i);
+                    fileInfo.setPosition(i);
+                    mRemoteFileList.add(fileInfo);
+                }
+                return mRemoteFileList;
             }
 
             @Override
@@ -460,7 +471,34 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         return false;
     }
 
-    private void refresh(DownloadInfo downloadInfo) {
+    public MEDIA_FILE_TYPE getFileType(String fileName) {
+        // 获取文件后缀名并转化为写，用于后续比较
+        String fileType = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length()).toLowerCase();
+        // 创建类型数组
+        String[] img = new String[]{"bmp", "jpg", "jpeg", "png", "tiff", "gif", "pcx", "tga", "exif", "fpx", "svg", "psd",
+                "cdr", "pcd", "dxf", "ufo", "eps", "ai", "raw", "wmf"};
+        for (int i = 0; i < img.length; i++) {
+            if (img[i].equals(fileType)) {
+                return MEDIA_FILE_TYPE.IMAGE;
+            }
+        }
+        img = new String[]{"mp3", "wma", "wav", "mod", "ra", "cd", "md", "asf", "aac", "vqf", "ape", "mid", "ogg",
+                "m4a", "vqf"};
+        for (int i = 0; i < img.length; i++) {
+            if (img[i].equals(fileType)) {
+                return MEDIA_FILE_TYPE.AUDIO;
+            }
+        }
+        img = new String[]{"mp4", "avi", "mov", "wmv", "asf", "navi", "3gp", "mkv", "f4v", "rmvb", "webm"};
+        for (int i = 0; i < img.length; i++) {
+            if (img[i].equals(fileType)) {
+                return MEDIA_FILE_TYPE.VIDEO;
+            }
+        }
+        return MEDIA_FILE_TYPE.ALL;
+    }
+
+    private synchronized void refresh(DownloadInfo downloadInfo) {
         try {
             ProgressPieView pieView = null;
             if(mShowModelType == MEDIA_SHOW_TYPE.CHART) {
@@ -495,7 +533,6 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                             String localPath = PubUtils.getDonwloadLocalPath(fileInfo.getFileName(), fileInfo.getType());
                             if(localPath.equals(downloadInfo.getFilePath())) {
                                 PreferenceUtils.getInstance().putBoolen(localPath, true);
-                                mChartAdapter.removeDownload(fileInfo.getPosition());
                                 mChartAdapter.notifyItemChanged(fileInfo.getPosition());
                                 return;
                             }

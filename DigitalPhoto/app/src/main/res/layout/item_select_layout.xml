@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/item_select_title_txt"
+        android:layout_width="match_parent"
+        android:layout_height="50dip"
+        android:background="@drawable/simple_bg_selector"
+        android:gravity="center_vertical"
+        android:paddingLeft="15dip"
+        android:text="ssss"
+        android:textColor="@drawable/selector_select_txt"
+        android:textSize="14sp"/>
+
+</LinearLayout>
