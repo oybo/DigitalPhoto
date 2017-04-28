@@ -13,6 +13,7 @@ public class Constants {
     public static final String MAIN_DEVICE_POHOTO_MANAGER = "main_device_photo_manager";
 
     public static final String MAIN_DEVICE_LIST = "main_device_list";
+    public static final String REFRESH_STATUSBAR_COLOR = "REFRESH_STATUSBAR_COLOR";
 
     /**    刷新相框设备文件列表     */
     public static final String REFRESH_DEVICE_FILE = "REFRESH_DEVICE_FILE";

@@ -11,6 +11,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.xyz.digital.photo.app.R;
+import com.xyz.digital.photo.app.bean.EventBase;
 import com.xyz.digital.photo.app.manager.DeviceManager;
 import com.xyz.digital.photo.app.ui.BaseActivity;
 import com.xyz.digital.photo.app.ui.fragment.DeviceFragment;
@@ -21,6 +22,10 @@ import com.xyz.digital.photo.app.ui.fragment.SetFragment;
 import com.xyz.digital.photo.app.ui.fragment.WiFiDeviceFragment;
 import com.xyz.digital.photo.app.util.Constants;
 import com.xyz.digital.photo.app.util.ToastUtil;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -62,6 +67,7 @@ public class MainActivity extends BaseActivity {
 
         initView();
         initFragment(savedInstanceState);
+        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -74,6 +80,18 @@ public class MainActivity extends BaseActivity {
         } else if(Constants.MAIN_DEVICE_LIST.equals(type)) {
             mLoginMain = false;
             currentFragment(0);
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEventMainThread(EventBase eventBase) {
+        String action = eventBase.getAction();
+        if(action.equals(Constants.REFRESH_STATUSBAR_COLOR)) {
+            if(oldFragmentIndex == 2) {
+                setWindowStatusBarColor(MainActivity.this, R.color.color_F2F2F2);
+            } else {
+                setWindowStatusBarColor(MainActivity.this, R.color.colorPrimaryDark);
+            }
         }
     }
 
@@ -232,5 +250,6 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 }

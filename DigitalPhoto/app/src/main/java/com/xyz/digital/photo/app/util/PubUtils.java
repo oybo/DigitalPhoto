@@ -5,6 +5,8 @@ import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 import java.io.File;
 import java.math.BigDecimal;
 
+import static com.xyz.digital.photo.app.manager.DeviceManager.mRemoteCurrentPath;
+
 /**
  * Created by O on 2017/4/5.
  */
@@ -40,15 +42,15 @@ public class PubUtils {
 
     public static long conversionSize(String sizeStr) {
         long size = 0;
-        if(sizeStr.contains("G")) {
+        if (sizeStr.contains("G")) {
             sizeStr = sizeStr.replace("G", "").replace(" ", "");
             size = Integer.parseInt(sizeStr);
             size = size * 1024 * 1024 * 1024;
-        } else if(sizeStr.contains("M")) {
+        } else if (sizeStr.contains("M")) {
             sizeStr = sizeStr.replace("M", "").replace(" ", "");
             size = Integer.parseInt(sizeStr);
             size = size * 1024 * 1024;
-        } else if(sizeStr.contains("K")) {
+        } else if (sizeStr.contains("K")) {
             sizeStr = sizeStr.replace("K", "").replace(" ", "");
             size = Integer.parseInt(sizeStr);
             size = size * 1024;
@@ -93,8 +95,7 @@ public class PubUtils {
     /**
      * 计算百分比
      *
-     * @param all
-     *            , pro
+     * @param all , pro
      * @return
      */
     public static String getSHCollagen(int all, int pro) {
@@ -121,17 +122,18 @@ public class PubUtils {
     public static String getDonwloadLocalPath(String fileName, MEDIA_FILE_TYPE type) {
         String localPath = "";
         try {
-            if(type == MEDIA_FILE_TYPE.VIDEO) {
+            if (type == MEDIA_FILE_TYPE.VIDEO) {
                 localPath = EnvironmentUtil.getVideoPath();
-            } else if(type == MEDIA_FILE_TYPE.AUDIO) {
+            } else if (type == MEDIA_FILE_TYPE.AUDIO) {
                 localPath = EnvironmentUtil.getAudioPath();
             } else {
                 localPath = EnvironmentUtil.getImagePath();
             }
-            localPath = localPath + "/" + fileName;
+            localPath = localPath + mRemoteCurrentPath + fileName;
             File file = new File(localPath);
-            if(!file.exists()) {
-                file.delete();
+            File parentFile = new File(file.getParent());
+            if (!parentFile.exists()) {
+                parentFile.mkdirs();
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -5,11 +5,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0dip"
-        android:background="@color/colorPrimary"/>
-
     <com.xyz.digital.photo.app.view.MyNestedScrollView
         android:id="@+id/fragment_control_scrollview"
         android:layout_width="match_parent"

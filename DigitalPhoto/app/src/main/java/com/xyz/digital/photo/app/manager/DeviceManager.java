@@ -2,7 +2,6 @@ package com.xyz.digital.photo.app.manager;
 
 import android.util.Log;
 import android.widget.Toast;
-
 import com.actions.actcommunication.AcEventListener;
 import com.actions.actcommunication.ActCommunication;
 import com.actions.actfilemanager.ACTFileEventListener;
@@ -16,9 +15,7 @@ import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 import com.xyz.digital.photo.app.util.Constants;
 import com.xyz.digital.photo.app.util.PubUtils;
 import com.xyz.digital.photo.app.util.ToastUtil;
-
 import org.greenrobot.eventbus.EventBus;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +45,34 @@ public class DeviceManager {
         return mInstance;
     }
 
+    public String setRemoteCurrentPath(String fileName) {
+        String requestPath;
+        if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
+            requestPath = mRemoteCurrentPath + fileName;
+        } else {
+            requestPath = mRemoteCurrentPath + "/" + fileName;
+        }
+        actFileManager.browseFiles(requestPath + "/");
+        mRemoteCurrentPath = requestPath;
+
+        return requestPath;
+    }
+
+    public void prevRemoteCurrentPath() {
+        if (!mRemoteCurrentPath.equalsIgnoreCase("/")) {
+            int lastIndex = mRemoteCurrentPath.lastIndexOf("/");
+            if (lastIndex == 0) {
+                mRemoteCurrentPath = "/";
+                actFileManager.browseFiles(mRemoteCurrentPath);
+            } else {
+                mRemoteCurrentPath = mRemoteCurrentPath.substring(0, lastIndex);
+                actFileManager.browseFiles(mRemoteCurrentPath + "/");
+            }
+        } else {
+            actFileManager.browseFiles(mRemoteCurrentPath);
+        }
+    }
+
     /**
      * 返回当前相框所有文件
      *
@@ -57,8 +82,13 @@ public class DeviceManager {
         return mRemoteFileList;
     }
 
-    public void removeFile(int position) {
-        mRemoteFileList.remove(position);
+    public void removeFile(String fileName) {
+        for(ActFileInfo actFileInfo : mRemoteFileList) {
+            if(actFileInfo.getFileName().equals(fileName)) {
+                mRemoteFileList.remove(actFileInfo);
+                return;
+            }
+        }
     }
 
     //=====================1上传相关==开始=======================================
@@ -296,6 +326,19 @@ public class DeviceManager {
 
         @Override
         public void onDeleteDirectoryCompleted(String parentPath, int result) {
+            boolean success;
+            if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
+                success = true;
+                refreshRemoteFiles();
+            } else {
+                success = false;
+            }
+            EventBase eventBase = new EventBase();
+            eventBase.setAction(Constants.SEND_DELETE_FILE_RESULT);
+            eventBase.setData(success);
+            EventBus.getDefault().post(eventBase);
+
+            Toast.makeText(AppContext.getInstance(), success ? "删除成功" : "删除失败", Toast.LENGTH_SHORT).show();
         }
 
         @Override

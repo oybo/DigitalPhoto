@@ -1,8 +1,15 @@
 package com.xyz.digital.photo.app.ui;
 
 import android.content.Context;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+
+import com.xyz.digital.photo.app.bean.EventBase;
+import com.xyz.digital.photo.app.util.Constants;
 import com.xyz.digital.photo.app.view.DialogTips;
+
+import org.greenrobot.eventbus.EventBus;
 
 /**
  * Created by O on 2017/4/6.
@@ -10,6 +17,12 @@ import com.xyz.digital.photo.app.view.DialogTips;
 
 public class BaseFragment extends Fragment {
 
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        sendRefreshStateMessage();
+    }
 
     protected void showSimpleTipDialog(Context context, String message) {
         try {
@@ -59,4 +72,17 @@ public class BaseFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if(!hidden) {
+            sendRefreshStateMessage();
+        }
+    }
+
+    private void sendRefreshStateMessage() {
+        EventBase eventBase = new EventBase();
+        eventBase.setAction(Constants.REFRESH_STATUSBAR_COLOR);
+        EventBus.getDefault().post(eventBase);
+    }
 }

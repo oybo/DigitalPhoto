@@ -4,6 +4,8 @@
     <color name="colorPrimaryDark">#3399FD</color>
     <color name="colorAccent">#3399FD</color>
 
+    <color name="color_F2F2F2">#F2F2F2</color>
+
     <color name="welcome_bg_color">#FF9999</color>
 
     <color name="layout_bg_normal">#30000000</color>

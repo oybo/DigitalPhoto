@@ -9,17 +9,36 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="65dip"
-        android:layout_margin="5dip"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="1dip">
+        android:padding="6dip">
 
-        <com.xyz.digital.photo.app.view.RoundAngleImageView
-            android:id="@+id/item_list_image"
-            android:layout_width="52dip"
-            android:layout_height="52dip"
-            android:scaleType="centerCrop"
-            android:src="@drawable/friends_sends_pictures_no"/>
+        <RelativeLayout
+            android:layout_width="55dip"
+            android:layout_height="55dip">
+
+            <com.xyz.digital.photo.app.view.RoundAngleImageView
+                android:id="@+id/item_list_image"
+                android:layout_width="52dip"
+                android:layout_height="52dip"
+                android:scaleType="centerCrop"
+                android:src="@drawable/friends_sends_pictures_no"/>
+
+            <com.xyz.digital.photo.app.view.ProgressPieView
+                android:id="@+id/item_child_download_progress"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
+                android:textColor="#FFF"
+                android:visibility="gone"
+                app:ppvBackgroundColor="#AAA"
+                app:ppvProgress="0"
+                app:ppvProgressColor="#DDD"
+                app:ppvStrokeColor="#FFF"
+                app:ppvStrokeWidth="1dp"/>
+
+        </RelativeLayout>
 
         <LinearLayout
             android:layout_width="0dip"
@@ -56,7 +75,7 @@
                     android:ellipsize="middle"
                     android:gravity="center"
                     android:singleLine="true"
-                    android:text="Camera"
+                    android:text="未知"
                     android:textColor="#666666"
                     android:textSize="12sp"/>
 
@@ -73,7 +92,7 @@
                     android:ellipsize="middle"
                     android:gravity="center"
                     android:singleLine="true"
-                    android:text="Camera"
+                    android:text="未知"
                     android:textColor="#666666"
                     android:textSize="12sp"/>
 
@@ -90,7 +109,7 @@
                     android:ellipsize="middle"
                     android:gravity="center"
                     android:singleLine="true"
-                    android:text="Camera"
+                    android:text="未知"
                     android:textColor="#666666"
                     android:textSize="12sp"/>
 

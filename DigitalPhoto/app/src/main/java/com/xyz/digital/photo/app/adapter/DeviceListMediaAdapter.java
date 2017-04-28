@@ -1,9 +1,19 @@
 package com.xyz.digital.photo.app.adapter;
 
 import android.content.Context;
+import android.view.View;
+import android.widget.ImageView;
+import com.actions.actfilemanager.ActFileInfo;
+import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.base.CommonAdapter;
 import com.xyz.digital.photo.app.adapter.base.ViewHolder;
+import com.xyz.digital.photo.app.bean.DownloadInfo;
 import com.xyz.digital.photo.app.bean.FileInfo;
+import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
+import com.xyz.digital.photo.app.manager.DeviceManager;
+import com.xyz.digital.photo.app.util.PreferenceUtils;
+import com.xyz.digital.photo.app.util.PubUtils;
+import com.xyz.digital.photo.app.view.ProgressPieView;
 import java.util.List;
 
 /**
@@ -19,6 +29,67 @@ public class DeviceListMediaAdapter extends CommonAdapter<FileInfo> {
     @Override
     public void convert(ViewHolder helper, FileInfo item) {
 
+        helper.setText(R.id.item_list_title_txt, item.getFileName());
+
+        ImageView imageView = helper.getView(R.id.item_list_image);
+
+        ImageView playImage = helper.getView(R.id.item_child_arrows_image);
+        if(item.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
+            // 文件夹
+            playImage.setImageResource(R.drawable.btn_home_counterattack);
+
+            imageView.setImageResource(R.drawable.folder);
+        } else if (item.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
+            // 文件
+            playImage.setImageResource(R.drawable.media_play_icon);
+
+            // 图片
+            if (item.getType() == MEDIA_FILE_TYPE.AUDIO) {
+                imageView.setImageResource(R.drawable.defult_audio_icon);
+            } else if (item.getType() == MEDIA_FILE_TYPE.VIDEO) {
+                imageView.setImageResource(R.drawable.defult_video_icon);
+            } else {
+                imageView.setImageResource(R.mipmap.ic_launcher);
+            }
+        }
+
+        // 是否在下载
+        ProgressPieView pieView = helper.getView(R.id.item_child_download_progress);
+        pieView.setTag("ProgressPieView" + PubUtils.getDonwloadLocalPath(item.getFileName(), item.getType()));
+
+        String localPath = PubUtils.getDonwloadLocalPath(item.getFileName(), item.getType());
+        if (isDownload(localPath)) {
+            pieView.setVisibility(View.VISIBLE);
+            DownloadInfo downloadInfo = DeviceManager.getInstance().getDownloadInfo(localPath);
+            if (downloadInfo != null) {
+                switch (downloadInfo.getState()) {
+                    case 0:
+                        pieView.setText("等待");
+                        break;
+                }
+            }
+        } else {
+            pieView.setVisibility(View.GONE);
+        }
+
+        // 判断是否下载完成
+        boolean isUpload = PreferenceUtils.getInstance().getBoolean(localPath, false);
+        if (isUpload) {
+            pieView.setText("成功");
+            pieView.setVisibility(View.GONE);
+        } else {
+        }
+
+    }
+
+    public boolean isDownload(String filePath) {
+        return DeviceManager.getInstance().isDownload(filePath);
+    }
+
+    public void addDownload(int pos) {
+        FileInfo bean = getItem(pos);
+        DeviceManager.getInstance().addDownload(bean.getFileName(), bean.getType());
+        notifyDataSetChanged();
     }
 
 }

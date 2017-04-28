@@ -1,5 +1,6 @@
 package com.xyz.digital.photo.app.ui;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
@@ -15,11 +16,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.util.SystemBarUtil;
 import com.xyz.digital.photo.app.util.ToastUtil;
 import com.xyz.digital.photo.app.view.DialogTips;
 import com.xyz.digital.photo.app.view.HeaderView;
+
 import butterknife.ButterKnife;
 
 /**
@@ -110,6 +113,21 @@ public abstract class BaseActivity extends AppCompatActivity {
             SystemBarUtil systemBarUtil = new SystemBarUtil(this);
             systemBarUtil.setStatusBarTintEnabled(true);
             systemBarUtil.setStatusBarTintColor(setStatusBarColor());
+        }
+    }
+
+    protected void setWindowStatusBarColor(Activity activity, int colorResId) {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                Window window = activity.getWindow();
+                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                window.setStatusBarColor(activity.getResources().getColor(colorResId));
+
+                //底部导航栏
+                //window.setNavigationBarColor(activity.getResources().getColor(colorResId));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

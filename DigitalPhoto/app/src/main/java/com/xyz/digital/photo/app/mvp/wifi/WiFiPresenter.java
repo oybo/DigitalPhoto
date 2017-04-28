@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -37,8 +38,11 @@ public class WiFiPresenter implements WiFiContract.Presenter {
         WifiUtils.startScan();
     }
 
+    private ScanResult mScanResult;
+
     @Override
     public void connect(final ScanResult wifi) {
+        mScanResult = wifi;
         if(WifiUtils.isConnectTheWifi(wifi)) {
             mView.onCallbackConnect();
             return;
@@ -62,11 +66,8 @@ public class WiFiPresenter implements WiFiContract.Presenter {
             @Override
             protected void onPostExecute(Boolean success) {
                 super.onPostExecute(success);
-                ToastUtil.showToast(mView._getActivity(), success ? "连接成功" : "连接失败");
-
-                mView.hideLoading();
-                if(success) {
-                    mView.onCallbackConnect();
+                if(!success) {
+                    ToastUtil.showToast(mView._getActivity(), "连接失败");
                 }
             }
         };
@@ -104,7 +105,15 @@ public class WiFiPresenter implements WiFiContract.Presenter {
             }
             else if(action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
                 // wifi连接状态更改 重新扫描
-                scanWiFi();
+                NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+                if(info != null && info.isConnected()) {
+                    if(mScanResult != null) {
+                        if(mScanResult.SSID.toString().replace("\"", "").equals(info.getExtraInfo().toString().replace("\"", ""))) {
+                            mView.hideLoading();
+                            mView.onCallbackConnect();
+                        }
+                    }
+                }
             }
         }
     };

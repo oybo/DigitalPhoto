@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.actions.actcommunication.ActCommunication;
 import com.actions.actfilemanager.ActFileInfo;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.DeviceListMediaAdapter;
@@ -53,6 +54,8 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
+import static com.xyz.digital.photo.app.manager.DeviceManager.mRemoteCurrentPath;
+
 /**
  * Created by O on 2017/4/12.
  */
@@ -84,11 +87,11 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
      * 列表模式
      */
     private DeviceListMediaAdapter mListAdapter;
+    private int mDeletePosition;
 
     private List<FileInfo> mRemoteFileList = new ArrayList<>();
 
     private static final String PATH = "本机存储:";
-    private static String mRemoteCurrentPath = "/";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -127,11 +130,23 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 switch (index) {
                     case 0:
                         // 下载
-
+                        final ActFileInfo info = DeviceManager.getInstance().getRemoteDeviceFiles().get(position);
+                        if (info.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
+                            ToastUtil.showToast(getActivity(), "文件不支持下载");
+                        } else if (info.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
+                            // 点击文件
+                            boolean isDownload = DeviceManager.getInstance().isDownloading();
+                            mListAdapter.addDownload(position);
+                            if(!isDownload) {
+                                DeviceManager.getInstance().startDownload();
+                            }
+                        }
                         break;
                     case 1:
                         // 删除
-
+                        showLoading();
+                        mDeletePosition = position;
+                        DeviceManager.getInstance().deleteFile(mRemoteFileList.get(position).getFileName());
                         break;
                 }
             }
@@ -142,14 +157,8 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 final ActFileInfo info = DeviceManager.getInstance().getRemoteDeviceFiles().get(position);
                 if (info.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
                     // 点击文件夹
-                    String requestPath = "";
-                    if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
-                        requestPath = mRemoteCurrentPath + info.getFileName();
-                    } else {
-                        requestPath = mRemoteCurrentPath + "/" + info.getFileName();
-                    }
-//                    actFileManager.browseFiles(requestPath + "/");
-                    mRemoteCurrentPath = requestPath;
+                    showLoading();
+                    String requestPath = DeviceManager.getInstance().setRemoteCurrentPath(info.getFileName());
                     mUpperView.setText(PATH + requestPath);
                 } else if (info.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
                     // 点击文件
@@ -157,6 +166,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
             }
         });
 
+        mUpperView.setOnClickListener(this);
         mModelTypeImage.setOnClickListener(this);
         fragmentPhotoImageTab.setOnClickListener(this);
         fragmentPhotoVideoTab.setOnClickListener(this);
@@ -168,7 +178,6 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
     private void initData() {
         // 默认图表模式
         showModel(MEDIA_SHOW_TYPE.CHART);
-
         EventBus.getDefault().register(this);
     }
 
@@ -183,17 +192,19 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
             if(success) {
                 if(mShowModelType == MEDIA_SHOW_TYPE.CHART) {
                     // 图表模式
-                    DeviceManager.getInstance().removeFile(mChartAdapter.getItem(mDeletePosition).getPosition());
+                    DeviceManager.getInstance().removeFile(mChartAdapter.getItem(mDeletePosition).getFileName());
                     mChartAdapter.remove(mDeletePosition);
                     mChartAdapter.notifyDataSetChanged();
                 } else {
                     // 列表模式
-
+                    DeviceManager.getInstance().removeFile(mRemoteFileList.get(mDeletePosition).getFileName());
+                    mRemoteFileList.remove(mDeletePosition);
+                    mListAdapter.notifyDataSetChanged();
                 }
             }
             hideLoading();
         } else if(action.equals(Constants.SEND_DOWNLOAD_FILE_RESULT)) {
-            // 下载
+            // 下载结果
             DownloadInfo downloadInfo = (DownloadInfo) eventBase.getData();
             refresh(downloadInfo);
         }
@@ -208,19 +219,19 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         switch (view.getId()) {
             case R.id.fragment_photo_image_tab:
                 // 图片
-                showFiles(MEDIA_FILE_TYPE.IMAGE);
+                showFiles(MEDIA_FILE_TYPE.IMAGE, false);
                 break;
             case R.id.fragment_photo_video_tab:
                 // 视频
-                showFiles(MEDIA_FILE_TYPE.VIDEO);
+                showFiles(MEDIA_FILE_TYPE.VIDEO, false);
                 break;
             case R.id.fragment_photo_audio_tab:
                 // 音乐
-                showFiles(MEDIA_FILE_TYPE.AUDIO);
+                showFiles(MEDIA_FILE_TYPE.AUDIO, false);
                 break;
             case R.id.fragment_photo_all_tab:
                 // 全部
-                showFiles(MEDIA_FILE_TYPE.ALL);
+                showFiles(MEDIA_FILE_TYPE.ALL, false);
                 break;
             case R.id.device_photo_choose_tab:
                 // 切换设备
@@ -258,6 +269,12 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 // 列表模式
                 showModel(MEDIA_SHOW_TYPE.LIST);
                 break;
+            case R.id.remote_browser_frag_txt_upper:
+                // 点击列表模式的路径
+                showLoading();
+                DeviceManager.getInstance().prevRemoteCurrentPath();
+                mUpperView.setText(PATH + mRemoteCurrentPath);
+                break;
         }
     }
 
@@ -286,32 +303,32 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 mListRecyclerView.setAdapter(mListAdapter);
             }
         }
-        showFiles(MEDIA_FILE_TYPE.IMAGE);
+        showFiles(MEDIA_FILE_TYPE.IMAGE, true);
     }
 
-    private void showFiles(MEDIA_FILE_TYPE type) {
+    private void showFiles(MEDIA_FILE_TYPE type, boolean refresh) {
         mShowMediaType = type;
         if (type == MEDIA_FILE_TYPE.IMAGE) {
             // 图片
-            if (fragmentPhotoImageTab.isSelected()) {
+            if (!refresh && fragmentPhotoImageTab.isSelected()) {
                 return;
             }
             setSelectTab(1);
         } else if (type == MEDIA_FILE_TYPE.VIDEO) {
             // 视频
-            if (fragmentPhotoVideoTab.isSelected()) {
+            if (!refresh && fragmentPhotoVideoTab.isSelected()) {
                 return;
             }
             setSelectTab(2);
         } else if (type == MEDIA_FILE_TYPE.AUDIO) {
             // 音乐
-            if (fragmentPhotoAudioTab.isSelected()) {
+            if (!refresh && fragmentPhotoAudioTab.isSelected()) {
                 return;
             }
             setSelectTab(3);
         } else if (type == MEDIA_FILE_TYPE.ALL) {
             // 全部
-            if (fragmentPhotoAllTab.isSelected()) {
+            if (!refresh && fragmentPhotoAllTab.isSelected()) {
                 return;
             }
             setSelectTab(4);
@@ -341,7 +358,11 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                         fileInfo.setPosition(i);
                         fileInfo.setType(type);
                         if(type == MEDIA_FILE_TYPE.ALL) {
-                            fileInfo.setType(getFileType(fileInfo.getFileName()));
+                            MEDIA_FILE_TYPE type1 = getFileType(fileInfo.getFileName());
+                            if(type1 == null) {
+                                continue;
+                            }
+                            fileInfo.setType(type1);
                         }
                         result.add(fileInfo);
                     }
@@ -367,7 +388,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                     mChartAdapter.notifyDataSetChanged();
                 } else {
                     // 列表模式
-
+                    mListAdapter.notifyDataSetChanged();
                 }
                 if(DeviceManager.getInstance().isResposeFiles()) {
                     hideLoading();
@@ -397,8 +418,6 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         }
     }
 
-    private int mDeletePosition;
-
     @Override
     public void OnClickListener(View parentV, View v, Integer position) {
         switch (v.getId()) {
@@ -414,11 +433,28 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 // 删除
                 showLoading();
                 mDeletePosition = position;
-                DeviceManager.getInstance().deleteFile(mChartAdapter.getItem(position).getFileName());
+                DeviceManager.getInstance().deleteFile(mChartAdapter.getItem(mDeletePosition).getFileName());
                 break;
             case R.id.item_device_media_play_image:
                 // 播放
-                ToastUtil.showToast(getActivity(), "播放");
+                FileInfo fileInfo = mChartAdapter.getItem(position);
+                MEDIA_FILE_TYPE type = fileInfo.getType();
+                int fileType = ActCommunication.FILE_TYPE_PHOTO;
+                if (type == MEDIA_FILE_TYPE.IMAGE) {
+                    // 图片
+                    fileType = ActCommunication.FILE_TYPE_PHOTO;
+                } else if (type == MEDIA_FILE_TYPE.VIDEO) {
+                    // 视频
+                    fileType = ActCommunication.FILE_TYPE_MUSIC;
+                } else if (type == MEDIA_FILE_TYPE.AUDIO) {
+                    // 音乐
+                    fileType = ActCommunication.FILE_TYPE_VIDEO;
+                }
+                if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
+                    ActCommunication.getInstance().playFile("/mnt/card" + mRemoteCurrentPath + fileInfo.getFileName(), fileType);
+                } else {
+                    ActCommunication.getInstance().playFile("/mnt/card" + mRemoteCurrentPath + "/" + fileInfo.getFileName(), fileType);
+                }
                 break;
         }
     }
@@ -495,18 +531,18 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 return MEDIA_FILE_TYPE.VIDEO;
             }
         }
-        return MEDIA_FILE_TYPE.ALL;
+        return null;
     }
 
     private synchronized void refresh(DownloadInfo downloadInfo) {
         try {
-            ProgressPieView pieView = null;
+            ProgressPieView pieView;
             if(mShowModelType == MEDIA_SHOW_TYPE.CHART) {
                 // 图表模式
                 pieView = (ProgressPieView) mChartRecyclerView.findViewWithTag("ProgressPieView" + downloadInfo.getFilePath());
             } else {
                 // 列表模式
-
+                pieView = (ProgressPieView) mListRecyclerView.findViewWithTag("ProgressPieView" + downloadInfo.getFilePath());
             }
             if (pieView != null) {
                 if(pieView.getVisibility() == View.GONE) {
@@ -538,7 +574,14 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                             }
                         }
                     } else {
-
+                        for(FileInfo fileInfo : mRemoteFileList) {
+                            String localPath = PubUtils.getDonwloadLocalPath(fileInfo.getFileName(), fileInfo.getType());
+                            if(localPath.equals(downloadInfo.getFilePath())) {
+                                PreferenceUtils.getInstance().putBoolen(localPath, true);
+                                mListAdapter.notifyDataSetChanged();
+                                return;
+                            }
+                        }
                     }
                 }
             }

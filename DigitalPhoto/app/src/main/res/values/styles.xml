@@ -46,13 +46,13 @@
     </style>
 
     <!--toolbar替代actionbar后必须设置主题为NoActionBar-->
-    <style name="MainTheme">
+    <style name="MainTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
 
     <!--toolbar替代actionbar后必须设置主题为NoActionBar-->
-    <style name="AppTheme.NoActionBar">
+    <style name="AppTheme.NoActionBar" parent="@style/AppTheme">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
