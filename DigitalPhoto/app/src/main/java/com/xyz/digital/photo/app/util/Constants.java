@@ -9,6 +9,7 @@ public class Constants {
     public static final String HOST_IP = "192.168.1.1";
 
     public static final int MAX_VOLUME = 10;
+    public static final int MAX_BRIGHTNESS = 16;
 
     public static final String MAIN_DEVICE_POHOTO_MANAGER = "main_device_photo_manager";
 

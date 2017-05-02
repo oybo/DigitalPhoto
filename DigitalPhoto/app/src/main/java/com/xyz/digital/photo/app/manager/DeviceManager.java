@@ -13,13 +13,17 @@ import com.xyz.digital.photo.app.bean.EventBase;
 import com.xyz.digital.photo.app.bean.UploadInfo;
 import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 import com.xyz.digital.photo.app.util.Constants;
+import com.xyz.digital.photo.app.util.EnvironmentUtil;
 import com.xyz.digital.photo.app.util.PubUtils;
 import com.xyz.digital.photo.app.util.ToastUtil;
 import org.greenrobot.eventbus.EventBus;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.actions.actfilemanager.ActFileManager.downloadFile;
 
 /**
  * Created by O on 2017/4/25.
@@ -200,9 +204,9 @@ public class DeviceManager {
             isDownload = true;
             mDownloadInfo = entry.getValue();
             if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
-                actFileManager.downloadFile(mRemoteCurrentPath + mDownloadInfo.getFileName(), mDownloadInfo.getFilePath());
+                downloadFile(mRemoteCurrentPath + mDownloadInfo.getFileName(), mDownloadInfo.getFilePath());
             } else {
-                actFileManager.downloadFile(mRemoteCurrentPath + "/" + mDownloadInfo.getFileName(), mDownloadInfo.getFilePath());
+                downloadFile(mRemoteCurrentPath + "/" + mDownloadInfo.getFileName(), mDownloadInfo.getFilePath());
             }
             return;
         }
@@ -273,22 +277,25 @@ public class DeviceManager {
 
         @Override
         public void onDownloadCompleted(String remotePath, String localPath, int result) {
-            if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
-                ActCommunication.getInstance().onUploadFile(remotePath);
-                mDownloadInfo.setState(2);
-                mDownloadInfo.setFilePath(localPath);
-                sendDownloadMessage(mDownloadInfo);
-                removeDownload(mDownloadInfo.getFilePath());
-                startDownload();
-                ToastUtil.showToast(AppContext.getInstance(), mDownloadInfo.getFileName() + "下载成功");
-            } else {
-                mDownloadInfo.setState(-1);
-                mDownloadInfo.setFilePath(localPath);
-                sendDownloadMessage(mDownloadInfo);
-                removeDownload(mDownloadInfo.getFilePath());
-                ToastUtil.showToast(AppContext.getInstance(), mDownloadInfo.getFileName() + "下载失败");
+            if (mDownloadInfo != null) {
+                if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
+                    ActCommunication.getInstance().onUploadFile(remotePath);
+                    mDownloadInfo.setState(2);
+                    mDownloadInfo.setFilePath(localPath);
+                    sendDownloadMessage(mDownloadInfo);
+                    removeDownload(mDownloadInfo.getFilePath());
+                    startDownload();
+                    ToastUtil.showToast(AppContext.getInstance(), mDownloadInfo.getFileName() + "下载成功");
+
+                } else {
+                    mDownloadInfo.setState(-1);
+                    mDownloadInfo.setFilePath(localPath);
+                    sendDownloadMessage(mDownloadInfo);
+                    removeDownload(mDownloadInfo.getFilePath());
+                    ToastUtil.showToast(AppContext.getInstance(), mDownloadInfo.getFileName() + "下载失败");
+                }
+                isDownload = false;
             }
-            isDownload = false;
         }
 
         @Override
@@ -322,6 +329,7 @@ public class DeviceManager {
                     EventBus.getDefault().post(eventBase);
                 }
             }
+            downloadSysConfig();
         }
 
         @Override
@@ -464,6 +472,29 @@ public class DeviceManager {
 
     public interface OnCmdBackListener {
         void onVolume(int value);
+        void onBrightness(int value);
+    }
+
+    private boolean downloadSysConfig;
+
+    /**
+     * 下载系统所需的配置文件
+     */
+    public void downloadSysConfig() {
+        if(!downloadSysConfig) {
+            try {
+                String sysConfigName = "sys_config.cfg";
+                File sysFile = new File(EnvironmentUtil.getFilePath(), sysConfigName);
+                if(sysFile.exists()) {
+                    sysFile.delete();
+                }
+                int ss = actFileManager.downloadFile("/" + sysConfigName, sysFile.getAbsolutePath());
+                downloadSysConfig = (ss == 0);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
 }

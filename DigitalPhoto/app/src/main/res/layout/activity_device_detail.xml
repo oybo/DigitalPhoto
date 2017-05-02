@@ -200,7 +200,8 @@
                     android:background="@drawable/view_layout_bg"
                     android:text="相框设置"
                     android:textColor="#666666"
-                    android:textSize="14sp"/>
+                    android:textSize="14sp"
+                    android:visibility="invisible"/>
 
             </LinearLayout>
         </LinearLayout>

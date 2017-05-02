@@ -147,8 +147,19 @@ public class ActCommunication {
         return this.sendMsg(cmd);
     }
 
+    public int setBrightness(int volume) {
+        String[] cmd = new String[]{"cmd", "setBrightness", "brightness", ""};
+        cmd[3] = Integer.toString(volume);
+        return this.sendMsg(cmd);
+    }
+
     public int requestVolume() {
         String[] cmd = new String[]{"cmd", "requestVolume"};
+        return this.sendMsg(cmd);
+    }
+
+    public int requestBrightness() {
+        String[] cmd = new String[]{"cmd", "reqBrightness"};
         return this.sendMsg(cmd);
     }
 
