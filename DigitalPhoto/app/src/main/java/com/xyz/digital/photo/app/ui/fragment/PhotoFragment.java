@@ -573,7 +573,12 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
     }
 
     public boolean isShowSelect() {
-        return mSelectLayout.getVisibility() == View.VISIBLE;
+        try {
+            return mSelectLayout.getVisibility() == View.VISIBLE;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public void closeSelect() {
@@ -599,7 +604,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEventMainThread(EventBase eventBase) {
+    public synchronized void onEventMainThread(EventBase eventBase) {
         String action = eventBase.getAction();
         if (action.equals(Constants.SEND_REFRESH_UPLOAD_STATE)) {
             // 刷新上传状态
@@ -608,7 +613,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
         }
     }
 
-    private void refresh(UploadInfo uploadInfo) {
+    private synchronized void refresh(UploadInfo uploadInfo) {
         try {
             ProgressPieView pieView;
             if(mListLayout.getVisibility() == View.VISIBLE) {

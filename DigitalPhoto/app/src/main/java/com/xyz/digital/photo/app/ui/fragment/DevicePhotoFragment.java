@@ -122,7 +122,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEventMainThread(EventBase eventBase) {
+    public synchronized void onEventMainThread(EventBase eventBase) {
         String action = eventBase.getAction();
         if (action.equals(Constants.REFRESH_DEVICE_FILE)) {
             refreshAdapter(mShowMediaType);
@@ -152,8 +152,8 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
 
     @Override
     public void onClick(View view) {
-        if (DeviceManager.getInstance().isUploading()) {
-            ToastUtil.showToast(getActivity(), "正在上传,请稍后");
+        if (DeviceManager.getInstance().isDownloading()) {
+            ToastUtil.showToast(getActivity(), "正在下载,请稍后");
             return;
         }
         switch (view.getId()) {

@@ -13,13 +13,17 @@ import com.xyz.digital.photo.app.bean.EventBase;
 import com.xyz.digital.photo.app.bean.UploadInfo;
 import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 import com.xyz.digital.photo.app.util.Constants;
+import com.xyz.digital.photo.app.util.EnvironmentUtil;
 import com.xyz.digital.photo.app.util.PubUtils;
 import com.xyz.digital.photo.app.util.ToastUtil;
 import org.greenrobot.eventbus.EventBus;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.actions.actfilemanager.ActFileManager.downloadFile;
 
 /**
  * Created by O on 2017/4/25.
@@ -200,9 +204,9 @@ public class DeviceManager {
             isDownload = true;
             mDownloadInfo = entry.getValue();
             if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
-                actFileManager.downloadFile(mRemoteCurrentPath + mDownloadInfo.getFileName(), mDownloadInfo.getFilePath());
+                downloadFile(mRemoteCurrentPath + mDownloadInfo.getFileName(), mDownloadInfo.getFilePath());
             } else {
-                actFileManager.downloadFile(mRemoteCurrentPath + "/" + mDownloadInfo.getFileName(), mDownloadInfo.getFilePath());
+                downloadFile(mRemoteCurrentPath + "/" + mDownloadInfo.getFileName(), mDownloadInfo.getFilePath());
             }
             return;
         }
@@ -233,8 +237,8 @@ public class DeviceManager {
         public void onOperationProgression(int opcode, int processed, int total) {
             if (opcode == 1) {
                 // 上传
-                isUpload = true;
                 if (mUploadInfo != null) {
+                    isUpload = true;
                     mUploadInfo.setState(1);
                     mUploadInfo.setProcessed(processed);
                     mUploadInfo.setTotal(total);
@@ -242,8 +246,8 @@ public class DeviceManager {
                 }
             } else if (opcode == 2) {
                 // 下载
-                isDownload = true;
                 if (mDownloadInfo != null) {
+                    isDownload = true;
                     mDownloadInfo.setState(1);
                     mDownloadInfo.setProcessed(processed);
                     mDownloadInfo.setTotal(total);
@@ -273,22 +277,25 @@ public class DeviceManager {
 
         @Override
         public void onDownloadCompleted(String remotePath, String localPath, int result) {
-            if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
-                ActCommunication.getInstance().onUploadFile(remotePath);
-                mDownloadInfo.setState(2);
-                mDownloadInfo.setFilePath(localPath);
-                sendDownloadMessage(mDownloadInfo);
-                removeDownload(mDownloadInfo.getFilePath());
-                startDownload();
-                ToastUtil.showToast(AppContext.getInstance(), mDownloadInfo.getFileName() + "下载成功");
-            } else {
-                mDownloadInfo.setState(-1);
-                mDownloadInfo.setFilePath(localPath);
-                sendDownloadMessage(mDownloadInfo);
-                removeDownload(mDownloadInfo.getFilePath());
-                ToastUtil.showToast(AppContext.getInstance(), mDownloadInfo.getFileName() + "下载失败");
+            if (mDownloadInfo != null) {
+                if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
+                    ActCommunication.getInstance().onUploadFile(remotePath);
+                    mDownloadInfo.setState(2);
+                    mDownloadInfo.setFilePath(localPath);
+                    sendDownloadMessage(mDownloadInfo);
+                    removeDownload(mDownloadInfo.getFilePath());
+                    startDownload();
+                    ToastUtil.showToast(AppContext.getInstance(), mDownloadInfo.getFileName() + "下载成功");
+
+                } else {
+                    mDownloadInfo.setState(-1);
+                    mDownloadInfo.setFilePath(localPath);
+                    sendDownloadMessage(mDownloadInfo);
+                    removeDownload(mDownloadInfo.getFilePath());
+                    ToastUtil.showToast(AppContext.getInstance(), mDownloadInfo.getFileName() + "下载失败");
+                }
+                isDownload = false;
             }
-            isDownload = false;
         }
 
         @Override
@@ -313,6 +320,12 @@ public class DeviceManager {
             isResposeFiles = true;
             if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
                 List<ActFileInfo> remoteFileList = (ArrayList) filelist;
+                for(ActFileInfo fileInfo : remoteFileList) {
+                    if(fileInfo.getFileName().equals(Constants.SYSTEM_FILE_NAME)) {
+                        remoteFileList.remove(fileInfo);
+                        break;
+                    }
+                }
                 if (remoteFileList != null) {
                     mRemoteFileList.clear();
                     mRemoteFileList.addAll(remoteFileList);
@@ -322,6 +335,7 @@ public class DeviceManager {
                     EventBus.getDefault().post(eventBase);
                 }
             }
+            downloadSysConfig();
         }
 
         @Override
@@ -389,6 +403,9 @@ public class DeviceManager {
     }
 
     private void sendConnectState(boolean success) {
+        if(isConnect) {
+            return;
+        }
         EventBase eventBase = new EventBase();
         eventBase.setAction(Constants.SEND_CONNECT_STATE);
         eventBase.setData(success);
@@ -399,14 +416,14 @@ public class DeviceManager {
 
         @Override
         public void onDeviceConnected() {
-            isConnect = true;
             sendConnectState(true);
+            isConnect = true;
         }
 
         @Override
         public void onDeviceDisconnect() {
-            isConnect = false;
             sendConnectState(false);
+            isConnect = false;
         }
 
         @Override
@@ -464,6 +481,28 @@ public class DeviceManager {
 
     public interface OnCmdBackListener {
         void onVolume(int value);
+        void onBrightness(int value);
+    }
+
+    private boolean downloadSysConfig;
+
+    /**
+     * 下载系统所需的配置文件
+     */
+    public void downloadSysConfig() {
+        if(!downloadSysConfig) {
+            try {
+                File sysFile = new File(EnvironmentUtil.getFilePath(), Constants.SYSTEM_FILE_NAME);
+                if(sysFile.exists()) {
+                    sysFile.delete();
+                }
+                int ss = actFileManager.downloadFile("/" + Constants.SYSTEM_FILE_NAME, sysFile.getAbsolutePath());
+                downloadSysConfig = (ss == 0);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
 }

@@ -42,6 +42,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
         initView();
         initData();
+
+        EventBus.getDefault().register(this);
     }
 
     private void initView() {
@@ -60,7 +62,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     }
 
     private void initData() {
-        EventBus.getDefault().register(this);
         if(DeviceManager.getInstance().isConnect()) {
             // 如果已经连接成功，则自动到详情页面
             if(DeviceManager.getInstance().getRemoteDeviceFiles().size() == 0) {

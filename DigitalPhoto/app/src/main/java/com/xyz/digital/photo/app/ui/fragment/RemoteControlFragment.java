@@ -146,7 +146,7 @@ public class RemoteControlFragment extends BaseFragment implements View.OnClickL
             } else if("brightness".equals(tag)) {
                 // 亮度
                 int progress = seekBar.getProgress();
-
+                ActCommunication.getInstance().setBrightness(progress);
             }
         }
         @Override
@@ -161,8 +161,15 @@ public class RemoteControlFragment extends BaseFragment implements View.OnClickL
                 mVoiceSeekBar.setMax(Constants.MAX_VOLUME);
                 mVoiceSeekBar.setProgress(value);
             }
+
+            @Override
+            public void onBrightness(int value) {
+                mBrightnessSeekBar.setMax(Constants.MAX_BRIGHTNESS);
+                mBrightnessSeekBar.setProgress(value);
+            }
         });
         ActCommunication.getInstance().requestVolume();
+        ActCommunication.getInstance().requestBrightness();
     }
 
     private RadialMenuItem createRadialMenuItem(int type, int resouceId) {

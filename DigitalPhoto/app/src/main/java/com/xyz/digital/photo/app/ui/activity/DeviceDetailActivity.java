@@ -79,17 +79,17 @@ public class DeviceDetailActivity extends BaseActivity implements View.OnClickLi
         mAdapter = new DeviceImageAdapter(this);
         deviceDetailPhotoRview.setAdapter(mAdapter);
 
+        EventBase eventBase = new EventBase();
+        eventBase.setAction(Constants.REFRESH_DEVICE_FILE);
+        eventBase.setData("first");
+        EventBus.getDefault().post(eventBase);
+
         // 请求内部存储剩余空间
         String[] msg = new String[]{"cmd", "reqNandInfo"};
         ActCommunication.getInstance().sendMsg(msg);
         // 请求U盘存储剩余空间
         msg = new String[]{"cmd", "reqUdiskInfo"};
         ActCommunication.getInstance().sendMsg(msg);
-
-        EventBase eventBase = new EventBase();
-        eventBase.setAction(Constants.REFRESH_DEVICE_FILE);
-        eventBase.setData("first");
-        EventBus.getDefault().post(eventBase);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -103,18 +103,32 @@ public class DeviceDetailActivity extends BaseActivity implements View.OnClickLi
             mLoadingView.setVisibility(View.GONE);
         } else if (action.equals(Constants.SEND_MNAD_INFO_ACTION)) {
             // 内部存储信息
-            String[] result = (String[]) eventBase.getData();
-            String allSizeStr = result[3];
-            String usableSizeStr = result[4];
-            String stateStr = result[5];
-            setDiskSize(allSizeStr, usableSizeStr, stateStr);
+            try {
+                String[] result = (String[]) eventBase.getData();
+                String size = result[3];
+                String[] temp = size.split("/");
+                String allSizeStr = temp[1];
+                String usableSizeStr = temp[0];
+                String stateStr = result[5];
+                stateStr = "online";
+                setDiskSize(allSizeStr, usableSizeStr, stateStr);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         } else if (action.equals(Constants.SEND_UDISK_INFO_ACTION)) {
             // U盘存储信息
-            String[] result = (String[]) eventBase.getData();
-            String allSizeStr = result[3];
-            String usableSizeStr = result[4];
-            String stateStr = result[5];
-            setUDiskSize(allSizeStr, usableSizeStr, stateStr);
+            try {
+                String[] result = (String[]) eventBase.getData();
+                String size = result[3];
+                String[] temp = size.split("/");
+                String allSizeStr = temp[1];
+                String usableSizeStr = temp[0];
+                String stateStr = result[5];
+                stateStr = "online";
+                setUDiskSize(allSizeStr, usableSizeStr, stateStr);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
