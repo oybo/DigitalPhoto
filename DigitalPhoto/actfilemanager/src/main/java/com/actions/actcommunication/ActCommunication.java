@@ -326,7 +326,8 @@ public class ActCommunication {
                                     ActCommunication.this.mEventListener.onRecvCurrentTime(Integer.parseInt(status1[data1 + 1]));
                                 } else if(state.equals("playerStatus")) {
                                     ActCommunication.this.mEventListener.onRecvPlayerStatus(Integer.parseInt(status1[data1 + 1]));
-                                } else if(state.equalsIgnoreCase("NandInfo") || state.equalsIgnoreCase("UdiskInfo")) {
+                                } else if(state.equalsIgnoreCase("NandInfo") || state.equalsIgnoreCase("UdiskInfo")
+                                        || state.equalsIgnoreCase("brightness")) {
                                     ActCommunication.this.mEventListener.onRecvResult(status1[data1], status1);
                                 }
                             }

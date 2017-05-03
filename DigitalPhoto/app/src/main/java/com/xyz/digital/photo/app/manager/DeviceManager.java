@@ -237,8 +237,8 @@ public class DeviceManager {
         public void onOperationProgression(int opcode, int processed, int total) {
             if (opcode == 1) {
                 // 上传
-                isUpload = true;
                 if (mUploadInfo != null) {
+                    isUpload = true;
                     mUploadInfo.setState(1);
                     mUploadInfo.setProcessed(processed);
                     mUploadInfo.setTotal(total);
@@ -246,8 +246,8 @@ public class DeviceManager {
                 }
             } else if (opcode == 2) {
                 // 下载
-                isDownload = true;
                 if (mDownloadInfo != null) {
+                    isDownload = true;
                     mDownloadInfo.setState(1);
                     mDownloadInfo.setProcessed(processed);
                     mDownloadInfo.setTotal(total);
@@ -320,6 +320,12 @@ public class DeviceManager {
             isResposeFiles = true;
             if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
                 List<ActFileInfo> remoteFileList = (ArrayList) filelist;
+                for(ActFileInfo fileInfo : remoteFileList) {
+                    if(fileInfo.getFileName().equals(Constants.SYSTEM_FILE_NAME)) {
+                        remoteFileList.remove(fileInfo);
+                        break;
+                    }
+                }
                 if (remoteFileList != null) {
                     mRemoteFileList.clear();
                     mRemoteFileList.addAll(remoteFileList);
@@ -397,6 +403,9 @@ public class DeviceManager {
     }
 
     private void sendConnectState(boolean success) {
+        if(isConnect) {
+            return;
+        }
         EventBase eventBase = new EventBase();
         eventBase.setAction(Constants.SEND_CONNECT_STATE);
         eventBase.setData(success);
@@ -407,14 +416,14 @@ public class DeviceManager {
 
         @Override
         public void onDeviceConnected() {
-            isConnect = true;
             sendConnectState(true);
+            isConnect = true;
         }
 
         @Override
         public void onDeviceDisconnect() {
-            isConnect = false;
             sendConnectState(false);
+            isConnect = false;
         }
 
         @Override
@@ -483,12 +492,11 @@ public class DeviceManager {
     public void downloadSysConfig() {
         if(!downloadSysConfig) {
             try {
-                String sysConfigName = "sys_config.cfg";
-                File sysFile = new File(EnvironmentUtil.getFilePath(), sysConfigName);
+                File sysFile = new File(EnvironmentUtil.getFilePath(), Constants.SYSTEM_FILE_NAME);
                 if(sysFile.exists()) {
                     sysFile.delete();
                 }
-                int ss = actFileManager.downloadFile("/" + sysConfigName, sysFile.getAbsolutePath());
+                int ss = actFileManager.downloadFile("/" + Constants.SYSTEM_FILE_NAME, sysFile.getAbsolutePath());
                 downloadSysConfig = (ss == 0);
             } catch (Exception e) {
                 e.printStackTrace();

@@ -42,7 +42,6 @@ android {
             signingConfig  signingConfigs.release
         }
     }
-
 }
 
 dependencies {
@@ -56,4 +55,5 @@ dependencies {
     compile 'org.greenrobot:eventbus:3.0.0'
     compile project(':library_pullrefresh')
     compile project(':actfilemanager')
+    compile files('libs/bugly_crash_release.jar')
 }

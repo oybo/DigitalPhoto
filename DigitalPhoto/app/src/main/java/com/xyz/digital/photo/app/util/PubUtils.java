@@ -47,11 +47,11 @@ public class PubUtils {
             size = Integer.parseInt(sizeStr);
             size = size * 1024 * 1024 * 1024;
         } else if (sizeStr.contains("M")) {
-            sizeStr = sizeStr.replace("M", "").replace(" ", "");
+            sizeStr = sizeStr.replace("M", "").replace(" ", "").replace("B", "");
             size = Integer.parseInt(sizeStr);
             size = size * 1024 * 1024;
         } else if (sizeStr.contains("K")) {
-            sizeStr = sizeStr.replace("K", "").replace(" ", "");
+            sizeStr = sizeStr.replace("K", "").replace(" ", "").replace("B", "");
             size = Integer.parseInt(sizeStr);
             size = size * 1024;
         } else {

@@ -11,6 +11,8 @@ public class Constants {
     public static final int MAX_VOLUME = 10;
     public static final int MAX_BRIGHTNESS = 16;
 
+    public static final String SYSTEM_FILE_NAME = "sys_config.cfg";
+
     public static final String MAIN_DEVICE_POHOTO_MANAGER = "main_device_photo_manager";
 
     public static final String MAIN_DEVICE_LIST = "main_device_list";

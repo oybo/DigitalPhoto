@@ -7,11 +7,13 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.TextView;
 
 import com.xyz.digital.photo.app.R;
-import com.xyz.digital.photo.app.adapter.DialogSelectAdapter;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
-import com.xyz.digital.photo.app.bean.ItemSelect;
+import com.xyz.digital.photo.app.adapter.base.RecyclerViewHolder;
+import com.xyz.digital.photo.app.ui.fragment.SetFragment;
+import com.xyz.digital.photo.app.util.PreferenceUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +24,8 @@ import java.util.List;
 
 public class SelectDialog extends Dialog implements android.view.View.OnClickListener {
 
-    private List<ItemSelect> mList = new ArrayList<>();
+    private int mType;
+    private List<String> mList = new ArrayList<>();
     private RecyclerView mRecyclerView;
     private DialogSelectAdapter mAdapter;
 
@@ -47,7 +50,7 @@ public class SelectDialog extends Dialog implements android.view.View.OnClickLis
             public void onItemClick(View itemView, int pos) {
                 dismiss();
                 if(mOnSelectListener != null) {
-                    mOnSelectListener.select(mTag, pos);
+                    mOnSelectListener.select(pos);
                 }
             }
         });
@@ -56,10 +59,9 @@ public class SelectDialog extends Dialog implements android.view.View.OnClickLis
     }
 
     private OnSelectListener mOnSelectListener;
-    private String mTag;
 
-    public void show(String tag, List<ItemSelect> list, OnSelectListener listener) {
-        mTag = tag;
+    public void show(int type, List<String> list, OnSelectListener listener) {
+        mType = type;
         if(list != null) {
             mList.addAll(list);
         }
@@ -82,7 +84,61 @@ public class SelectDialog extends Dialog implements android.view.View.OnClickLis
     }
 
     public interface OnSelectListener {
-        void select(String tag, int position);
+        void select(int position);
     }
+
+    public class DialogSelectAdapter extends BaseRecyclerAdapter<String> {
+
+        public DialogSelectAdapter(Context ctx) {
+            super(ctx);
+        }
+
+        @Override
+        public int getItemLayoutId(int viewType) {
+            return R.layout.item_select_layout;
+        }
+
+        @Override
+        public void bindData(RecyclerViewHolder holder, int position, String item) {
+
+            TextView txt = (TextView) holder.getView(R.id.item_select_title_txt);
+            txt.setText(item);
+
+            int id = 0;
+            switch (mType) {
+                case 1:
+                    // 图片显示比例
+                    id = PreferenceUtils.getInstance().getInt(SetFragment.mImageShowScale_key, 0);
+                    break;
+                case 2:
+                    // 幻灯片放映时间
+                    id = PreferenceUtils.getInstance().getInt(SetFragment.mPlayTime_key, 0);
+                    break;
+                case 3:
+                    // 幻灯片播放顺序
+                    id = PreferenceUtils.getInstance().getInt(SetFragment.mPlayOrder_key, 0);
+                    break;
+                case 4:
+                    // 视频显示比例
+                    id = PreferenceUtils.getInstance().getInt(SetFragment.mVideoShowScale_key, 0);
+                    break;
+                case 5:
+                    // 视频播放模式
+                    id = PreferenceUtils.getInstance().getInt(SetFragment.mVideoPlayModel_key, 0);
+                    break;
+                case 6:
+                    // 音乐播放模式
+                    id = PreferenceUtils.getInstance().getInt(SetFragment.mAudioPlayModel_key, 0);
+                    break;
+                case 7:
+                    // 开机播放模式
+                    id = PreferenceUtils.getInstance().getInt(SetFragment.mStartPlayModel_key, 0);
+                    break;
+            }
+
+            txt.setSelected(id == position ? true : false);
+        }
+    }
+
 
 }
