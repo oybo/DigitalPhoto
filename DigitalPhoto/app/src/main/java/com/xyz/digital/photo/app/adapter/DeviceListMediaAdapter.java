@@ -2,11 +2,13 @@ package com.xyz.digital.photo.app.adapter;
 
 import android.content.Context;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
+
 import com.actions.actfilemanager.ActFileInfo;
 import com.xyz.digital.photo.app.R;
-import com.xyz.digital.photo.app.adapter.base.CommonAdapter;
-import com.xyz.digital.photo.app.adapter.base.ViewHolder;
+import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
+import com.xyz.digital.photo.app.adapter.base.RecyclerViewHolder;
 import com.xyz.digital.photo.app.bean.DownloadInfo;
 import com.xyz.digital.photo.app.bean.FileInfo;
 import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
@@ -14,31 +16,37 @@ import com.xyz.digital.photo.app.manager.DeviceManager;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
 import com.xyz.digital.photo.app.util.PubUtils;
 import com.xyz.digital.photo.app.view.ProgressPieView;
-import java.util.List;
 
 /**
  * Created by O on 2017/3/18.
  */
 
-public class DeviceListMediaAdapter extends CommonAdapter<FileInfo> {
+public class DeviceListMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
 
-    public DeviceListMediaAdapter(Context context, List<FileInfo> mDatas, int itemLayoutId) {
-        super(context, mDatas, itemLayoutId);
+
+    public DeviceListMediaAdapter(Context ctx) {
+        super(ctx);
     }
 
     @Override
-    public void convert(ViewHolder helper, FileInfo item) {
+    public int getItemLayoutId(int viewType) {
+        return R.layout.item_grid_group_layout;
+    }
 
-        helper.setText(R.id.item_list_title_txt, item.getFileName());
+    @Override
+    public void bindData(RecyclerViewHolder holder, int position, FileInfo item) {
 
-        ImageView imageView = helper.getView(R.id.item_list_image);
+        holder.setText(R.id.item_list_title_txt, item.getFileName());
 
-        ImageView playImage = helper.getView(R.id.item_child_arrows_image);
-        if(item.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
+        ImageView imageView = holder.getImageView(R.id.item_list_image);
+
+        ImageView playImage = holder.getImageView(R.id.item_child_arrows_image);
+        if (item.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
             // 文件夹
             playImage.setImageResource(R.drawable.btn_home_counterattack);
 
             imageView.setImageResource(R.drawable.folder);
+            holder.getView(R.id.item_menu_download_bt).setVisibility(View.GONE);
         } else if (item.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
             // 文件
             playImage.setImageResource(R.drawable.media_play_icon);
@@ -51,10 +59,11 @@ public class DeviceListMediaAdapter extends CommonAdapter<FileInfo> {
             } else {
                 imageView.setImageResource(R.mipmap.ic_launcher);
             }
+            holder.getView(R.id.item_menu_download_bt).setVisibility(View.VISIBLE);
         }
 
         // 是否在下载
-        ProgressPieView pieView = helper.getView(R.id.item_child_download_progress);
+        ProgressPieView pieView = (ProgressPieView) holder.getView(R.id.item_child_download_progress);
         pieView.setTag("ProgressPieView" + PubUtils.getDonwloadLocalPath(item.getFileName(), item.getType()));
 
         String localPath = PubUtils.getDonwloadLocalPath(item.getFileName(), item.getType());
@@ -73,11 +82,14 @@ public class DeviceListMediaAdapter extends CommonAdapter<FileInfo> {
         }
 
         // 判断是否下载完成
+        Button downloadBt = holder.getButton(R.id.item_menu_download_bt);
         boolean isUpload = PreferenceUtils.getInstance().getBoolean(localPath, false);
         if (isUpload) {
             pieView.setText("成功");
             pieView.setVisibility(View.GONE);
+            downloadBt.setText("已下载");
         } else {
+            downloadBt.setText("下载");
         }
 
     }

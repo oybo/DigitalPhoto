@@ -1,17 +1,15 @@
 package com.xyz.digital.photo.app.ui.fragment;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -33,16 +31,11 @@ import com.xyz.digital.photo.app.ui.activity.MainActivity;
 import com.xyz.digital.photo.app.util.Constants;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
 import com.xyz.digital.photo.app.util.PubUtils;
-import com.xyz.digital.photo.app.util.ScreenUtils;
 import com.xyz.digital.photo.app.util.ToastUtil;
 import com.xyz.digital.photo.app.view.ChooseModePopView;
 import com.xyz.digital.photo.app.view.DividerItemDecoration;
 import com.xyz.digital.photo.app.view.LoadingView;
 import com.xyz.digital.photo.app.view.ProgressPieView;
-import com.xyz.digital.photo.app.view.swipemenulistview.SwipeMenu;
-import com.xyz.digital.photo.app.view.swipemenulistview.SwipeMenuCreator;
-import com.xyz.digital.photo.app.view.swipemenulistview.SwipeMenuItem;
-import com.xyz.digital.photo.app.view.swipemenulistview.SwipeMenuListView;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -64,7 +57,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
 
     @Bind(R.id.device_photo_model_type) ImageView mModelTypeImage;
     @Bind(R.id.device_media_chart_recyclerview) RecyclerView mChartRecyclerView;
-    @Bind(R.id.device_media_list_recyclerview) SwipeMenuListView mListRecyclerView;
+    @Bind(R.id.device_media_list_recyclerview) RecyclerView mListRecyclerView;
     @Bind(R.id.view_loading) LoadingView mLoadingView;
     @Bind(R.id.fragment_photo_image_tab) TextView fragmentPhotoImageTab;
     @Bind(R.id.fragment_photo_video_tab) TextView fragmentPhotoVideoTab;
@@ -89,8 +82,6 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
     private DeviceListMediaAdapter mListAdapter;
     private int mDeletePosition;
 
-    private List<FileInfo> mRemoteFileList = new ArrayList<>();
-
     private static final String PATH = "本机存储:";
 
     @Override
@@ -112,59 +103,8 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         mChartRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         mChartRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
 
-        SwipeMenuCreator creator = new SwipeMenuCreator() {
-            @Override
-            public void create(SwipeMenu menu) {
-                // create "download" item
-                menu.addMenuItem(createSwipeMenuItem(Color.parseColor("#C5C7C6"), "下载"));
-                // create "delete" item
-                menu.addMenuItem(createSwipeMenuItem(Color.parseColor("#C42708"), "删除"));
-            }
-        };
-        // set creator
-        mListRecyclerView.setMenuCreator(creator);
-        // step 2. listener item click event
-        mListRecyclerView.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
-            @Override
-            public void onMenuItemClick(int position, SwipeMenu menu, int index) {
-                switch (index) {
-                    case 0:
-                        // 下载
-                        final ActFileInfo info = DeviceManager.getInstance().getRemoteDeviceFiles().get(position);
-                        if (info.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
-                            ToastUtil.showToast(getActivity(), "文件不支持下载");
-                        } else if (info.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
-                            // 点击文件
-                            boolean isDownload = DeviceManager.getInstance().isDownloading();
-                            mListAdapter.addDownload(position);
-                            if(!isDownload) {
-                                DeviceManager.getInstance().startDownload();
-                            }
-                        }
-                        break;
-                    case 1:
-                        // 删除
-                        showLoading();
-                        mDeletePosition = position;
-                        DeviceManager.getInstance().deleteFile(mRemoteFileList.get(position).getFileName());
-                        break;
-                }
-            }
-        });
-        mListRecyclerView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                final ActFileInfo info = DeviceManager.getInstance().getRemoteDeviceFiles().get(position);
-                if (info.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
-                    // 点击文件夹
-                    showLoading();
-                    String requestPath = DeviceManager.getInstance().setRemoteCurrentPath(info.getFileName());
-                    mUpperView.setText(PATH + requestPath);
-                } else if (info.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
-                    // 点击文件
-                }
-            }
-        });
+        mListRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mListRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
 
         mUpperView.setOnClickListener(this);
         mModelTypeImage.setOnClickListener(this);
@@ -197,8 +137,8 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                     mChartAdapter.notifyDataSetChanged();
                 } else {
                     // 列表模式
-                    DeviceManager.getInstance().removeFile(mRemoteFileList.get(mDeletePosition).getFileName());
-                    mRemoteFileList.remove(mDeletePosition);
+                    DeviceManager.getInstance().removeFile(mListAdapter.getItem(mDeletePosition).getFileName());
+                    mListAdapter.remove(mDeletePosition);
                     mListAdapter.notifyDataSetChanged();
                 }
             }
@@ -299,8 +239,25 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
             mModelTypeImage.setImageResource(R.drawable.mode_list_icon);
             mUpperView.setText(PATH + mRemoteCurrentPath);
             if(mListAdapter == null) {
-                mListAdapter = new DeviceListMediaAdapter(getActivity(), mRemoteFileList, R.layout.item_grid_group_layout);
+                mListAdapter = new DeviceListMediaAdapter(getActivity());
                 mListRecyclerView.setAdapter(mListAdapter);
+                mListAdapter.setOnInViewClickListener(R.id.item_menu_download_bt, this);
+                mListAdapter.setOnInViewClickListener(R.id.item_menu_delete_bt, this);
+
+                mListAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View itemView, int pos) {
+                        final ActFileInfo info = DeviceManager.getInstance().getRemoteDeviceFiles().get(pos);
+                        if (info.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
+                            // 点击文件夹
+                            showLoading();
+                            String requestPath = DeviceManager.getInstance().setRemoteCurrentPath(info.getFileName());
+                            mUpperView.setText(PATH + requestPath);
+                        } else if (info.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
+                            // 点击文件
+                        }
+                    }
+                });
             }
         }
         showFiles(MEDIA_FILE_TYPE.IMAGE, true);
@@ -368,14 +325,14 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                     }
                 }
 
-                mRemoteFileList.clear();
+                List<FileInfo> temp = new ArrayList<>();
                 len = result.size();
                 for (int i = 0; i < len; i++) {
                     FileInfo fileInfo = result.get(i);
                     fileInfo.setPosition(i);
-                    mRemoteFileList.add(fileInfo);
+                    temp.add(fileInfo);
                 }
-                return mRemoteFileList;
+                return temp;
             }
 
             @Override
@@ -388,6 +345,8 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                     mChartAdapter.notifyDataSetChanged();
                 } else {
                     // 列表模式
+                    mListAdapter.clear();
+                    mListAdapter.appendToList(result);
                     mListAdapter.notifyDataSetChanged();
                 }
                 if(DeviceManager.getInstance().isResposeFiles()) {
@@ -456,6 +415,20 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                     ActCommunication.getInstance().playFile("/mnt/card" + mRemoteCurrentPath + "/" + fileInfo.getFileName(), fileType);
                 }
                 break;
+            case R.id.item_menu_download_bt:
+                // 列表模式下载
+                isDownload = DeviceManager.getInstance().isDownloading();
+                mListAdapter.addDownload(position);
+                if(!isDownload) {
+                    DeviceManager.getInstance().startDownload();
+                }
+                break;
+            case R.id.item_menu_delete_bt:
+                // 列表模式删除
+                showLoading();
+                mDeletePosition = position;
+                DeviceManager.getInstance().deleteFile(mListAdapter.getItem(position).getFileName());
+                break;
         }
     }
 
@@ -465,21 +438,6 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
 
     private void hideLoading() {
         mLoadingView.hide();
-    }
-
-    private SwipeMenuItem createSwipeMenuItem(int color, String txt) {
-        SwipeMenuItem swipeMenuItem = new SwipeMenuItem(getActivity().getApplicationContext());
-        // set item background
-        swipeMenuItem.setBackground(new ColorDrawable(color));
-        // set item width
-        swipeMenuItem.setWidth(ScreenUtils.dpToPxInt(80));
-        // set a icon
-        // set a txt
-        swipeMenuItem.setTitleSize(16);
-        swipeMenuItem.setTitleColor(Color.BLACK);
-        swipeMenuItem.setTitle(txt);
-
-        return swipeMenuItem;
     }
 
     public boolean isTypeFile(String fileName, MEDIA_FILE_TYPE type) {
@@ -574,11 +532,11 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                             }
                         }
                     } else {
-                        for(FileInfo fileInfo : mRemoteFileList) {
+                        for(FileInfo fileInfo : mListAdapter.getList()) {
                             String localPath = PubUtils.getDonwloadLocalPath(fileInfo.getFileName(), fileInfo.getType());
                             if(localPath.equals(downloadInfo.getFilePath())) {
                                 PreferenceUtils.getInstance().putBoolen(localPath, true);
-                                mListAdapter.notifyDataSetChanged();
+                                mListAdapter.notifyItemChanged(fileInfo.getPosition());
                                 return;
                             }
                         }

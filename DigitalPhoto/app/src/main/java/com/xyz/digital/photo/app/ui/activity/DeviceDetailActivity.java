@@ -7,7 +7,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.Spanned;
-import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -97,13 +96,11 @@ public class DeviceDetailActivity extends BaseActivity implements View.OnClickLi
     public void onEventMainThread(EventBase eventBase) {
         String action = eventBase.getAction();
         if (action.equals(Constants.REFRESH_DEVICE_FILE)) {
-            if (TextUtils.isEmpty((String) eventBase.getData())) {
-                mLoadingView.setVisibility(View.GONE);
-            }
             mAdapter.clear();
             mAdapter.appendToList(DeviceManager.getInstance().getRemoteDeviceFiles());
             mAdapter.notifyDataSetChanged();
             setRemoteCount(DeviceManager.getInstance().getRemoteDeviceFiles().size());
+            mLoadingView.setVisibility(View.GONE);
         } else if (action.equals(Constants.SEND_MNAD_INFO_ACTION)) {
             // 内部存储信息
             String[] result = (String[]) eventBase.getData();
