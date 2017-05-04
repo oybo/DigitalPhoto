@@ -2,6 +2,7 @@ package com.xyz.digital.photo.app.manager;
 
 import android.util.Log;
 import android.widget.Toast;
+
 import com.actions.actcommunication.AcEventListener;
 import com.actions.actcommunication.ActCommunication;
 import com.actions.actfilemanager.ACTFileEventListener;
@@ -10,18 +11,24 @@ import com.actions.actfilemanager.ActFileManager;
 import com.xyz.digital.photo.app.AppContext;
 import com.xyz.digital.photo.app.bean.DownloadInfo;
 import com.xyz.digital.photo.app.bean.EventBase;
+import com.xyz.digital.photo.app.bean.FileInfo;
 import com.xyz.digital.photo.app.bean.UploadInfo;
 import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 import com.xyz.digital.photo.app.util.Constants;
 import com.xyz.digital.photo.app.util.EnvironmentUtil;
 import com.xyz.digital.photo.app.util.PubUtils;
 import com.xyz.digital.photo.app.util.ToastUtil;
+
 import org.greenrobot.eventbus.EventBus;
+
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 import static com.actions.actfilemanager.ActFileManager.downloadFile;
 
@@ -458,15 +465,22 @@ public class DeviceManager {
         @Override
         public void onRecvResult(String action, String[] status) {
             if (action.equals("NandInfo")) {
+                // 内部存储信息
                 EventBase eventBase = new EventBase();
                 eventBase.setAction(Constants.SEND_MNAD_INFO_ACTION);
                 eventBase.setData(status);
                 EventBus.getDefault().post(eventBase);
             } else if (action.equals("UdiskInfo")) {
+                // U盘存储信息
                 EventBase eventBase = new EventBase();
                 eventBase.setAction(Constants.SEND_UDISK_INFO_ACTION);
                 eventBase.setData(status);
                 EventBus.getDefault().post(eventBase);
+            } else if (action.equals("brightness")) {
+                // 遥控器的亮度
+                for (OnCmdBackListener listener : mCmdListeners) {
+                    listener.onBrightness(Integer.parseInt(status[3]));
+                }
             }
         }
     };
@@ -487,7 +501,7 @@ public class DeviceManager {
     private boolean downloadSysConfig;
 
     /**
-     * 下载系统所需的配置文件
+     * 下载系统配置文件
      */
     public void downloadSysConfig() {
         if(!downloadSysConfig) {
@@ -503,6 +517,86 @@ public class DeviceManager {
             }
         }
 
+    }
+
+    /**
+     * 上传系统配置文件
+     */
+    public void uploadSysConfig() {
+        try {
+            File sysFile = new File(EnvironmentUtil.getFilePath(), Constants.SYSTEM_FILE_NAME);
+            if(sysFile.exists()) {
+                sysFile.delete();
+            }
+            int ss = actFileManager.uploadFile(sysFile.getAbsolutePath(), "/" + Constants.SYSTEM_FILE_NAME);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Map<String, String> propertiesMap = new HashMap<String, String>();
+
+    private void getProperties() {
+        try {
+            Properties properties = new Properties();
+            File sysFile = new File(EnvironmentUtil.getFilePath(), Constants.SYSTEM_FILE_NAME);
+            FileInputStream fis = new FileInputStream(sysFile);
+            properties.load(fis);
+            Set<Object> keySet = properties.keySet();
+            for (Object object : keySet) {
+                String key = (String) object;
+                String value = (String) properties.get(key);
+                System.out.println(key+"="+value);
+                System.out.println(key+"="+new String(value.getBytes(), "UTF-8"));
+                propertiesMap.put(key, value);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String getpropertiesValue(String key) {
+        if(propertiesMap.size() == 0) {
+            getProperties();
+        }
+        String value = "";
+        value = propertiesMap.get(key);
+
+        return value;
+    }
+
+    private Map<String, String> mPlayFiles = new HashMap<>();
+
+    public void setPlayFile(FileInfo fileInfo) {
+        MEDIA_FILE_TYPE type = fileInfo.getType();
+        int fileType = ActCommunication.FILE_TYPE_PHOTO;
+
+        if (type == MEDIA_FILE_TYPE.IMAGE) {
+            // 图片
+            fileType = ActCommunication.FILE_TYPE_PHOTO;
+        } else if (type == MEDIA_FILE_TYPE.VIDEO) {
+            // 视频
+            fileType = ActCommunication.FILE_TYPE_MUSIC;
+        } else if (type == MEDIA_FILE_TYPE.AUDIO) {
+            // 音乐
+            fileType = ActCommunication.FILE_TYPE_VIDEO;
+        }
+        if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
+            ActCommunication.getInstance().playFile(mRemoteCurrentPath + fileInfo.getFileName(), fileType);
+        } else {
+            ActCommunication.getInstance().playFile(mRemoteCurrentPath + "/" + fileInfo.getFileName(), fileType);
+        }
+
+        addPlayFile(mRemoteCurrentPath + fileInfo.getFileName());
+    }
+
+    private void addPlayFile(String filePath) {
+        mPlayFiles.clear();
+        mPlayFiles.put(filePath, filePath);
+    }
+
+    public boolean isPlay(String filePath) {
+        return mPlayFiles.containsKey(filePath);
     }
 
 }

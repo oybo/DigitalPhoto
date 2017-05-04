@@ -110,7 +110,6 @@ public class DeviceDetailActivity extends BaseActivity implements View.OnClickLi
                 String allSizeStr = temp[1];
                 String usableSizeStr = temp[0];
                 String stateStr = result[5];
-                stateStr = "online";
                 setDiskSize(allSizeStr, usableSizeStr, stateStr);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -124,7 +123,6 @@ public class DeviceDetailActivity extends BaseActivity implements View.OnClickLi
                 String allSizeStr = temp[1];
                 String usableSizeStr = temp[0];
                 String stateStr = result[5];
-                stateStr = "online";
                 setUDiskSize(allSizeStr, usableSizeStr, stateStr);
             } catch (Exception e) {
                 e.printStackTrace();

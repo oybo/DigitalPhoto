@@ -1,9 +1,7 @@
 package com.xyz.digital.photo.app.mvp.wifi;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
-import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
@@ -11,7 +9,9 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+
 import com.xyz.digital.photo.app.AppContext;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -162,28 +162,14 @@ public class WifiUtils {
         return 4;
     }
 
-    /**
-     * 判断是否连接上wifi
-     *
-     * @return boolean值(isConnect), 对应已连接(true)和未连接(false)
-     */
-    public static boolean isWifiConnect() {
-        NetworkInfo mNetworkInfo = ((ConnectivityManager) mContext
-                .getSystemService(Context.CONNECTIVITY_SERVICE))
-                .getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        return mNetworkInfo.isConnected();
-    }
-
     public static boolean isConnectTheWifi(ScanResult wifi) {
         boolean connect = false;
         try {
-            if (isWifiConnect()) {
-                WifiInfo wifiInfo = getWifiInfo();
-                if (wifiInfo != null) {
-                    if ((wifiInfo.getSSID().toString().replace("\"", "")).equals(wifi.SSID.toString().replace("\"", "")) &&
-                            (wifiInfo.getBSSID().toString().replace("\"", "")).equals(wifi.BSSID.toString().replace("\"", ""))) {
-                        return true;
-                    }
+            WifiInfo wifiInfo = getWifiInfo();
+            if (wifiInfo != null) {
+                if ((wifiInfo.getSSID().toString().replace("\"", "")).equals(wifi.SSID.toString().replace("\"", "")) &&
+                        (wifiInfo.getBSSID().toString().replace("\"", "")).equals(wifi.BSSID.toString().replace("\"", ""))) {
+                    return true;
                 }
             }
         } catch (Exception e) {

@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.xyz.digital.photo.app.R;
+import com.xyz.digital.photo.app.manager.DeviceManager;
 import com.xyz.digital.photo.app.ui.BaseFragment;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
 import com.xyz.digital.photo.app.view.SelectDialog;
@@ -89,6 +90,10 @@ public class SetFragment extends BaseFragment implements View.OnClickListener {
         setVideoPlayModelTxt();
         setAudioPlayModelTxt();
         setStartPlayModelTxt();
+
+        // 读取配置文件
+        String value = DeviceManager.getInstance().getpropertiesValue("photo_enter_mode");
+        String sds = "";
     }
 
     private void setImageShowRatioTxt() {
@@ -128,6 +133,9 @@ public class SetFragment extends BaseFragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
+        // 读取配置文件
+        String value = DeviceManager.getInstance().getpropertiesValue("photo_enter_mode");
+        String sds = "";
         mItemSelects.clear();
         switch (v.getId()) {
             case R.id.set_image_show_ratio_layout:

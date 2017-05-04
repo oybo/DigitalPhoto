@@ -43,10 +43,10 @@ public class WiFiPresenter implements WiFiContract.Presenter {
     @Override
     public void connect(final ScanResult wifi) {
         mScanResult = wifi;
-        if(WifiUtils.isConnectTheWifi(wifi)) {
-            mView.onCallbackConnect();
-            return;
-        }
+//        if(WifiUtils.isConnectTheWifi(wifi)) {
+//            mView.onCallbackConnect();
+//            return;
+//        }
         if(mConnectTask != null) {
             mConnectTask.cancel(true);
         }

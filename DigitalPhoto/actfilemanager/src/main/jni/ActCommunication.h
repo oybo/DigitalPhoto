@@ -32,6 +32,8 @@ JNIEXPORT jint JNICALL
 JNIEXPORT jint JNICALL
         Java_com_actions_actcommunication_ActCommunication_disconnect(JNIEnv *env, jobject instance);
 JNIEXPORT jint JNICALL
+        Java_com_actions_actcommunication_ActCommunication_readSystemCfgFile(JNIEnv *env, jobject instance);
+JNIEXPORT jint JNICALL
         Java_com_actions_actcommunication_ActCommunication_sendData(JNIEnv *env, jobject instance, jobjectArray msg, jbyteArray data);
 
 ////////////////////////////////////////////////////////////////////////////////////

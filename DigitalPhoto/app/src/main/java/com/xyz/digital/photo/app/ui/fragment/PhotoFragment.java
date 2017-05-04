@@ -556,7 +556,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
 
     public boolean isShowChild() {
         boolean bol = false;
-        if(mListLayout.getVisibility() == View.VISIBLE) {
+        if(mListLayout != null && mListLayout.getVisibility() == View.VISIBLE) {
             if(!mListAdapter.getItem(0).isFolder()) {
                 bol = true;
             }

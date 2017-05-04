@@ -291,6 +291,8 @@ public class ActCommunication {
 
     public native int sendData(Object[] var1, byte[] var2);
 
+    public native int readSystemCfgFile();
+
     static {
         try {
             System.loadLibrary("actcommunication");

@@ -1,11 +1,14 @@
 package com.xyz.digital.photo.app.adapter;
 
 import android.content.Context;
+import android.widget.ImageView;
 
 import com.actions.actfilemanager.ActFileInfo;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.adapter.base.RecyclerViewHolder;
+import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
+import com.xyz.digital.photo.app.util.PubUtils;
 
 /**
  * Created by O on 2017/4/5.
@@ -25,9 +28,18 @@ public class DeviceImageAdapter extends BaseRecyclerAdapter<ActFileInfo> {
     @Override
     public void bindData(RecyclerViewHolder holder, int position, ActFileInfo item) {
 
-//        ImageLoadManager.setImage("ftp://192.168.1.1/FBA96FF8592B259FED6B13D824A160C3.jpg", holder.getImageView(R.id.item_device_photo_image));
+        // 图片
+        ImageView imageView = holder.getImageView(R.id.item_device_photo_image);
 
-        holder.getImageView(R.id.item_device_photo_image).setImageResource(R.mipmap.ic_launcher);
+        MEDIA_FILE_TYPE type = PubUtils.getFileType(item.getFileName());
+        
+        if (type == MEDIA_FILE_TYPE.IMAGE) {
+            imageView.setImageResource(R.drawable.defult_audio_icon);
+        } else if (type == MEDIA_FILE_TYPE.VIDEO) {
+            imageView.setImageResource(R.drawable.defult_video_icon);
+        } else {
+            imageView.setImageResource(R.drawable.defult_image_icon);
+        }
 
     }
 

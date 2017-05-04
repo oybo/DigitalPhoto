@@ -13,9 +13,9 @@ public class Constants {
 
     public static final String SYSTEM_FILE_NAME = "sys_config.cfg";
 
-    public static final String MAIN_DEVICE_POHOTO_MANAGER = "main_device_photo_manager";
+    public static final String MAIN_DEVICE_POHOTO_MANAGER = "MAIN_DEVICE_POHOTO_MANAGER";
 
-    public static final String MAIN_DEVICE_LIST = "main_device_list";
+    public static final String MAIN_DEVICE_LIST = "MAIN_DEVICE_LIST";
     public static final String REFRESH_STATUSBAR_COLOR = "REFRESH_STATUSBAR_COLOR";
 
     /**    刷新相框设备文件列表     */
@@ -25,10 +25,10 @@ public class Constants {
     public static final String SEND_CONNECT_STATE = "SEND_CONNECT_STATE";
 
     /**    内部存储信息     */
-    public static final String SEND_MNAD_INFO_ACTION = "SEND_CONNECT_STATE";
+    public static final String SEND_MNAD_INFO_ACTION = "SEND_MNAD_INFO_ACTION";
 
     /**    U盘信息     */
-    public static final String SEND_UDISK_INFO_ACTION = "SEND_CONNECT_STATE";
+    public static final String SEND_UDISK_INFO_ACTION = "SEND_UDISK_INFO_ACTION";
 
     /**    刷新上传状态和进度     */
     public static final String SEND_REFRESH_UPLOAD_STATE = "SEND_REFRESH_UPLOAD_STATE";

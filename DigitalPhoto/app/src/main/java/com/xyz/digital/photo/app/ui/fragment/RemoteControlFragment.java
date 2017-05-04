@@ -155,6 +155,10 @@ public class RemoteControlFragment extends BaseFragment implements View.OnClickL
     };
 
     private void initData() {
+        mVoiceSeekBar.setMax(Constants.MAX_VOLUME);
+        mVoiceSeekBar.setProgress(0);
+        mBrightnessSeekBar.setMax(Constants.MAX_BRIGHTNESS);
+        mBrightnessSeekBar.setProgress(0);
         DeviceManager.getInstance().addOnCmdBackListener(new DeviceManager.OnCmdBackListener() {
             @Override
             public void onVolume(int value) {
@@ -242,18 +246,18 @@ public class RemoteControlFragment extends BaseFragment implements View.OnClickL
                 break;
             case R.id.fragment_control_previou_bt:
                 // 上一首
-                sendCmd(new String[]{"cmd", "up"});
+                sendCmd(new String[]{"cmd", "prev"});
                 break;
             case R.id.fragment_control_next_bt:
                 // 下一首
-                sendCmd(new String[]{"cmd", "down"});
+                sendCmd(new String[]{"cmd", "next"});
                 break;
             case R.id.fragment_control_play_bt:
                 // 播放暂停
                 isPlay = !isPlay;
                 if(isPlay) {
                     // 播放
-                    sendCmd(new String[]{"cmd", "stop"});
+                    sendCmd(new String[]{"cmd", "play"});
                     mPlayOrStopBt.setImageResource(R.drawable.control_stop_src_icon);
                 } else {
                     // 暂停
@@ -289,11 +293,11 @@ public class RemoteControlFragment extends BaseFragment implements View.OnClickL
                     break;
                 case 3:
                     // 左
-                    sendCmd(new String[]{"cmd", "prev"});
+                    sendCmd(new String[]{"cmd", "left"});
                     break;
                 case 4:
                     // 右
-                    sendCmd(new String[]{"cmd", "next"});
+                    sendCmd(new String[]{"cmd", "right"});
                     break;
             }
         }

@@ -17,6 +17,8 @@ import com.xyz.digital.photo.app.util.PreferenceUtils;
 import com.xyz.digital.photo.app.util.PubUtils;
 import com.xyz.digital.photo.app.view.ProgressPieView;
 
+import static com.xyz.digital.photo.app.manager.DeviceManager.mRemoteCurrentPath;
+
 /**
  * Created by O on 2017/3/18.
  */
@@ -49,7 +51,13 @@ public class DeviceListMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
             holder.getView(R.id.item_menu_download_bt).setVisibility(View.GONE);
         } else if (item.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
             // 文件
-            playImage.setImageResource(R.drawable.media_play_icon);
+            // 是否添加到了播放
+            String remotePath = mRemoteCurrentPath + item.getFileName();
+            if(DeviceManager.getInstance().isPlay(remotePath)) {
+                playImage.setImageResource(R.drawable.media_pause_icon);
+            } else {
+                playImage.setImageResource(R.drawable.media_play_icon);
+            }
 
             // 图片
             if (item.getType() == MEDIA_FILE_TYPE.AUDIO) {
@@ -57,7 +65,7 @@ public class DeviceListMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
             } else if (item.getType() == MEDIA_FILE_TYPE.VIDEO) {
                 imageView.setImageResource(R.drawable.defult_video_icon);
             } else {
-                imageView.setImageResource(R.mipmap.ic_launcher);
+                imageView.setImageResource(R.drawable.defult_image_icon);
             }
             holder.getView(R.id.item_menu_download_bt).setVisibility(View.VISIBLE);
         }
