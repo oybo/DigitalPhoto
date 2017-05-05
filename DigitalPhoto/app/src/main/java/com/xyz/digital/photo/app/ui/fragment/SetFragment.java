@@ -7,10 +7,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.actions.actcommunication.ActCommunication;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.manager.DeviceManager;
 import com.xyz.digital.photo.app.ui.BaseFragment;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
+import com.xyz.digital.photo.app.util.ToastUtil;
 import com.xyz.digital.photo.app.view.SelectDialog;
 import com.xyz.digital.photo.app.view.SwitchButton;
 
@@ -91,9 +93,8 @@ public class SetFragment extends BaseFragment implements View.OnClickListener {
         setAudioPlayModelTxt();
         setStartPlayModelTxt();
 
-        // 读取配置文件
-        String value = DeviceManager.getInstance().getpropertiesValue("photo_enter_mode");
-        String sds = "";
+        int code = ActCommunication.getInstance().readSystemCfgFile();
+        ToastUtil.showToast(getActivity(), "" + code);
     }
 
     private void setImageShowRatioTxt() {

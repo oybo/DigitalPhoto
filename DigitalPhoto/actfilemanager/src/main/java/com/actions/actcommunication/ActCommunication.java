@@ -271,6 +271,11 @@ public class ActCommunication {
         return this.sendData(cmd, data.getBytes());
     }
 
+    public int onUploadFinish() {
+        String[] cmd = new String[]{"cmd", "addFile", "url", ""};
+        return this.sendMsg(cmd);
+    }
+
     public int onUploadFile(String url) {
         String[] cmd = new String[]{"cmd", "addFile", "url", url};
         return this.sendMsg(cmd);

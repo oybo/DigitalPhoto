@@ -1,6 +1,7 @@
 package com.xyz.digital.photo.app.adapter;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -12,6 +13,7 @@ import com.xyz.digital.photo.app.bean.DownloadInfo;
 import com.xyz.digital.photo.app.bean.FileInfo;
 import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 import com.xyz.digital.photo.app.manager.DeviceManager;
+import com.xyz.digital.photo.app.manager.ImageLoadManager;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
 import com.xyz.digital.photo.app.util.PubUtils;
 import com.xyz.digital.photo.app.view.ProgressPieView;
@@ -44,18 +46,25 @@ public class DeviceMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
 
         ImageView imageView = holder.getImageView(R.id.item_device_media_imange);
 
-        // 图片
-        if (item.getType() == MEDIA_FILE_TYPE.AUDIO) {
-            imageView.setImageResource(R.drawable.defult_audio_icon);
-        } else if (item.getType() == MEDIA_FILE_TYPE.VIDEO) {
-            imageView.setImageResource(R.drawable.defult_video_icon);
-        } else {
-            imageView.setImageResource(R.drawable.defult_image_icon);
-        }
-
         // 是否添加到了播放
         ImageView playImage = holder.getImageView(R.id.item_device_media_play_image);
         String remotePath = mRemoteCurrentPath + item.getFileName();
+
+        // 加载图片
+        String tempFile = DeviceManager.getInstance().getTempFile(remotePath);
+        if(!TextUtils.isEmpty(tempFile)) {
+            ImageLoadManager.setImage(tempFile, imageView);
+        } else {
+            // 图片
+            if (item.getType() == MEDIA_FILE_TYPE.AUDIO) {
+                imageView.setImageResource(R.drawable.defult_audio_icon);
+            } else if (item.getType() == MEDIA_FILE_TYPE.VIDEO) {
+                imageView.setImageResource(R.drawable.defult_video_icon);
+            } else {
+                imageView.setImageResource(R.drawable.defult_image_icon);
+            }
+        }
+
         if(DeviceManager.getInstance().isPlay(remotePath)) {
             playImage.setImageResource(R.drawable.media_pause_icon);
         } else {

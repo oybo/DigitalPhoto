@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.view.View;
 
 import com.xyz.digital.photo.app.R;
+import com.xyz.digital.photo.app.util.PubUtils;
 
 /**
  * Created by O on 2017/3/18.
@@ -20,6 +21,9 @@ public class WelcomeActivity extends Activity implements View.OnClickListener {
         setContentView(R.layout.activity_welcome);
 
         findViewById(R.id.welcome_begin_employ_bt).setOnClickListener(this);
+
+        PubUtils.deleteTempFile();
+
     }
 
     @Override

@@ -96,6 +96,7 @@ public class DeviceDetailActivity extends BaseActivity implements View.OnClickLi
     public void onEventMainThread(EventBase eventBase) {
         String action = eventBase.getAction();
         if (action.equals(Constants.REFRESH_DEVICE_FILE)) {
+            // 刷新媒体文件列表
             mAdapter.clear();
             mAdapter.appendToList(DeviceManager.getInstance().getRemoteDeviceFiles());
             mAdapter.notifyDataSetChanged();

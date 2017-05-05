@@ -137,6 +137,8 @@ public class DeviceManager {
     public void startUpload() {
         if (mUploadInfos.size() == 0) {
             mUploadInfo = null;
+            // 上传完成后命令回调一下
+            ActCommunication.getInstance().onUploadFinish();
             // 这里刷新下服务器文件列表
             refreshRemoteFiles();
             return;
@@ -223,12 +225,15 @@ public class DeviceManager {
 
     //=====================3删除相关==开始=======================================
 
+    private String mDeleteRemotePath;
+
     public void deleteFile(String fileName) {
         if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
-            actFileManager.deleteFile(mRemoteCurrentPath + fileName);
+            mDeleteRemotePath = mRemoteCurrentPath + fileName;
         } else {
-            actFileManager.deleteFile(mRemoteCurrentPath + "/" + fileName);
+            mDeleteRemotePath = mRemoteCurrentPath + "/" + fileName;
         }
+        actFileManager.deleteFile(mDeleteRemotePath);
     }
 
     //=====================3删除相关==结束=======================================
@@ -242,6 +247,7 @@ public class DeviceManager {
     private ACTFileEventListener actFileEventListener = new ACTFileEventListener() {
         @Override
         public void onOperationProgression(int opcode, int processed, int total) {
+            // 进度回调
             if (opcode == 1) {
                 // 上传
                 if (mUploadInfo != null) {
@@ -265,6 +271,7 @@ public class DeviceManager {
 
         @Override
         public void onUploadCompleted(String remotePath, String localPath, int result) {
+            // 上传完成回调
             if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
                 ActCommunication.getInstance().onUploadFile(remotePath);
                 mUploadInfo.setState(2);
@@ -284,9 +291,22 @@ public class DeviceManager {
 
         @Override
         public void onDownloadCompleted(String remotePath, String localPath, int result) {
+            if(tempFiles.containsKey(remotePath)) {
+                // 属于临时文件
+                if (result != ACTFileEventListener.OPERATION_SUCESSFULLY) {
+                    tempFiles.remove(remotePath);
+                }
+                tempFileSize--;
+                if(tempFileSize <= 0) {
+                    EventBase eventBase = new EventBase();
+                    eventBase.setAction(Constants.REFRESH_DEVICE_FILE);
+                    EventBus.getDefault().post(eventBase);
+                }
+                return;
+            }
+            // 下载回调
             if (mDownloadInfo != null) {
                 if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
-                    ActCommunication.getInstance().onUploadFile(remotePath);
                     mDownloadInfo.setState(2);
                     mDownloadInfo.setFilePath(localPath);
                     sendDownloadMessage(mDownloadInfo);
@@ -307,8 +327,10 @@ public class DeviceManager {
 
         @Override
         public void onDeleteCompleted(String parentPath, int result) {
+            // 删除完成回调
             boolean success;
             if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
+                ActCommunication.getInstance().onDeleteFile(mDeleteRemotePath);
                 success = true;
                 refreshRemoteFiles();
             } else {
@@ -336,19 +358,40 @@ public class DeviceManager {
                 if (remoteFileList != null) {
                     mRemoteFileList.clear();
                     mRemoteFileList.addAll(remoteFileList);
-
+                    // 更新文件系统
                     EventBase eventBase = new EventBase();
                     eventBase.setAction(Constants.REFRESH_DEVICE_FILE);
                     EventBus.getDefault().post(eventBase);
+                    // 下载系统配置文件
+                    downloadSysConfig();
+                    // 下载临时文件
+                    for(ActFileInfo actFileInfo : mRemoteFileList) {
+                        if(actFileInfo.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
+                            // 属于文件，并且是图片类型就下载
+                            if(PubUtils.getFileType(actFileInfo.getFileName()) == MEDIA_FILE_TYPE.IMAGE) {
+                                // 下载临时文件
+                                String remotePath = mRemoteCurrentPath + actFileInfo.getFileName();
+                                String localPath = PubUtils.getTempLocalPath(actFileInfo.getFileName(), MEDIA_FILE_TYPE.IMAGE);
+                                if(!tempFiles.containsKey(remotePath)) {
+                                    tempFiles.put(remotePath, localPath);
+                                    if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
+                                        downloadFile(mRemoteCurrentPath + actFileInfo.getFileName(), localPath);
+                                    } else {
+                                        downloadFile(mRemoteCurrentPath + "/" + actFileInfo.getFileName(), localPath);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
-            downloadSysConfig();
         }
 
         @Override
         public void onDeleteDirectoryCompleted(String parentPath, int result) {
             boolean success;
             if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
+                ActCommunication.getInstance().onDeleteFile(mDeleteRemotePath);
                 success = true;
                 refreshRemoteFiles();
             } else {
@@ -375,6 +418,16 @@ public class DeviceManager {
             }
         }
     };
+
+    private Map<String, String> tempFiles = new HashMap<>();
+    private int tempFileSize;
+
+    public String getTempFile(String remotePath) {
+        if(tempFiles.containsKey(remotePath)) {
+            return tempFiles.get(remotePath);
+        }
+        return null;
+    }
 
     private void refreshRemoteFiles() {
         if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
@@ -423,12 +476,14 @@ public class DeviceManager {
 
         @Override
         public void onDeviceConnected() {
+            ToastUtil.showToast(AppContext.getInstance(), "连接成功");
             sendConnectState(true);
             isConnect = true;
         }
 
         @Override
         public void onDeviceDisconnect() {
+            ToastUtil.showToast(AppContext.getInstance(), "连接已断开");
             sendConnectState(false);
             isConnect = false;
         }
@@ -546,8 +601,11 @@ public class DeviceManager {
             for (Object object : keySet) {
                 String key = (String) object;
                 String value = (String) properties.get(key);
-                System.out.println(key+"="+value);
-                System.out.println(key+"="+new String(value.getBytes(), "UTF-8"));
+                System.out.println(key + "=" + value);
+
+                String s = new String(value.getBytes(), "UTF-8");
+                String ss = new String(value.getBytes(), "GBK");
+                System.out.println(s + "=" + ss);
                 propertiesMap.put(key, value);
             }
         } catch (Exception e) {

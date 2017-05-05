@@ -13,6 +13,7 @@ public class EnvironmentUtil {
     public static final String VIDEO_STORAGE = "video";
     public static final String AUDIO_STORAGE = "audio";
     public static final String FILE_STORAGE = "file";
+    public static final String TEMP_IMAGE_STORAGE = "temp";
 
     public static boolean isSdCard(Context context) {
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
@@ -42,6 +43,12 @@ public class EnvironmentUtil {
 
     public static String getFilePath() {
         String path = getMainFilePath() + File.separator + FILE_STORAGE;
+        mkdirs(path);
+        return path;
+    }
+
+    public static String getTempFilePath() {
+        String path = getMainFilePath() + File.separator + TEMP_IMAGE_STORAGE;
         mkdirs(path);
         return path;
     }

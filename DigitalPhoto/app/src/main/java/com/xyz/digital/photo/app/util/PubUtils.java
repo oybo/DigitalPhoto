@@ -69,13 +69,13 @@ public class PubUtils {
      */
     public static String formatFileLen(long size) {
         if (size >= 1024 * 1024 * 1024) {
-            return String.format("%.1fG", (size * 1.0) / (1024 * 1024 * 1024));
+            return String.format("%.2fG", (size * 1.0) / (1024 * 1024 * 1024));
         }
         if (size > 1024 * 1024) {
-            return String.format("%.1fM", (size * 1.0) / (1024 * 1024));
+            return String.format("%.2fM", (size * 1.0) / (1024 * 1024));
         }
         if (size > 1024) {
-            return String.format("%.1fK", (size * 1.0) / 1024);
+            return String.format("%.2fK", (size * 1.0) / 1024);
         }
         return size + "B";
     }
@@ -128,6 +128,43 @@ public class PubUtils {
                 localPath = EnvironmentUtil.getAudioPath();
             } else {
                 localPath = EnvironmentUtil.getImagePath();
+            }
+            localPath = localPath + mRemoteCurrentPath + fileName;
+            File file = new File(localPath);
+            File parentFile = new File(file.getParent());
+            if (!parentFile.exists()) {
+                parentFile.mkdirs();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return localPath;
+    }
+
+    public static void deleteTempFile() {
+        // 删除临时图片文件夹
+        new Thread(){
+            @Override
+            public void run() {
+                super.run();
+                try {
+                    FileUtil.deleteFolder(EnvironmentUtil.getTempFilePath());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+    }
+
+    public static String getTempLocalPath(String fileName, MEDIA_FILE_TYPE type) {
+        String localPath = "";
+        try {
+            if (type == MEDIA_FILE_TYPE.VIDEO) {
+                localPath = EnvironmentUtil.getTempFilePath();
+            } else if (type == MEDIA_FILE_TYPE.AUDIO) {
+                localPath = EnvironmentUtil.getTempFilePath();
+            } else {
+                localPath = EnvironmentUtil.getTempFilePath();
             }
             localPath = localPath + mRemoteCurrentPath + fileName;
             File file = new File(localPath);
