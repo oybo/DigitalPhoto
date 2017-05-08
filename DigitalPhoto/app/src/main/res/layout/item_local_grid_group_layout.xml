@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="65dip"
+    android:orientation="vertical"
+    android:paddingBottom="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="6dip">
+
+        <RelativeLayout
+            android:layout_width="55dip"
+            android:layout_height="55dip">
+
+            <com.xyz.digital.photo.app.view.RoundAngleImageView
+                android:id="@+id/item_list_image"
+                android:layout_width="52dip"
+                android:layout_height="52dip"
+                android:scaleType="centerCrop"
+                android:src="@drawable/friends_sends_pictures_no" />
+
+            <com.xyz.digital.photo.app.view.ProgressPieView
+                android:id="@+id/item_child_download_progress"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
+                android:textColor="#FFF"
+                android:visibility="gone"
+                app:ppvBackgroundColor="#AAA"
+                app:ppvProgress="0"
+                app:ppvProgressColor="#DDD"
+                app:ppvStrokeColor="#FFF"
+                app:ppvStrokeWidth="1dp" />
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="0dip"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dip"
+            android:layout_marginRight="10dip"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/item_list_title_txt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="middle"
+                android:gravity="center"
+                android:singleLine="true"
+                android:text="Camera"
+                android:textColor="#333333"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/item_list_title_txt"
+                android:layout_marginTop="5dip"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/item_list_size_txt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="middle"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:text="未知"
+                    android:textColor="#666666"
+                    android:textSize="12sp" />
+
+                <View
+                    android:layout_width="1dip"
+                    android:layout_height="10dip"
+                    android:layout_marginLeft="8dip"
+                    android:layout_marginRight="8dip"
+                    android:background="#999999" />
+
+                <TextView
+                    android:id="@+id/item_list_count_txt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="middle"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:text="未知"
+                    android:textColor="#666666"
+                    android:textSize="12sp" />
+
+                <View
+                    android:layout_width="1dip"
+                    android:layout_height="10dip"
+                    android:layout_marginLeft="8dip"
+                    android:layout_marginRight="8dip"
+                    android:background="#999999" />
+
+                <TextView
+                    android:id="@+id/item_list_time_txt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="middle"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:text="未知"
+                    android:textColor="#666666"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="5dip">
+
+            <ImageView
+                android:id="@+id/item_child_arrows_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:src="@drawable/btn_home_counterattack" />
+
+            <TextView
+                android:id="@+id/item_child_isupload_txt"
+                android:layout_width="55dip"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/view_ellipse"
+                android:gravity="center"
+                android:paddingBottom="5dip"
+                android:paddingLeft="12dip"
+                android:paddingRight="12dip"
+                android:paddingTop="5dip"
+                android:text="已上传"
+                android:textColor="@drawable/selector_upload_txt"
+                android:textSize="10sp"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/item_child_select_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:src="@drawable/select_icon"
+                android:visibility="gone" />
+
+            <com.xyz.digital.photo.app.view.ProgressPieView
+                android:id="@+id/item_child_upload_progress"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_centerInParent="true"
+                android:textColor="#FFF"
+                android:visibility="gone"
+                app:ppvBackgroundColor="#AAA"
+                app:ppvProgress="0"
+                app:ppvProgressColor="#DDD"
+                app:ppvStrokeColor="#FFF"
+                app:ppvStrokeWidth="1dp" />
+
+        </RelativeLayout>
+    </LinearLayout>
+
+</LinearLayout>

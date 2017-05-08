@@ -356,10 +356,14 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                 break;
             case R.id.fragment_photo_choose_tab:
                 // 点击选择
-                if((mListAdapter != null && mListAdapter.getList().size() > 0) && mListAdapter.getItem(0).isFolder()) {
-                    return;
+                if(mListLayout.getVisibility() == View.VISIBLE) {
+                    // 列表模式
+                    if(!mListAdapter.getItem(0).isFolder()) {
+                        showSelect();
+                    }
+                } else {
+                    showSelect();
                 }
-                showSelect();
                 break;
             case R.id.fragment_photo_image_tab:
                 // 图片

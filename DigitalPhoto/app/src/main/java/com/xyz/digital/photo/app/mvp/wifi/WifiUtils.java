@@ -442,7 +442,7 @@ public class WifiUtils {
         List<ScanResult> scanResults = sortByLevel(mWifiManager.getScanResults());
 
         String key = "ZXFAP";
-        boolean filtration = false;
+        boolean filtration = true;
         if(filtration) {
             List<ScanResult> temp = new ArrayList<>();
              for(ScanResult scanResult : scanResults) {

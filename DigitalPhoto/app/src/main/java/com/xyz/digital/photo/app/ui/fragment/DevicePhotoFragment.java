@@ -260,7 +260,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 });
             }
         }
-        showFiles(MEDIA_FILE_TYPE.IMAGE, true);
+        showFiles(mShowMediaType, true);
     }
 
     private void showFiles(MEDIA_FILE_TYPE type, boolean refresh) {

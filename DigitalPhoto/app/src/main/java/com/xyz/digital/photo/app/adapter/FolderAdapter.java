@@ -33,7 +33,7 @@ public class FolderAdapter extends BaseRecyclerAdapter<FolderBean> {
 
     @Override
     public int getItemLayoutId(int viewType) {
-        return R.layout.item_grid_group_layout;
+        return R.layout.item_local_grid_group_layout;
     }
 
     @Override
