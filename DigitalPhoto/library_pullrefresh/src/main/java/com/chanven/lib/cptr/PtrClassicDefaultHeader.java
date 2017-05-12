@@ -136,9 +136,9 @@ public class PtrClassicDefaultHeader extends FrameLayout implements PtrUIHandler
         mRotateView.setVisibility(VISIBLE);
         mTitleTextView.setVisibility(VISIBLE);
         if (frame.isPullToRefresh()) {
-            mTitleTextView.setText(getResources().getString(R.string.cube_ptr_pull_down_to_refresh));
+            mTitleTextView.setText("下拉刷新");
         } else {
-            mTitleTextView.setText(getResources().getString(R.string.cube_ptr_pull_down));
+            mTitleTextView.setText("下拉即可刷新");
         }
     }
 
@@ -148,7 +148,7 @@ public class PtrClassicDefaultHeader extends FrameLayout implements PtrUIHandler
         hideRotateView();
         mProgressBar.setVisibility(VISIBLE);
         mTitleTextView.setVisibility(VISIBLE);
-        mTitleTextView.setText(R.string.cube_ptr_refreshing);
+        mTitleTextView.setText("加载中,请稍后...");
 
         tryUpdateLastUpdateTime();
         mLastUpdateTimeUpdater.stop();
@@ -161,7 +161,7 @@ public class PtrClassicDefaultHeader extends FrameLayout implements PtrUIHandler
         mProgressBar.setVisibility(INVISIBLE);
 
         mTitleTextView.setVisibility(VISIBLE);
-        mTitleTextView.setText(getResources().getString(R.string.cube_ptr_refresh_complete));
+        mTitleTextView.setText("更新完成.");
 
         // update last update time
         SharedPreferences sharedPreferences = getContext().getSharedPreferences(KEY_SharedPreferences, 0);
@@ -202,10 +202,10 @@ public class PtrClassicDefaultHeader extends FrameLayout implements PtrUIHandler
             return null;
         }
         StringBuilder sb = new StringBuilder();
-        sb.append(getContext().getString(R.string.cube_ptr_last_update));
+        sb.append("上次更新: ");
 
         if (seconds < 60) {
-            sb.append(seconds + getContext().getString(R.string.cube_ptr_seconds_ago));
+            sb.append(seconds + " 秒之前");
         } else {
             int minutes = (seconds / 60);
             if (minutes > 60) {
@@ -214,11 +214,11 @@ public class PtrClassicDefaultHeader extends FrameLayout implements PtrUIHandler
                     Date date = new Date(mLastUpdateTime);
                     sb.append(sDataFormat.format(date));
                 } else {
-                    sb.append(hours + getContext().getString(R.string.cube_ptr_hours_ago));
+                    sb.append(hours + " 小时之前");
                 }
 
             } else {
-                sb.append(minutes + getContext().getString(R.string.cube_ptr_minutes_ago));
+                sb.append(minutes + " 分钟之前");
             }
         }
         return sb.toString();
@@ -253,16 +253,16 @@ public class PtrClassicDefaultHeader extends FrameLayout implements PtrUIHandler
     private void crossRotateLineFromTopUnderTouch(PtrFrameLayout frame) {
         if (!frame.isPullToRefresh()) {
             mTitleTextView.setVisibility(VISIBLE);
-            mTitleTextView.setText(R.string.cube_ptr_release_to_refresh);
+            mTitleTextView.setText("松开即可刷新");
         }
     }
 
     private void crossRotateLineFromBottomUnderTouch(PtrFrameLayout frame) {
         mTitleTextView.setVisibility(VISIBLE);
         if (frame.isPullToRefresh()) {
-            mTitleTextView.setText(getResources().getString(R.string.cube_ptr_pull_down_to_refresh));
+            mTitleTextView.setText("下拉刷新");
         } else {
-            mTitleTextView.setText(getResources().getString(R.string.cube_ptr_pull_down));
+            mTitleTextView.setText("下拉即可刷新");
         }
     }
 

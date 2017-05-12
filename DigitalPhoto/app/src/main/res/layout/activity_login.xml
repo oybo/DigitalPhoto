@@ -28,7 +28,7 @@
                 android:drawableLeft="@drawable/login_device_icon"
                 android:drawablePadding="12dip"
                 android:gravity="center_vertical"
-                android:hint="请输入您的设备号"
+                android:hint="@string/login_please_input_name_txt"
                 android:inputType="textVisiblePassword"
                 android:singleLine="true"
                 android:textColor="#666666"
@@ -46,7 +46,7 @@
                 android:drawableLeft="@drawable/login_pwd_icon"
                 android:drawablePadding="12dip"
                 android:gravity="center_vertical"
-                android:hint="请输入您的密码"
+                android:hint="@string/login_please_input_pwd_txt"
                 android:inputType="textPassword"
                 android:singleLine="true"
                 android:textColor="#666666"
@@ -88,7 +88,7 @@
                 android:layout_marginRight="40dip"
                 android:layout_marginTop="30dip"
                 android:background="@drawable/selector_blue_bt_layout"
-                android:text="登录"
+                android:text="@string/login_login_txt"
                 android:textColor="#FFFFFF"
                 android:textSize="14sp"/>
 
@@ -99,7 +99,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="10dip"
-                android:text="记住密码"
+                android:text="@string/login_save_pwd_txt"
                 android:textColor="#777777"/>
 
         </LinearLayout>

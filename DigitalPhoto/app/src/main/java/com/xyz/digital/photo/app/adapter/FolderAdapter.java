@@ -2,14 +2,15 @@ package com.xyz.digital.photo.app.adapter;
 
 import android.content.Context;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.xyz.digital.photo.app.AppContext;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.adapter.base.RecyclerViewHolder;
 import com.xyz.digital.photo.app.bean.FolderBean;
 import com.xyz.digital.photo.app.bean.UploadInfo;
-import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 import com.xyz.digital.photo.app.manager.DeviceManager;
 import com.xyz.digital.photo.app.manager.ImageLoadManager;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
@@ -43,7 +44,7 @@ public class FolderAdapter extends BaseRecyclerAdapter<FolderBean> {
 
         holder.setText(R.id.item_list_size_txt, item.getSize());
 
-        holder.setText(R.id.item_list_count_txt, String.valueOf(item.getImageCounts()) + "项");
+        holder.setText(R.id.item_list_count_txt, String.valueOf(item.getImageCounts()) + AppContext.getInstance().getSString(R.string.download_item_txt));
 
         holder.setText(R.id.item_list_time_txt, item.getDate());
 
@@ -52,24 +53,25 @@ public class FolderAdapter extends BaseRecyclerAdapter<FolderBean> {
         ProgressPieView pieView = (ProgressPieView) holder.getView(R.id.item_child_upload_progress);
         pieView.setTag("ProgressPieView" + item.getTopImagePath());
 
+        TextView isUoloadTxt = holder.getTextView(R.id.item_child_isupload_txt);
+        ImageView uoloadStateTxt = holder.getImageView(R.id.item_child_already_upload);
+
         if (item.isFolder()) {
             // 文件夹
             imageView.setImageResource(R.drawable.folder);
 
             holder.getView(R.id.item_child_arrows_image).setVisibility(View.VISIBLE);
-            holder.getView(R.id.item_child_isupload_txt).setVisibility(View.INVISIBLE);
+            isUoloadTxt.setVisibility(View.INVISIBLE);
+            uoloadStateTxt.setVisibility(View.INVISIBLE);
             holder.getView(R.id.item_child_select_image).setVisibility(View.INVISIBLE);
             pieView.setVisibility(View.INVISIBLE);
         } else {
+            ImageLoadManager.setImage(item.getTopImagePath(), imageView);
             holder.getView(R.id.item_child_arrows_image).setVisibility(View.INVISIBLE);
-            if (item.getFileType() == MEDIA_FILE_TYPE.AUDIO) {
-                imageView.setImageResource(R.drawable.defult_audio_icon);
-            } else {
-                ImageLoadManager.setImage(item.getTopImagePath(), imageView);
-            }
+
             if (isShowSelect) {
                 // 开始选择
-                holder.getView(R.id.item_child_isupload_txt).setVisibility(View.INVISIBLE);
+                isUoloadTxt.setVisibility(View.INVISIBLE);
                 holder.getView(R.id.item_child_select_image).setVisibility(View.INVISIBLE);
                 pieView.setVisibility(View.INVISIBLE);
 
@@ -78,16 +80,20 @@ public class FolderAdapter extends BaseRecyclerAdapter<FolderBean> {
                 }
             } else {
                 holder.getView(R.id.item_child_select_image).setVisibility(View.INVISIBLE);
-                TextView isUoloadTxt = holder.getTextView(R.id.item_child_isupload_txt);
+                isUoloadTxt.setVisibility(View.VISIBLE);
+                if (DeviceManager.getInstance().isUpload(item.getTopImagePath())) {
+                    isUoloadTxt.setSelected(false);
+                } else {
+                    isUoloadTxt.setSelected(true);
+                }
 
                 // 判断是否处于上传
                 if (DeviceManager.getInstance().isUpload(item.getTopImagePath())) {
-                    isUoloadTxt.setVisibility(View.INVISIBLE);
                     pieView.setVisibility(View.VISIBLE);
                     UploadInfo uploadInfo = DeviceManager.getInstance().getUploadInfo(item.getTopImagePath());
                     switch (uploadInfo.getState()) {
                         case 0:
-                            pieView.setText("等待");
+                            pieView.setText(AppContext.getInstance().getSString(R.string.download_wait_txt));
                             break;
                     }
                 } else {
@@ -95,23 +101,15 @@ public class FolderAdapter extends BaseRecyclerAdapter<FolderBean> {
                 }
 
                 boolean isUpload = PreferenceUtils.getInstance().getBoolean(item.getTopImagePath(), false);
-                if (isUpload) {
-                    isUoloadTxt.setVisibility(View.VISIBLE);
-                    pieView.setText("成功");
+                boolean isExist = DeviceManager.getInstance().isExist(item.getFolderName());
+                if (isUpload && isExist) {
+                    uoloadStateTxt.setVisibility(View.VISIBLE);
+                    pieView.setText(AppContext.getInstance().getSString(R.string.download_success_txt));
                     if(!DeviceManager.getInstance().isUpload(item.getTopImagePath())) {
                         pieView.setVisibility(View.INVISIBLE);
                     }
-
-                    isUoloadTxt.setText("已上传");
-                    isUoloadTxt.setSelected(false);
                 } else {
-                    if (DeviceManager.getInstance().isUpload(item.getTopImagePath())) {
-                        isUoloadTxt.setVisibility(View.INVISIBLE);
-                    } else {
-                        isUoloadTxt.setVisibility(View.VISIBLE);
-                    }
-                    isUoloadTxt.setText("上传");
-                    isUoloadTxt.setSelected(true);
+                    uoloadStateTxt.setVisibility(View.INVISIBLE);
                 }
             }
         }

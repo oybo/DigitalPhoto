@@ -2,6 +2,8 @@ package com.xyz.digital.photo.app.ui;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -9,6 +11,7 @@ import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,10 +21,14 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.xyz.digital.photo.app.R;
+import com.xyz.digital.photo.app.ui.fragment.SetFragment;
+import com.xyz.digital.photo.app.util.PreferenceUtils;
 import com.xyz.digital.photo.app.util.SystemBarUtil;
 import com.xyz.digital.photo.app.util.ToastUtil;
 import com.xyz.digital.photo.app.view.DialogTips;
 import com.xyz.digital.photo.app.view.HeaderView;
+
+import java.util.Locale;
 
 import butterknife.ButterKnife;
 
@@ -31,13 +38,29 @@ import butterknife.ButterKnife;
 
 public abstract class BaseActivity extends AppCompatActivity {
 
-    protected static final int PUBLIC_EMNU_VIEW = 10;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         initSystemBarTint();
+
+        //根据上次的语言设置，重新设置语言
+        int id = PreferenceUtils.getInstance().getInt(SetFragment.mSelectLanguage_key, 0);
+        String sta = id == 0 ? "zh" : "en";
+        switchLanguage(sta);
+    }
+
+    protected void switchLanguage(String language) {
+        //设置应用语言类型
+        Resources resources = getResources();
+        Configuration config = resources.getConfiguration();
+        DisplayMetrics dm = resources.getDisplayMetrics();
+        if (language.equals("en")) {
+            config.locale = Locale.ENGLISH;
+        } else {
+            config.locale = Locale.getDefault();
+        }
+        resources.updateConfiguration(config, dm);
     }
 
     @Override
@@ -62,31 +85,41 @@ public abstract class BaseActivity extends AppCompatActivity {
         initToolBar(toolbar, homeAsUpEnabled, getString(resTitle));
     }
 
-    /** 初始化 Toolbar */
+    /**
+     * 初始化 Toolbar
+     */
     public void initToolBar(Toolbar toolbar, boolean homeAsUpEnabled, String title) {
         toolbar.setTitle(title);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(homeAsUpEnabled);
     }
 
-    /** 子类可以重写改变状态栏颜色 */
+    /**
+     * 子类可以重写改变状态栏颜色
+     */
     protected int setStatusBarColor() {
         return getColorPrimary();
     }
 
-    /** 获取主题色 */
+    /**
+     * 获取主题色
+     */
     public int getColorPrimary() {
         TypedValue typedValue = new TypedValue();
         getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
         return typedValue.data;
     }
 
-    /** 子类可以重写决定是否使用透明状态栏 */
+    /**
+     * 子类可以重写决定是否使用透明状态栏
+     */
     protected boolean translucentStatusBar() {
         return false;
     }
 
-    /** 设置状态栏颜色 */
+    /**
+     * 设置状态栏颜色
+     */
     protected void initSystemBarTint() {
         Window window = getWindow();
         if (translucentStatusBar()) {
@@ -152,7 +185,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             DialogTips dialogTips = new DialogTips(context);
             dialogTips.setMessage(message);
             dialogTips.setOkListenner(listenner);
-            if(!isTouchCancel) {
+            if (!isTouchCancel) {
                 dialogTips.setCancelable(false);
                 dialogTips.setCanceledOnTouchOutside(false);
             }
@@ -169,7 +202,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             dialogTips.setMessage(message);
             dialogTips.setCancelListenner(cancelListenner);
             dialogTips.setOkListenner(listenner);
-            if(!isTouchCancel) {
+            if (!isTouchCancel) {
                 dialogTips.setCancelable(false);
                 dialogTips.setCanceledOnTouchOutside(false);
             }
@@ -185,7 +218,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     protected void initTopBarOnlyTitle(String title) {
         HeaderView headerView = (HeaderView) findViewById(R.id.actionbar_headerview);
-        if(headerView != null) {
+        if (headerView != null) {
             headerView.setTitile(title);
             headerView.getToolbar().setTitle("");
             headerView.getToolbar().setNavigationIcon(R.drawable.finish_icon);
@@ -195,20 +228,12 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if(getToolBarMenuView() != 0) {
-            if(getToolBarMenuView() == PUBLIC_EMNU_VIEW) {
-                // 使用公共的
-                getMenuInflater().inflate(R.menu.toolbar_menu_public, menu);
-            } else {
-                getMenuInflater().inflate(getToolBarMenuView(), menu);
-            }
-        }
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == android.R.id.home) {
+        if (item.getItemId() == android.R.id.home) {
             // 统一的返回按钮
             finish();
         } else {
@@ -220,5 +245,4 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected abstract int getToolBarMenuView();
 
     protected abstract void onItemMenuSelected(MenuItem item);
-
 }

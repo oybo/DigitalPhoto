@@ -18,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.xyz.digital.photo.app.AppContext;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.FolderAdapter;
 import com.xyz.digital.photo.app.adapter.LocalMediaAdapter;
@@ -126,6 +127,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
         mPresenter = new PhotoPresenter(this);
         // 默认图表模式
         mPresenter.showType(MEDIA_SHOW_TYPE.CHART);
+        setSelectTab(1);
 
         // 图表模式
         mChartAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
@@ -133,7 +135,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
             public void onItemClick(View itemView, int pos) {
                 if (mSelectLayout.getVisibility() == View.VISIBLE) {
                     // 选择模式
-                    mSelectNumTxt.setText("已选择" + mChartAdapter.select(pos) + "项");
+                    mSelectNumTxt.setText(AppContext.getInstance().getSString(R.string.select_z_txt, String.valueOf(mChartAdapter.select(pos))));
                     checkSelectAll();
                 } else {
                     MediaFileBean mediaFileBean = mChartAdapter.getItem(pos);
@@ -167,7 +169,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
             public void onItemClick(View itemView, int pos) {
                 if (mSelectLayout.getVisibility() == View.VISIBLE) {
                     // 选择模式
-                    mSelectNumTxt.setText("已选择" + mListAdapter.select(pos) + "项");
+                    mSelectNumTxt.setText(AppContext.getInstance().getSString(R.string.select_z_txt, String.valueOf(mListAdapter.select(pos))));
                     checkSelectAll();
                 } else {
                     // 获取第一个可见view的位置
@@ -176,7 +178,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                         firstItemPosition = ((LinearLayoutManager) mListRecyclerView.getLayoutManager()).findFirstVisibleItemPosition();
                         List<FolderBean> files = new ArrayList<FolderBean>();
                         String folderName = mListAdapter.getItem(pos).getFolderName();
-                        mPathTxt.setText("本地存储设备 > " + folderName);
+                        mPathTxt.setText(AppContext.getInstance().getSString(R.string.bendi_device_txt) + " > " + folderName);
                         List<MediaFileBean> childList = mListImages.get(folderName);
                         for(MediaFileBean mediaFileBean : childList) {
                             FolderBean folderBean  = new FolderBean();
@@ -228,29 +230,24 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
             switch (v.getId()) {
                 case R.id.item_child_upload_cancel:
                     // 停止上传任务
-//                    try {
-//                        String path = mChartAdapter.getItem(position).getFilePath();
-//                        for (UploadInfo uploadInfo : uploadManager.getAllTask()) {
-//                            if (path.equals(uploadInfo.getTaskKey())) {
-//                                uploadInfo.getTask().cancel(true);
-//                                uploadManager.getAllTask().remove(uploadInfo);
-//                                mChartAdapter.addUpload(position);
-//                                return;
-//                            }
-//                        }
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
+                    try {
+                        String path = mChartAdapter.getItem(position).getFilePath();
+                        UploadInfo uploadInfo = DeviceManager.getInstance().getCurUploadInfo();
+                        if(uploadInfo != null && uploadInfo.getFilePath().equals(path)) {
+                            return;
+                        }
+                        DeviceManager.getInstance().removeUpload(path);
+                        mChartAdapter.notifyItemChanged(position);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     break;
                 case R.id.item_child_isupload_txt:
                     // 点击单个上传
                     MediaFileBean file = mChartAdapter.getItem(position);
-                    boolean isUpload = PreferenceUtils.getInstance().getBoolean(file.getFilePath(), false);
-                    if(!isUpload) {
-                        if(!DeviceManager.getInstance().isUpload(file.getFilePath())) {
-                            mChartAdapter.select(position);
-                            uploadFiles();
-                        }
+                    if(!DeviceManager.getInstance().isUpload(file.getFilePath())) {
+                        mChartAdapter.select(position);
+                        uploadFiles();
                     }
                     break;
             }
@@ -265,8 +262,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                 case R.id.item_child_isupload_txt:
                     // 点击单个上传
                     FolderBean file = mListAdapter.getItem(position);
-                    boolean isUpload = PreferenceUtils.getInstance().getBoolean(file.getTopImagePath(), false);
-                    if(!isUpload) {
+                    if(!DeviceManager.getInstance().isUpload(file.getTopImagePath())) {
                         mListAdapter.select(position);
                         uploadFiles();
                     }
@@ -290,10 +286,9 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mPathTxt.setText("本地存储设备");
+                    mPathTxt.setText(AppContext.getInstance().getSString(R.string.bendi_device_txt));
                     mListAdapter.notifyDataSetChanged();
                     if (isRefreshModel) {
-                        setSelectTab(1);
                         mChartRecyclerView.setVisibility(View.GONE);
                         mListLayout.setVisibility(View.VISIBLE);
                         mModelTypeImage.setImageResource(R.drawable.mode_list_icon);
@@ -316,7 +311,6 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                 public void run() {
                     mChartAdapter.notifyDataSetChanged();
                     if (isRefreshModel) {
-                        setSelectTab(1);
                         mListLayout.setVisibility(View.GONE);
                         mChartRecyclerView.setVisibility(View.VISIBLE);
                         mModelTypeImage.setImageResource(R.drawable.mode_chrat_icon);
@@ -346,7 +340,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
     @Override
     public void onClick(View view) {
         if (DeviceManager.getInstance().isUploading()) {
-            ToastUtil.showToast(getActivity(), "正在上传,请稍后");
+            ToastUtil.showToast(getActivity(), AppContext.getInstance().getSString(R.string.uploading_txt));
             return;
         }
         switch (view.getId()) {
@@ -398,15 +392,15 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                 if (isSelectAll()) {
                     // 取消全选
                     if(mListLayout.getVisibility() == View.VISIBLE) {
-                        mSelectNumTxt.setText("已选择" + mListAdapter.clearSelectAll() + "项");
+                        mSelectNumTxt.setText(AppContext.getInstance().getSString(R.string.select_z_txt, String.valueOf(mListAdapter.clearSelectAll())));
                     } else {
-                        mSelectNumTxt.setText("已选择" + mChartAdapter.clearSelectAll() + "项");
+                        mSelectNumTxt.setText(AppContext.getInstance().getSString(R.string.select_z_txt, String.valueOf(mChartAdapter.clearSelectAll())));
                     }
                 } else {
                     if(mListLayout.getVisibility() == View.VISIBLE) {
-                        mSelectNumTxt.setText("已选择" + mListAdapter.selectAll() + "项");
+                        mSelectNumTxt.setText(AppContext.getInstance().getSString(R.string.select_z_txt, String.valueOf(mListAdapter.clearSelectAll())));
                     } else {
-                        mSelectNumTxt.setText("已选择" + mChartAdapter.selectAll() + "项");
+                        mSelectNumTxt.setText(AppContext.getInstance().getSString(R.string.select_z_txt, String.valueOf(mChartAdapter.clearSelectAll())));
                     }
                 }
                 checkSelectAll();
@@ -428,7 +422,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                     uploadSize = mChartAdapter.getSelectFiles().size();
                 }
                 if(uploadSize == 0) {
-                    ToastUtil.showToast(getActivity(), "请选择要上传的文件");
+                    ToastUtil.showToast(getActivity(), AppContext.getInstance().getSString(R.string.pleace_upload_file_txt));
                     return;
                 }
                 uploadFiles();
@@ -496,7 +490,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
     }
 
     private void deleteFiles() {
-        showTipDialog(getActivity(), "是否删除?", new DialogTips.onDialogOkListenner() {
+        showTipDialog(getActivity(), AppContext.getInstance().getSString(R.string.is_delete_txt), new DialogTips.onDialogOkListenner() {
             @Override
             public void onClick() {
                 new AsyncTask<Void, Void, Void>() {
@@ -528,7 +522,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                             // 音乐
                             mPresenter.showMediaFiles(MEDIA_FILE_TYPE.AUDIO);
                         }
-                        mSelectNumTxt.setText("已选择0项");
+                        mSelectNumTxt.setText(AppContext.getInstance().getSString(R.string.select_z_txt, "0"));
                     }
                 }.execute();
             }
@@ -540,7 +534,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
         mTabBarLayout.setVisibility(View.GONE);
         mSelectLayout.setVisibility(View.VISIBLE);
 
-        mSelectNumTxt.setText("已选择0项");
+        mSelectNumTxt.setText(AppContext.getInstance().getSString(R.string.select_z_txt, String.valueOf(0)));
         mPhotoUploadPopView.showAtLocation(mTabBarLayout, Gravity.BOTTOM, 0, 0);
         if(mListLayout.getVisibility() == View.VISIBLE) {
             mListAdapter.showSelect(true);
@@ -569,7 +563,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
     }
 
     public void closeShowChild() {
-        mPathTxt.setText("本地存储设备");
+        mPathTxt.setText(AppContext.getInstance().getSString(R.string.bendi_device_txt));
         mListAdapter.clear();
         mListAdapter.appendToList(mPresenter.subGroupOfMedia(mListImages));
         mListAdapter.notifyDataSetChanged();
@@ -601,9 +595,9 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
 
     private void checkSelectAll() {
         if (isSelectAll()) {
-            mSelectAllTxt.setText("取消全选");
+            mSelectAllTxt.setText(AppContext.getInstance().getSString(R.string.select_uall_txt));
         } else {
-            mSelectAllTxt.setText("全选");
+            mSelectAllTxt.setText(AppContext.getInstance().getSString(R.string.select_all_txt));
         }
     }
 
@@ -614,6 +608,14 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
             // 刷新上传状态
             UploadInfo uploadInfo = (UploadInfo) eventBase.getData();
             refresh(uploadInfo);
+        } else if(action.equals(Constants.SEND_DELETE_FILE_RESULT)) {
+            // 刷新下列表
+            if(mChartAdapter != null) {
+                mChartAdapter.notifyDataSetChanged();
+            }
+            if(mListAdapter != null) {
+                mListAdapter.notifyDataSetChanged();
+            }
         }
     }
 
@@ -629,7 +631,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                 int state = uploadInfo.getState();
                 if(state == 0) {
                     // 等待上传
-                    pieView.setText("等待");
+                    pieView.setText(AppContext.getInstance().getSString(R.string.download_wait_txt));
                 } else if(state == 1) {
                     // 上传中
                     int progress = Integer.parseInt(PubUtils.getSHCollagen(uploadInfo.getTotal(), uploadInfo.getProcessed()));
@@ -637,13 +639,14 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                     pieView.setText((Math.round(progress * 100) * 1.0f / 100) + "%");
                 } else if (state == -1) {
                     // 上传出错
-                    pieView.setText("错误");
+                    pieView.setText(AppContext.getInstance().getSString(R.string.error_txt));
                 } else if (state == 2) {
                     // 上传成功
-                    pieView.setText("成功");
+                    pieView.setText(AppContext.getInstance().getSString(R.string.download_success_txt));
                     if(mListLayout.getVisibility() == View.VISIBLE) {
                         for(FolderBean folderBean : mListAdapter.getList()) {
                             if(folderBean.getTopImagePath().equals(uploadInfo.getFilePath())) {
+                                DeviceManager.getInstance().addRemoteFileMap(folderBean.getFolderName());
                                 PreferenceUtils.getInstance().putBoolen(folderBean.getTopImagePath(), true);
                                 mListAdapter.removeUpload(folderBean.getPosition());
                                 mListAdapter.notifyItemChanged(folderBean.getPosition());
@@ -653,6 +656,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                     } else {
                         for(MediaFileBean mediaFileBean : mChartAdapter.getList()) {
                             if(mediaFileBean.getFilePath().equals(uploadInfo.getFilePath())) {
+                                DeviceManager.getInstance().addRemoteFileMap(mediaFileBean.getFileName());
                                 PreferenceUtils.getInstance().putBoolen(mediaFileBean.getFilePath(), true);
                                 mChartAdapter.removeUpload(mediaFileBean.getPosition());
                                 mChartAdapter.notifyItemChanged(mediaFileBean.getPosition());

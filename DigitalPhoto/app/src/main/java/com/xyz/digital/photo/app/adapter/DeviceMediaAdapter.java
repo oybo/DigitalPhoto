@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.xyz.digital.photo.app.AppContext;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.adapter.base.RecyclerViewHolder;
@@ -17,6 +18,8 @@ import com.xyz.digital.photo.app.manager.ImageLoadManager;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
 import com.xyz.digital.photo.app.util.PubUtils;
 import com.xyz.digital.photo.app.view.ProgressPieView;
+
+import java.io.File;
 
 import static com.xyz.digital.photo.app.manager.DeviceManager.mRemoteCurrentPath;
 
@@ -82,7 +85,7 @@ public class DeviceMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
             if (downloadInfo != null) {
                 switch (downloadInfo.getState()) {
                     case 0:
-                        pieView.setText("等待");
+                        pieView.setText(AppContext.getInstance().getSString(R.string.download_wait_txt));
                         break;
                 }
             }
@@ -93,14 +96,14 @@ public class DeviceMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
         // 判断是否下载完成
         TextView download = holder.getTextView(R.id.item_device_media_download_txt);
         boolean isUpload = PreferenceUtils.getInstance().getBoolean(localPath, false);
-        if (isUpload) {
-            pieView.setText("成功");
+        if (isUpload && new File(localPath).exists()) {
+            pieView.setText(AppContext.getInstance().getSString(R.string.download_success_txt));
             pieView.setVisibility(View.GONE);
             download.setSelected(true);
-            download.setText("已下载");
+            download.setText(AppContext.getInstance().getSString(R.string.download_finish_txt));
         } else {
             download.setSelected(false);
-            download.setText("下载");
+            download.setText(AppContext.getInstance().getSString(R.string.download_download_txt));
         }
 
     }

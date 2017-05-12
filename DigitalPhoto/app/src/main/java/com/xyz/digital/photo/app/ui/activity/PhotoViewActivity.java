@@ -24,7 +24,6 @@ import android.widget.TextView;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.manager.ImageLoadManager;
 import com.xyz.digital.photo.app.ui.BaseActivity;
-import com.xyz.digital.photo.app.util.ToastUtil;
 import com.xyz.digital.photo.app.view.photoview.PhotoView;
 import com.xyz.digital.photo.app.view.photoview.PhotoViewAttacher;
 
@@ -81,7 +80,6 @@ public class PhotoViewActivity extends BaseActivity implements OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.photoview_delete_bt:
-                ToastUtil.showToast(PhotoViewActivity.this, "删除？");
                 break;
         }
     }

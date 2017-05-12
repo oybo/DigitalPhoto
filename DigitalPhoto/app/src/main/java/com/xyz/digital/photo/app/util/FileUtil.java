@@ -115,7 +115,6 @@ public class FileUtil {
             writer = new BufferedWriter(write);
             writer.append(fileContent);
         } catch (Exception e) {
-            System.out.println("写文件内容操作出错");
             e.printStackTrace();
         } finally {
             try {

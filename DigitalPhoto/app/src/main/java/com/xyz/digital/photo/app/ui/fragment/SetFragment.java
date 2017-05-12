@@ -7,12 +7,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.actions.actcommunication.ActCommunication;
+import com.xyz.digital.photo.app.AppContext;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.manager.DeviceManager;
 import com.xyz.digital.photo.app.ui.BaseFragment;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
-import com.xyz.digital.photo.app.util.ToastUtil;
+import com.xyz.digital.photo.app.util.PubUtils;
+import com.xyz.digital.photo.app.view.AppInfoDialog;
 import com.xyz.digital.photo.app.view.SelectDialog;
 import com.xyz.digital.photo.app.view.SwitchButton;
 
@@ -29,20 +30,18 @@ import butterknife.ButterKnife;
 
 public class SetFragment extends BaseFragment implements View.OnClickListener {
 
-    public static final String mImageShowScale_key = "mImageShowScale_key";
-    public static final String mPlayTime_key = "mPlayTime_key";
-    public static final String mPlayOrder_key = "mPlayOrder_key";
-    public static final String mVideoShowScale_key = "mVideoShowScale_key";
-    public static final String mVideoPlayModel_key = "mVideoPlayModel_key";
-    public static final String mAudioPlayModel_key = "mAudioPlayModel_key";
-    public static final String mStartPlayModel_key = "mStartPlayModel_key";
-    private static final String[] mImageShowScale = new String[] { "全屏", "原始尺寸", "等比例缩放"};
-    private static final String[] mPlayTime = new String[] { "3秒", "5秒", "15秒", "30秒", "1分钟", "5分钟", "15分钟", "30分钟", "1小时"};
-    private static final String[] mPlayOrder = new String[] { "顺序", "随机"};
-    private static final String[] mVideoShowScale = new String[] { "全屏", "原始尺寸", "等比例"};
-    private static final String[] mVideoPlayModel = new String[] { "顺序", "单个重复", "全部重复", "随机", "随机+重复"};
-    private static final String[] mAudioPlayModel = new String[] { "顺序", "单个重复", "全部重复", "随机", "随机+重复"};
-    private static final String[] mStartPlayModel = new String[] { "关", "图片", "音乐", "视频", "图片+音乐", "日历"};
+    public static final String mImageShowScale_key = "photo_display_ratio";
+    public static final String mPlayTime_key = "photo_slide_interval";
+    public static final String mPlayOrder_key = "photo_play_mode";
+    public static final String mVideoShowScale_key = "video_displaymode";
+    public static final String mVideoPlayModel_key = "video_playmode";
+    public static final String mAudioPlayModel_key = "music_play_mode";
+    public static final String mStartPlayModel_key = "sys_startup_play";
+    public static final String mSelectLanguage_key = "select_language_key";
+
+    public static final String mBreakpointPlay_key = "video_resume_enable";
+    public static final String mSubtitle_key = "video_subtitle";
+    public static final String mShowSpectrum_key = "music_show_spectrum";
 
     @Bind(R.id.set_image_show_ratio_txt) TextView mImageShowRatioTxt;
     @Bind(R.id.set_image_play_time_txt) TextView mImagePlayTimeTxt;
@@ -54,6 +53,9 @@ public class SetFragment extends BaseFragment implements View.OnClickListener {
     @Bind(R.id.set_breakpoint_play_sb) SwitchButton mBreakpointPlayBt;
     @Bind(R.id.set_subtitle_sb) SwitchButton mSubtitleBt;
     @Bind(R.id.set_show_channel_sb) SwitchButton mShowChannelBt;
+
+    @Bind(R.id.set_version_txt) TextView mVersionTxt;
+    @Bind(R.id.set_language_txt) TextView mLanguageTxt;
 
     private SelectDialog mSelectDialog;
     private List<String> mItemSelects = new ArrayList<>();
@@ -82,61 +84,79 @@ public class SetFragment extends BaseFragment implements View.OnClickListener {
         getView().findViewById(R.id.set_video_play_model_layout).setOnClickListener(this);
         getView().findViewById(R.id.set_audio_play_model_layout).setOnClickListener(this);
         getView().findViewById(R.id.set_start_play_model_layout).setOnClickListener(this);
+
+        setSwitchListener(mBreakpointPlayBt, mBreakpointPlay_key);
+        setSwitchListener(mSubtitleBt, mSubtitle_key);
+        setSwitchListener(mShowChannelBt, mShowSpectrum_key);
+
+        getView().findViewById(R.id.set_language_layout).setOnClickListener(this);
+        getView().findViewById(R.id.set_info_layout).setOnClickListener(this);
+    }
+
+    private void setSwitchListener(SwitchButton switchButton, final String key) {
+        switchButton.setOnSwitchListener(new SwitchButton.OnSwitchListener() {
+            @Override
+            public void OnCheckListenr(boolean isCheck) {
+                DeviceManager.getInstance().setpropertiesValue(key, !isCheck ? "0" : "1");
+            }
+        });
     }
 
     private void initData() {
-        setImageShowRatioTxt();
-        setImagePlayTimeTxt();
-        setImagePlayOrderTxt();
-        setVideoShowScaleTxt();
-        setVideoPlayModelTxt();
-        setAudioPlayModelTxt();
-        setStartPlayModelTxt();
+        initTxt();
+        initConfig();
 
-        int code = ActCommunication.getInstance().readSystemCfgFile();
-        ToastUtil.showToast(getActivity(), "" + code);
+        mVersionTxt.setText(PubUtils.getSoftVersion(getActivity()));
+        mLanguageTxt.setText(mSelectLanguage[PreferenceUtils.getInstance().getInt(mSelectLanguage_key, 0)]);
     }
 
-    private void setImageShowRatioTxt() {
-        int position = PreferenceUtils.getInstance().getInt(mImageShowScale_key, 0);
-        mImageShowRatioTxt.setText(mImageShowScale[position]);
+    private void initConfig() {
+        // 图片显示比例
+        initProperties(mImageShowScale_key, mImageShowScale_key, mImageShowRatioTxt, mImageShowScale);
+        // 幻灯片放映时间
+        initProperties(mPlayTime_key, mPlayTime_key, mImagePlayTimeTxt, mPlayTime);
+        // 幻灯片播放顺序
+        initProperties(mPlayOrder_key, mPlayOrder_key, mImagePlayOrderTxt, mPlayOrder);
+        // 视频显示比例
+        initProperties(mVideoShowScale_key, mVideoShowScale_key, mVideoShowScaleTxt, mVideoShowScale);
+        // 视频播放模式
+        initProperties(mVideoPlayModel_key, mVideoPlayModel_key, mVideoPlayModelTxt, mVideoPlayModel);
+        // 音乐播放模式
+        initProperties(mAudioPlayModel_key, mAudioPlayModel_key, mAudioPlayModelTxt, mAudioPlayModel);
+        // 开机播放模式
+        initProperties(mStartPlayModel_key, mStartPlayModel_key, mStartPlayModelTxt, mStartPlayModel);
+
+        // 断点播放功能-开关
+        initSwitch(mBreakpointPlay_key, mBreakpointPlayBt);
+        // 字幕-开关
+        initSwitch(mSubtitle_key, mSubtitleBt);
+        // 显示频谱-开关
+        initSwitch(mShowSpectrum_key, mShowChannelBt);
     }
 
-    private void setImagePlayTimeTxt() {
-        int position = PreferenceUtils.getInstance().getInt(mPlayTime_key, 0);
-        mImagePlayTimeTxt.setText(mPlayTime[position]);
+    private void initSwitch(String key, SwitchButton switchButton) {
+        try {
+            String p = DeviceManager.getInstance().getpropertiesValue(key);
+            switchButton.setCheck(Integer.parseInt(p) == 0 ? false : true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    private void setImagePlayOrderTxt() {
-        int position = PreferenceUtils.getInstance().getInt(mPlayOrder_key, 0);
-        mImagePlayOrderTxt.setText(mPlayOrder[position]);
-    }
+    // 初始化配置文件
+    private void initProperties(String p_key, String sp_key, TextView txtView, String[] values) {
+        try {
+            String p = DeviceManager.getInstance().getpropertiesValue(p_key);
+            PreferenceUtils.getInstance().putInt(sp_key, Integer.parseInt(p));
 
-    private void setVideoShowScaleTxt() {
-        int position = PreferenceUtils.getInstance().getInt(mVideoShowScale_key, 0);
-        mVideoShowScaleTxt.setText(mVideoShowScale[position]);
-    }
-
-    private void setVideoPlayModelTxt() {
-        int position = PreferenceUtils.getInstance().getInt(mVideoPlayModel_key, 0);
-        mVideoPlayModelTxt.setText(mVideoPlayModel[position]);
-    }
-
-    private void setAudioPlayModelTxt() {
-        int position = PreferenceUtils.getInstance().getInt(mAudioPlayModel_key, 0);
-        mAudioPlayModelTxt.setText(mAudioPlayModel[position]);
-    }
-
-    private void setStartPlayModelTxt() {
-        int position = PreferenceUtils.getInstance().getInt(mStartPlayModel_key, 0);
-        mStartPlayModelTxt.setText(mStartPlayModel[position]);
+            txtView.setText(values[Integer.parseInt(p)]);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void onClick(View v) {
-        // 读取配置文件
-        String value = DeviceManager.getInstance().getpropertiesValue("photo_enter_mode");
-        String sds = "";
         mItemSelects.clear();
         switch (v.getId()) {
             case R.id.set_image_show_ratio_layout:
@@ -188,8 +208,32 @@ public class SetFragment extends BaseFragment implements View.OnClickListener {
                     mItemSelects.add(str);
                 }
                 break;
+            case R.id.set_language_layout:
+                // 选择语言
+                selectLanguage();
+                return;
+            case R.id.set_info_layout:
+                // 功能介绍
+                new AppInfoDialog(getActivity()).show();
+                return;
         }
         showSelectDialog(mItemType, mItemSelects);
+    }
+
+    private void selectLanguage() {
+        SelectDialog selectLanguageDialog = new SelectDialog(getActivity());
+        List<String> mItemSelects = new ArrayList<>();
+        for(String str : mSelectLanguage) {
+            mItemSelects.add(str);
+        }
+        selectLanguageDialog.show(8, mItemSelects, new SelectDialog.OnSelectListener() {
+            @Override
+            public void select(int position) {
+                PreferenceUtils.getInstance().putInt(mSelectLanguage_key, position);
+                mLanguageTxt.setText(mSelectLanguage[PreferenceUtils.getInstance().getInt(mSelectLanguage_key, 0)]);
+                getActivity().recreate();
+            }
+        });
     }
 
     private void showSelectDialog(final int type, final List<String> itemSelects) {
@@ -200,34 +244,34 @@ public class SetFragment extends BaseFragment implements View.OnClickListener {
                 switch (type) {
                     case 1:
                         // 图片显示比例
-                        PreferenceUtils.getInstance().putInt(mImageShowScale_key, position);
+                        DeviceManager.getInstance().setpropertiesValue(mImageShowScale_key, String.valueOf(position));
                         break;
                     case 2:
                         // 幻灯片放映时间
-                        PreferenceUtils.getInstance().putInt(mPlayTime_key, position);
+                        DeviceManager.getInstance().setpropertiesValue(mPlayTime_key, String.valueOf(position));
                         break;
                     case 3:
                         // 幻灯片播放顺序
-                        PreferenceUtils.getInstance().putInt(mPlayOrder_key, position);
+                        DeviceManager.getInstance().setpropertiesValue(mPlayOrder_key, String.valueOf(position));
                         break;
                     case 4:
                         // 视频显示比例
-                        PreferenceUtils.getInstance().putInt(mVideoShowScale_key, position);
+                        DeviceManager.getInstance().setpropertiesValue(mVideoShowScale_key, String.valueOf(position));
                         break;
                     case 5:
                         // 视频播放模式
-                        PreferenceUtils.getInstance().putInt(mVideoPlayModel_key, position);
+                        DeviceManager.getInstance().setpropertiesValue(mVideoPlayModel_key, String.valueOf(position));
                         break;
                     case 6:
                         // 音乐播放模式
-                        PreferenceUtils.getInstance().putInt(mAudioPlayModel_key, position);
+                        DeviceManager.getInstance().setpropertiesValue(mAudioPlayModel_key, String.valueOf(position));
                         break;
                     case 7:
                         // 开机播放模式
-                        PreferenceUtils.getInstance().putInt(mStartPlayModel_key, position);
+                        DeviceManager.getInstance().setpropertiesValue(mStartPlayModel_key, String.valueOf(position));
                         break;
                 }
-                initData();
+                initConfig();
             }
         });
     }
@@ -237,4 +281,59 @@ public class SetFragment extends BaseFragment implements View.OnClickListener {
         super.onDestroyView();
         ButterKnife.unbind(this);
     }
+
+    private static String[] mImageShowScale = new String[]{AppContext.getInstance().getSString(R.string.quanping_txt),
+            AppContext.getInstance().getSString(R.string.yscc_txt), AppContext.getInstance().getSString(R.string.dblsf_txt)};
+    private static String[] mPlayTime = new String[]{AppContext.getInstance().getSString(R.string.time_sm_txt),
+            AppContext.getInstance().getSString(R.string.time_wm_txt), AppContext.getInstance().getSString(R.string.time_swm_txt),
+            AppContext.getInstance().getSString(R.string.time_ssm_txt), AppContext.getInstance().getSString(R.string.time_yfz_txt),
+            AppContext.getInstance().getSString(R.string.time_wfz_txt), AppContext.getInstance().getSString(R.string.time_swfz_txt),
+            AppContext.getInstance().getSString(R.string.time_ssfz_txt), AppContext.getInstance().getSString(R.string.time_yxs_txt)};
+    private static String[] mPlayOrder = new String[]{AppContext.getInstance().getSString(R.string.shunxu_txt), AppContext
+            .getInstance().getSString(R.string.suiji_txt)};
+    private static String[] mVideoShowScale = new String[]{AppContext.getInstance().getSString(R.string.quanping_txt), AppContext
+            .getInstance().getSString(R.string.yscc_txt), AppContext.getInstance().getSString(R.string.dblsf_txt)};
+    private static String[] mVideoPlayModel = new String[]{AppContext.getInstance().getSString(R.string.shunxu_txt), AppContext
+            .getInstance().getSString(R.string.sangecf_txt),
+            AppContext.getInstance().getSString(R.string.quanbucf_txt), AppContext.getInstance().getSString(R.string.suiji_txt),
+            AppContext.getInstance().getSString(R.string.suijijchongf_txt)};
+    private static String[] mAudioPlayModel = new String[]{AppContext.getInstance().getSString(R.string.shunxu_txt), AppContext
+            .getInstance().getSString(R.string.sangecf_txt),
+            AppContext.getInstance().getSString(R.string.quanbucf_txt), AppContext.getInstance().getSString(R.string.suiji_txt),
+            AppContext.getInstance().getSString(R.string.suijijchongf_txt)};
+    private static String[] mStartPlayModel = new String[]{AppContext.getInstance().getSString(R.string.close_txt), AppContext
+            .getInstance().getSString(R.string.image_txt),
+            AppContext.getInstance().getSString(R.string.music_txt), AppContext.getInstance().getSString(R.string.video_txt), AppContext
+            .getInstance().getSString(R.string.image_music_txt),
+            AppContext.getInstance().getSString(R.string.set_calendar_txt)};
+    private static String[] mSelectLanguage = new String[] { "简体中文", "English"};
+
+    private void initTxt() {
+        mImageShowScale = new String[]{AppContext.getInstance().getSString(R.string.quanping_txt),
+                AppContext.getInstance().getSString(R.string.yscc_txt), AppContext.getInstance().getSString(R.string.dblsf_txt)};
+        mPlayTime = new String[]{AppContext.getInstance().getSString(R.string.time_sm_txt),
+                AppContext.getInstance().getSString(R.string.time_wm_txt), AppContext.getInstance().getSString(R.string.time_swm_txt),
+                AppContext.getInstance().getSString(R.string.time_ssm_txt), AppContext.getInstance().getSString(R.string.time_yfz_txt),
+                AppContext.getInstance().getSString(R.string.time_wfz_txt), AppContext.getInstance().getSString(R.string.time_swfz_txt),
+                AppContext.getInstance().getSString(R.string.time_ssfz_txt), AppContext.getInstance().getSString(R.string.time_yxs_txt)};
+        mPlayOrder = new String[]{AppContext.getInstance().getSString(R.string.shunxu_txt), AppContext
+                .getInstance().getSString(R.string.suiji_txt)};
+        mVideoShowScale = new String[]{AppContext.getInstance().getSString(R.string.quanping_txt), AppContext
+                .getInstance().getSString(R.string.yscc_txt), AppContext.getInstance().getSString(R.string.dblsf_txt)};
+        mVideoPlayModel = new String[]{AppContext.getInstance().getSString(R.string.shunxu_txt), AppContext
+                .getInstance().getSString(R.string.sangecf_txt),
+                AppContext.getInstance().getSString(R.string.quanbucf_txt), AppContext.getInstance().getSString(R.string.suiji_txt),
+                AppContext.getInstance().getSString(R.string.suijijchongf_txt)};
+        mAudioPlayModel = new String[]{AppContext.getInstance().getSString(R.string.shunxu_txt), AppContext
+                .getInstance().getSString(R.string.sangecf_txt),
+                AppContext.getInstance().getSString(R.string.quanbucf_txt), AppContext.getInstance().getSString(R.string.suiji_txt),
+                AppContext.getInstance().getSString(R.string.suijijchongf_txt)};
+        mStartPlayModel = new String[]{AppContext.getInstance().getSString(R.string.close_txt), AppContext
+                .getInstance().getSString(R.string.image_txt),
+                AppContext.getInstance().getSString(R.string.music_txt), AppContext.getInstance().getSString(R.string.video_txt), AppContext
+                .getInstance().getSString(R.string.image_music_txt),
+                AppContext.getInstance().getSString(R.string.set_calendar_txt)};
+        mSelectLanguage = new String[] { "简体中文", "English"};
+    }
+
 }

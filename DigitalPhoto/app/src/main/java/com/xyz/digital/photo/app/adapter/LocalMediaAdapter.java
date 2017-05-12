@@ -5,7 +5,10 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.xyz.digital.photo.app.AppContext;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.adapter.base.RecyclerViewHolder;
@@ -96,7 +99,7 @@ public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
             if(uploadInfo != null) {
                 switch (uploadInfo.getState()) {
                     case 0:
-                        pieView.setText("等待");
+                        pieView.setText(AppContext.getInstance().getSString(R.string.download_wait_txt));
                         break;
                 }
             }
@@ -107,20 +110,27 @@ public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
 
         // 判断是否上传完成
         TextView isUoloadTxt = holder.getTextView(R.id.item_child_isupload_txt);
+        isUoloadTxt.setText(AppContext.getInstance().getSString(R.string.upload_txt));
+        if (DeviceManager.getInstance().isUpload(item.getFilePath())) {
+            isUoloadTxt.setSelected(false);
+        } else {
+            isUoloadTxt.setSelected(true);
+        }
+
+        ImageView uoloadStateTxt = holder.getImageView(R.id.item_child_already_upload);
+
         boolean isUpload = PreferenceUtils.getInstance().getBoolean(item.getFilePath(), false);
-        if (isUpload) {
+        boolean isExist = DeviceManager.getInstance().isExist(item.getFileName());
+        if (isUpload && isExist) {
             holder.getView(R.id.item_child_isupload_txt).setVisibility(View.VISIBLE);
             holder.getView(R.id.item_child_upload_cancel).setVisibility(View.GONE);
-            pieView.setText("成功");
+            pieView.setText(AppContext.getInstance().getSString(R.string.download_success_txt));
             if(!isUpload(item.getFilePath())) {
                 pieView.setVisibility(View.GONE);
             }
-
-            isUoloadTxt.setText("已上传");
-            isUoloadTxt.setSelected(false);
+            uoloadStateTxt.setVisibility(View.VISIBLE);
         } else {
-            isUoloadTxt.setText("上传");
-            isUoloadTxt.setSelected(true);
+            uoloadStateTxt.setVisibility(View.GONE);
         }
     }
 

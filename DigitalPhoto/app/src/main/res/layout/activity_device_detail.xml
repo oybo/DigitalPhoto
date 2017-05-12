@@ -79,7 +79,6 @@
                         android:id="@+id/device_detail_disk_size_txt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="本机存储容量："
                         android:textColor="#333333"
                         android:textSize="14sp"/>
 
@@ -92,7 +91,6 @@
                             android:id="@+id/device_detail_disk_used_size_txt"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="已用："
                             android:textColor="#666666"
                             android:textSize="14sp"/>
 
@@ -101,7 +99,6 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentRight="true"
-                            android:text="可用："
                             android:textColor="#666666"
                             android:textSize="14sp"/>
 
@@ -131,7 +128,6 @@
                         android:id="@+id/device_u_detail_disk_size_txt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="U存储容量："
                         android:textColor="#333333"
                         android:textSize="14sp"/>
 
@@ -144,7 +140,6 @@
                             android:id="@+id/device_detail_u_disk_used_size_txt"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="已用："
                             android:textColor="#666666"
                             android:textSize="14sp"/>
 
@@ -153,7 +148,6 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentRight="true"
-                            android:text="可用："
                             android:textColor="#666666"
                             android:textSize="14sp"/>
 
@@ -186,22 +180,9 @@
                     android:layout_marginLeft="40dip"
                     android:layout_marginRight="40dip"
                     android:background="@drawable/selector_blue_bt_layout"
-                    android:text="管理设备"
+                    android:text="@string/manager_device_txt"
                     android:textColor="#FFFFFF"
                     android:textSize="14sp"/>
-
-                <Button
-                    android:id="@+id/device_detail_set_bt"
-                    android:layout_width="match_parent"
-                    android:layout_height="45dip"
-                    android:layout_marginLeft="40dip"
-                    android:layout_marginRight="40dip"
-                    android:layout_marginTop="25dip"
-                    android:background="@drawable/view_layout_bg"
-                    android:text="相框设置"
-                    android:textColor="#666666"
-                    android:textSize="14sp"
-                    android:visibility="invisible"/>
 
             </LinearLayout>
         </LinearLayout>

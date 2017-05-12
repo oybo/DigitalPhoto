@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.xyz.digital.photo.app.AppContext;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.view.ProgressWheel;
 import java.util.HashMap;
@@ -113,12 +115,12 @@ public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<Recycl
                 ((FooterViewHolder) holder).mProgressView.setVisibility(View.VISIBLE);
                   ((FooterViewHolder) holder).mProgressView.spin();
                 //((FooterViewHolder) holder).mProgressView.setIndeterminate(true);
-                ((FooterViewHolder) holder).mTextView.setText("正在加载。。。");
+                ((FooterViewHolder) holder).mTextView.setText(AppContext.getInstance().getSString(R.string.loading_txt));
             } else {
                    ((FooterViewHolder) holder).mProgressView.stopSpinning();
                 ((FooterViewHolder) holder).mProgressView.setVisibility(View.GONE);
                 //((FooterViewHolder) holder).mProgressView.st;
-                ((FooterViewHolder) holder).mTextView.setText("没有更多数据了。。。。");
+                ((FooterViewHolder) holder).mTextView.setText(AppContext.getInstance().getSString(R.string.upload_faild_txt));
             }
         } else {
             bindData(holder, position, mData.get(position));

@@ -1,11 +1,13 @@
 package com.xyz.digital.photo.app.adapter;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
 import com.actions.actfilemanager.ActFileInfo;
+import com.xyz.digital.photo.app.AppContext;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.adapter.base.RecyclerViewHolder;
@@ -13,9 +15,12 @@ import com.xyz.digital.photo.app.bean.DownloadInfo;
 import com.xyz.digital.photo.app.bean.FileInfo;
 import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 import com.xyz.digital.photo.app.manager.DeviceManager;
+import com.xyz.digital.photo.app.manager.ImageLoadManager;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
 import com.xyz.digital.photo.app.util.PubUtils;
 import com.xyz.digital.photo.app.view.ProgressPieView;
+
+import java.io.File;
 
 import static com.xyz.digital.photo.app.manager.DeviceManager.mRemoteCurrentPath;
 
@@ -60,12 +65,18 @@ public class DeviceListMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
             }
 
             // 图片
-            if (item.getType() == MEDIA_FILE_TYPE.AUDIO) {
-                imageView.setImageResource(R.drawable.defult_audio_icon);
-            } else if (item.getType() == MEDIA_FILE_TYPE.VIDEO) {
-                imageView.setImageResource(R.drawable.defult_video_icon);
+            String tempFile = DeviceManager.getInstance().getTempFile(remotePath);
+            if(!TextUtils.isEmpty(tempFile)) {
+                ImageLoadManager.setImage(tempFile, imageView);
             } else {
-                imageView.setImageResource(R.drawable.defult_image_icon);
+                // 图片
+                if (item.getType() == MEDIA_FILE_TYPE.AUDIO) {
+                    imageView.setImageResource(R.drawable.defult_audio_icon);
+                } else if (item.getType() == MEDIA_FILE_TYPE.VIDEO) {
+                    imageView.setImageResource(R.drawable.defult_video_icon);
+                } else {
+                    imageView.setImageResource(R.drawable.defult_image_icon);
+                }
             }
             holder.getView(R.id.item_menu_download_bt).setVisibility(View.VISIBLE);
         }
@@ -81,7 +92,7 @@ public class DeviceListMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
             if (downloadInfo != null) {
                 switch (downloadInfo.getState()) {
                     case 0:
-                        pieView.setText("等待");
+                        pieView.setText(AppContext.getInstance().getSString(R.string.download_wait_txt));
                         break;
                 }
             }
@@ -92,12 +103,12 @@ public class DeviceListMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
         // 判断是否下载完成
         Button downloadBt = holder.getButton(R.id.item_menu_download_bt);
         boolean isUpload = PreferenceUtils.getInstance().getBoolean(localPath, false);
-        if (isUpload) {
-            pieView.setText("成功");
+        if (isUpload && new File(localPath).exists()) {
+            pieView.setText(AppContext.getInstance().getSString(R.string.download_success_txt));
             pieView.setVisibility(View.GONE);
-            downloadBt.setText("已下载");
+            downloadBt.setText(AppContext.getInstance().getSString(R.string.download_finish_txt));
         } else {
-            downloadBt.setText("下载");
+            downloadBt.setText(AppContext.getInstance().getSString(R.string.download_download_txt));
         }
 
     }

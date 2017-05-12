@@ -7,12 +7,13 @@ import com.xyz.digital.photo.app.bean.FolderBean;
 import com.xyz.digital.photo.app.bean.MediaFileBean;
 import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 import com.xyz.digital.photo.app.bean.e.MEDIA_SHOW_TYPE;
-import com.xyz.digital.photo.app.util.ToastUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE.IMAGE;
 
 /**
  * Created by O on 2017/4/1.
@@ -24,6 +25,8 @@ public class PhotoPresenter implements PhotoContract.Presenter {
 
     private MEDIA_SHOW_TYPE mShowType;
 
+    private MEDIA_FILE_TYPE mShowFileType;
+
     public PhotoPresenter(PhotoContract.View view) {
         mView = view;
         mView.setPresenter(this);
@@ -32,14 +35,16 @@ public class PhotoPresenter implements PhotoContract.Presenter {
     @Override
     public void showType(MEDIA_SHOW_TYPE type) {
         mShowType = type;
-        loadMediaFiles(true, MEDIA_FILE_TYPE.IMAGE);
+        if(mShowFileType == null) {
+            mShowFileType = MEDIA_FILE_TYPE.IMAGE;
+        }
+        loadMediaFiles(true, mShowFileType);
     }
 
     @Override
     public void showMediaFiles(final MEDIA_FILE_TYPE type) {
 
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            ToastUtil.showToast(mView._getActivity(), "暂无外部存储设备");
             return;
         }
 
@@ -47,6 +52,7 @@ public class PhotoPresenter implements PhotoContract.Presenter {
     }
 
     private void loadMediaFiles(final boolean isRefreshModel, final MEDIA_FILE_TYPE type) {
+        mShowFileType = type;
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected void onPreExecute() {
@@ -58,7 +64,7 @@ public class PhotoPresenter implements PhotoContract.Presenter {
             protected Void doInBackground(Void... voids) {
                 HashMap<String, List<MediaFileBean>> mGruopMap = new HashMap<>();
 
-                if(type == MEDIA_FILE_TYPE.IMAGE) {
+                if(type == IMAGE) {
                     // 图片
                     MultiMediaUtils.getAllImages(mView._getActivity(), mGruopMap);
                 } else if(type == MEDIA_FILE_TYPE.AUDIO) {

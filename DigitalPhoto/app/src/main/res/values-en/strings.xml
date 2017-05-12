@@ -1,0 +1,137 @@
+<resources>
+    <string name="app_name">ZXFAP</string>
+
+    <string name="app_info_txt">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;Point to point photo frame work in wifi AP+app mode.Photo frame work as a wifi AP,mobile phone connect to wifi AP and log in photo frame. APP support upload files to photo frame, and view files, delete or play files in the photo frame\;Download files from photo frame to mobile phone\;Support remote control photo frame and modify photo frames configuration and so on</string>
+
+    <string name="app_corporation_txt">深圳市正芯峰电子科技有限公司</string>
+
+    <!--  上传和下载状态文字  -->
+    <string name="download_item_txt">much</string>
+    <string name="upload_txt">Upload</string>
+    <string name="weizhi_txt">Unknown</string>
+    <string name="download_delete_txt">Delete</string>
+    <string name="download_wait_txt">Wait</string>
+    <string name="download_success_txt">Successfully</string>
+    <string name="upload_finish_txt">Uploaded</string>
+    <string name="download_finish_txt">Downloaded</string>
+    <string name="download_download_txt">Download</string>
+    <string name="upload_faild_txt">Download</string>
+    <string name="download_ok_txt">Download Successfully</string>
+    <string name="download_error_txt">Download Failed</string>
+    <string name="delete_success_txt">Delete Successfully</string>
+    <string name="delete_faild_txt">Delete Failed</string>
+    <string name="connect_success_txt">Connect successfully</string>
+    <string name="connect_faild_txt">Connect Failed</string>
+    <string name="connect_disconnect_txt">Disconnect</string>
+    <string name="downloading_txt">Downloaded, Please Later</string>
+    <string name="uploading_txt">Uploaded, Please Later</string>
+    <string name="pleace_upload_file_txt">Please select a file to upload</string>
+    <string name="error_txt">ERROR</string>
+
+    <!--  上传和下载状态文字  -->
+    <string name="loading_txt">Loading...</string>
+    <string name="no_more_data_txt">No more data...</string>
+
+    <string name="device_the_txt">Local:</string>
+    <string name="device_defult_txt">Device detail</string>
+    <string name="device_size_txt">Local storage:</string>
+    <string name="device_u_size_txt">UDISK storage:</string>
+    <string name="device_yiyong_size_txt">Used:</string>
+    <string name="device_keyong_size_txt">Available:</string>
+    <string name="device_no_size_txt">No devices found</string>
+    <string name="device_no_u_size_txt">Not insert U disk</string>
+    <string name="login_txt">Login</string>
+    <string name="exit_txt">Again according to exit the program</string>
+    <string name="pleace_connect_txt">Please connect device</string>
+    <string name="no_connect_device_txt">not connect any equipment</string>
+    <string name="bendi_device_txt">Local storage devices</string>
+    <string name="is_delete_txt">Whether or not to delete?</string>
+
+    <string name="select_uall_txt">To cancel all</string>
+    <string name="select_all_txt">Select all</string>
+    <string name="select_z_txt">Had selected%s</string>
+    <string name="count_file_txt"> media files</string>
+    <string name="manager_device_txt">Manager device</string>
+    <string name="image_mode_txt">Graphics mode</string>
+    <string name="list_mode_txt">List mode</string>
+    <string name="loading_mo_txt">Loading More</string>
+    <string name="upload_device_txt">Upload to device</string>
+
+    <string name="quanping_txt">Full screen</string>
+    <string name="yscc_txt">Original size</string>
+    <string name="dblsf_txt">Such as scaling</string>
+    <string name="time_sm_txt">3 seconds</string>
+    <string name="time_wm_txt">5 seconds</string>
+    <string name="time_swm_txt">15 seconds</string>
+    <string name="time_ssm_txt">30 seconds</string>
+    <string name="time_yfz_txt">1 minutes</string>
+    <string name="time_wfz_txt">5 minutes</string>
+    <string name="time_swfz_txt">15 minutes</string>
+    <string name="time_ssfz_txt">30 minutes</string>
+    <string name="time_yxs_txt">1 hours</string>
+    <string name="shunxu_txt">Order</string>
+    <string name="suiji_txt">Random</string>
+    <string name="sangecf_txt">Single repeat</string>
+    <string name="quanbucf_txt">All repeat</string>
+    <string name="suijijchongf_txt">Random and repeat</string>
+    <string name="close_txt">Close</string>
+    <string name="image_txt">Photo</string>
+    <string name="music_txt">Music</string>
+    <string name="video_txt">Video</string>
+    <string name="image_music_txt">Photo and Music</string>
+    <string name="set_calendar_txt">Calendar</string>
+
+    <string name="login_please_input_name_txt">Please enter your number</string>
+    <string name="login_please_input_pwd_txt">Please enter your password</string>
+    <string name="login_login_txt">Login</string>
+    <string name="login_save_pwd_txt">Save password</string>
+
+    <string name="main_tab_device_txt">Device</string>
+    <string name="main_tab_image_txt">Gallery</string>
+    <string name="main_tab_yaokong_txt">Remote control</string>
+    <string name="main_tab_set_txt">Setting</string>
+
+    <string name="no_add_device_txt">You haven\'t add any equipment\?</string>
+    <string name="scan_txt">Scan devices</string>
+    <string name="welcome_txt">Experience immediately</string>
+    <string name="tips_txt">Tips</string>
+    <string name="select_txt">Select</string>
+    <string name="all_txt">All</string>
+    <string name="switch_device_txt">Change device</string>
+    <string name="residue_device_size_txt">Equipment for the remaining space has been inadequate:</string>
+
+    <string name="set_set_image_txt">Photo Settings</string>
+    <string name="set_set_video_txt">Video Settings</string>
+    <string name="set_set_music_txt">Music Settings</string>
+    <string name="set_tpxsbl_txt">Picture shows proportion</string>
+    <string name="set_hdpfysj_txt">Slide show time</string>
+    <string name="set_hdpbfsx_txt">Slide play order</string>
+    <string name="set_spxsbl_txt">Video shows proportion</string>
+    <string name="set_spbfms_txt">Video playback mode</string>
+    <string name="set_ddbfgn_txt">Breakpoint play function</string>
+    <string name="set_zimu_txt">Subtitles</string>
+    <string name="set_yybfms_txt">Music playback mode</string>
+    <string name="set_xspp_txt">According to spectrum</string>
+    <string name="set_system_txt">System Settings</string>
+    <string name="set_kjbfms_txt">Boot play mode</string>
+    <string name="set_language_txt">Language</string>
+    <string name="set_app_info_txt">Function introduced</string>
+    <string name="set_version_txt">Version</string>
+
+    <string name="set_dianyuan_txt">POWER</string>
+    <string name="set_set_txt">SETTING</string>
+    <string name="set_bjyy_txt">BGM</string>
+    <string name="set_jy_txt">MUTE</string>
+    <string name="set_image_txt">PHOTO</string>
+    <string name="set_music_txt">MUSIC</string>
+    <string name="set_video_txt">VIDEO</string>
+    <string name="set_calendars_txt">CALENDAR</string>
+    <string name="set_xsms_txt">RATIO</string>
+    <string name="set_back_txt">RETURN</string>
+    <string name="set_main_txt">HOME</string>
+    <string name="set_pre_txt">PREV</string>
+    <string name="set_play_pause_txt">PLAY/PAUSE</string>
+    <string name="set_next_txt">NEXT</string>
+
+
+</resources>

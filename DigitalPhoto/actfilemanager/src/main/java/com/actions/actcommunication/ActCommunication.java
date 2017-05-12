@@ -334,7 +334,7 @@ public class ActCommunication {
                                 } else if(state.equals("playerStatus")) {
                                     ActCommunication.this.mEventListener.onRecvPlayerStatus(Integer.parseInt(status1[data1 + 1]));
                                 } else if(state.equalsIgnoreCase("NandInfo") || state.equalsIgnoreCase("UdiskInfo")
-                                        || state.equalsIgnoreCase("brightness")) {
+                                        || state.equalsIgnoreCase("brightness") || state.equalsIgnoreCase("storageInfo")) {
                                     ActCommunication.this.mEventListener.onRecvResult(status1[data1], status1);
                                 }
                             }

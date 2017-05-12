@@ -36,7 +36,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="20dip"
-            android:text="您还未添加任何设备?"
+            android:text="@string/no_add_device_txt"
             android:textColor="#62B0F8"
             android:textSize="12sp"/>
 
@@ -54,7 +54,7 @@
                 android:layout_marginLeft="40dip"
                 android:layout_marginRight="40dip"
                 android:background="@drawable/selector_blue_bt_layout"
-                android:text="扫描设备"
+                android:text="@string/scan_txt"
                 android:textColor="#FFFFFF"
                 android:textSize="14sp"/>
 

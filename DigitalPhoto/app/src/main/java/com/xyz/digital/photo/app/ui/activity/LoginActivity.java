@@ -9,6 +9,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 
+import com.xyz.digital.photo.app.AppContext;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.bean.EventBase;
 import com.xyz.digital.photo.app.manager.DeviceManager;
@@ -39,15 +40,14 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        EventBus.getDefault().register(this);
 
         initView();
         initData();
-
-        EventBus.getDefault().register(this);
     }
 
     private void initView() {
-        initTopBarOnlyTitle("登录");
+        initTopBarOnlyTitle(AppContext.getInstance().getSString(R.string.login_txt));
 
         mLogoImage = (ImageView) findViewById(R.id.login_logo_icon_image);
         mCheckBox = (CheckBox) findViewById(R.id.login_is_save_pwd);
@@ -78,10 +78,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             boolean success = (boolean) eventBase.getData();
             mLoadingView.hide();
             if (success) {
-                ToastUtil.showToast(LoginActivity.this, "连接成功");
+                ToastUtil.showToast(LoginActivity.this, AppContext.getInstance().getSString(R.string.connect_success_txt));
                 goMain();
             } else {
-                ToastUtil.showToast(LoginActivity.this, "连接失败");
+                ToastUtil.showToast(LoginActivity.this, AppContext.getInstance().getSString(R.string.connect_faild_txt));
             }
         }
     }
@@ -101,6 +101,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         switch (view.getId()) {
             case R.id.login_login_bt:
                 mLoadingView.show();
+                DeviceManager.getInstance().disConnect();
                 DeviceManager.getInstance().connect();
                 break;
         }

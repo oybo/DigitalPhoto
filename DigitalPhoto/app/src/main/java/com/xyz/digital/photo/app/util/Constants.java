@@ -11,12 +11,17 @@ public class Constants {
     public static final int MAX_VOLUME = 10;
     public static final int MAX_BRIGHTNESS = 16;
 
-    public static final String SYSTEM_FILE_NAME = "sys_config.cfg";
+    public static final String SYSTEM_FILE_NAME = "sys_config.txt";
 
     public static final String MAIN_DEVICE_POHOTO_MANAGER = "MAIN_DEVICE_POHOTO_MANAGER";
 
     public static final String MAIN_DEVICE_LIST = "MAIN_DEVICE_LIST";
     public static final String REFRESH_STATUSBAR_COLOR = "REFRESH_STATUSBAR_COLOR";
+
+    /**    是否过滤热点     */
+    public static final boolean FILTRATION = true;
+    public static final String FILTRATION_NAME = "ZXFAP";
+    public static final String EVENT_REFRESH_LANGUAGE = "EVENT_REFRESH_LANGUAGE";
 
     /**    刷新相框设备文件列表     */
     public static final String REFRESH_DEVICE_FILE = "REFRESH_DEVICE_FILE";

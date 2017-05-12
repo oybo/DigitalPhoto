@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<com.xyz.digital.photo.app.view.swipemenulib.SwipeMenuLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.xyz.digital.photo.app.view.swipemenulib.SwipeMenuLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="65dip"
@@ -10,6 +11,7 @@
     app:swipeEnable="true">
 
     <LinearLayout
+        android:id="@+id/item_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_vertical"
@@ -25,7 +27,7 @@
                 android:layout_width="52dip"
                 android:layout_height="52dip"
                 android:scaleType="centerCrop"
-                android:src="@drawable/friends_sends_pictures_no" />
+                android:src="@drawable/friends_sends_pictures_no"/>
 
             <com.xyz.digital.photo.app.view.ProgressPieView
                 android:id="@+id/item_child_download_progress"
@@ -39,7 +41,7 @@
                 app:ppvProgress="0"
                 app:ppvProgressColor="#DDD"
                 app:ppvStrokeColor="#FFF"
-                app:ppvStrokeWidth="1dp" />
+                app:ppvStrokeWidth="1dp"/>
 
         </RelativeLayout>
 
@@ -61,7 +63,7 @@
                 android:singleLine="true"
                 android:text="Camera"
                 android:textColor="#333333"
-                android:textSize="16sp" />
+                android:textSize="16sp"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -78,16 +80,16 @@
                     android:ellipsize="middle"
                     android:gravity="center"
                     android:singleLine="true"
-                    android:text="未知"
+                    android:text="@string/weizhi_txt"
                     android:textColor="#666666"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"/>
 
                 <View
                     android:layout_width="1dip"
                     android:layout_height="10dip"
                     android:layout_marginLeft="8dip"
                     android:layout_marginRight="8dip"
-                    android:background="#999999" />
+                    android:background="#999999"/>
 
                 <TextView
                     android:id="@+id/item_list_count_txt"
@@ -96,16 +98,16 @@
                     android:ellipsize="middle"
                     android:gravity="center"
                     android:singleLine="true"
-                    android:text="未知"
+                    android:text="@string/weizhi_txt"
                     android:textColor="#666666"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"/>
 
                 <View
                     android:layout_width="1dip"
                     android:layout_height="10dip"
                     android:layout_marginLeft="8dip"
                     android:layout_marginRight="8dip"
-                    android:background="#999999" />
+                    android:background="#999999"/>
 
                 <TextView
                     android:id="@+id/item_list_time_txt"
@@ -114,9 +116,9 @@
                     android:ellipsize="middle"
                     android:gravity="center"
                     android:singleLine="true"
-                    android:text="未知"
+                    android:text="@string/weizhi_txt"
                     android:textColor="#666666"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"/>
 
             </LinearLayout>
 
@@ -133,7 +135,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:src="@drawable/btn_home_counterattack" />
+                android:src="@drawable/btn_home_counterattack"/>
 
             <TextView
                 android:id="@+id/item_child_isupload_txt"
@@ -147,10 +149,10 @@
                 android:paddingLeft="12dip"
                 android:paddingRight="12dip"
                 android:paddingTop="5dip"
-                android:text="已上传"
+                android:text="@string/upload_finish_txt"
                 android:textColor="@drawable/selector_upload_txt"
                 android:textSize="10sp"
-                android:visibility="gone" />
+                android:visibility="gone"/>
 
             <ImageView
                 android:id="@+id/item_child_select_image"
@@ -158,7 +160,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:src="@drawable/select_icon"
-                android:visibility="gone" />
+                android:visibility="gone"/>
 
             <com.xyz.digital.photo.app.view.ProgressPieView
                 android:id="@+id/item_child_upload_progress"
@@ -171,7 +173,7 @@
                 app:ppvProgress="0"
                 app:ppvProgressColor="#DDD"
                 app:ppvStrokeColor="#FFF"
-                app:ppvStrokeWidth="1dp" />
+                app:ppvStrokeWidth="1dp"/>
 
         </RelativeLayout>
     </LinearLayout>
@@ -182,17 +184,17 @@
         android:layout_width="80dp"
         android:layout_height="match_parent"
         android:background="#C5C7C6"
-        android:text="下载"
+        android:text="@string/download_download_txt"
         android:textColor="#333333"
-        android:textSize="14sp" />
+        android:textSize="14sp"/>
 
     <Button
         android:id="@+id/item_menu_delete_bt"
         android:layout_width="80dp"
         android:layout_height="match_parent"
         android:background="#C42708"
-        android:text="删除"
+        android:text="@string/download_delete_txt"
         android:textColor="#333333"
-        android:textSize="14sp" />
+        android:textSize="14sp"/>
 
 </com.xyz.digital.photo.app.view.swipemenulib.SwipeMenuLayout>

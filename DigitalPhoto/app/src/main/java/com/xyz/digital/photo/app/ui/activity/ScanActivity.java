@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.xyz.digital.photo.app.AppContext;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.ui.BaseActivity;
 
@@ -24,7 +25,7 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
     }
 
     private void initView() {
-        initTopBarOnlyTitle("您还未连接任何设备");
+        initTopBarOnlyTitle(AppContext.getInstance().getSString(R.string.no_connect_device_txt));
 
         findViewById(R.id.login_scanning_device_bt).setOnClickListener(this);
     }

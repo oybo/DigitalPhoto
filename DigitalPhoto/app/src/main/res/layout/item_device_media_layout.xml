@@ -80,7 +80,7 @@
                     android:drawableLeft="@drawable/selector_media_download"
                     android:gravity="center"
                     android:singleLine="true"
-                    android:text="已下载"
+                    android:text="@string/download_finish_txt"
                     android:textColor="@drawable/selector_txt_download"
                     android:textSize="12sp"/>
 
@@ -95,7 +95,7 @@
                     android:drawableLeft="@drawable/media_delete_icon"
                     android:gravity="center"
                     android:singleLine="true"
-                    android:text="删除"
+                    android:text="@string/download_delete_txt"
                     android:textColor="@drawable/selector_txt_download"
                     android:textSize="12sp"/>
 
@@ -122,7 +122,7 @@
                 android:layout_below="@id/item_device_media_title_txt"
                 android:layout_marginLeft="6dip"
                 android:singleLine="true"
-                android:text="未知"
+                android:text="@string/weizhi_txt"
                 android:textColor="#666666"
                 android:textSize="12sp"/>
 
@@ -134,7 +134,7 @@
                 android:layout_marginLeft="15dip"
                 android:layout_toRightOf="@id/item_device_media_date_txt"
                 android:singleLine="true"
-                android:text="未知"
+                android:text="@string/weizhi_txt"
                 android:textColor="#666666"
                 android:textSize="12sp"/>
 

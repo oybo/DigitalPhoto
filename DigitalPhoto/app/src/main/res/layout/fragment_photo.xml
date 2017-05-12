@@ -40,7 +40,7 @@
                     android:gravity="center"
                     android:paddingLeft="7dip"
                     android:paddingRight="7dip"
-                    android:text="图片"
+                    android:text="@string/image_txt"
                     android:textColor="@drawable/selector_txt_tab"
                     android:textSize="14sp"/>
 
@@ -53,7 +53,7 @@
                     android:gravity="center"
                     android:paddingLeft="7dip"
                     android:paddingRight="7dip"
-                    android:text="视频"
+                    android:text="@string/video_txt"
                     android:textColor="@drawable/selector_txt_tab"
                     android:textSize="14sp"/>
 
@@ -66,7 +66,7 @@
                     android:gravity="center"
                     android:paddingLeft="7dip"
                     android:paddingRight="7dip"
-                    android:text="音乐"
+                    android:text="@string/music_txt"
                     android:textColor="@drawable/selector_txt_tab"
                     android:textSize="14sp"/>
 
@@ -79,7 +79,7 @@
                     android:gravity="center"
                     android:paddingLeft="7dip"
                     android:paddingRight="7dip"
-                    android:text="选择"
+                    android:text="@string/select_txt"
                     android:textColor="@drawable/selector_txt_tab"
                     android:textSize="14sp"/>
 
@@ -101,7 +101,7 @@
                 android:layout_marginLeft="5dip"
                 android:padding="10dip"
                 android:src="@drawable/mode_chrat_icon"
-                android:text="取消"
+                android:text="@android:string/cancel"
                 android:textColor="#FFFFFF"
                 android:textSize="14sp"/>
 
@@ -113,7 +113,7 @@
                 android:layout_centerVertical="true"
                 android:paddingLeft="10dip"
                 android:paddingRight="10dip"
-                android:text="全选"
+                android:text="@string/select_all_txt"
                 android:textColor="#FFFFFF"
                 android:textSize="14sp"/>
 
@@ -122,7 +122,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:text="已选0项"
                 android:textColor="#FFFFFF"
                 android:textSize="15sp"/>
 
@@ -152,7 +151,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="10dip"
-                android:text="本地存储设备"
+                android:text="@string/bendi_device_txt"
                 android:textColor="#929292"
                 android:textSize="14sp"/>
 

@@ -10,8 +10,10 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.xyz.digital.photo.app.AppContext;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.bean.EventBase;
+import com.xyz.digital.photo.app.manager.DeviceManager;
 import com.xyz.digital.photo.app.ui.BaseActivity;
 import com.xyz.digital.photo.app.ui.fragment.DeviceFragment;
 import com.xyz.digital.photo.app.ui.fragment.DevicePhotoFragment;
@@ -20,7 +22,6 @@ import com.xyz.digital.photo.app.ui.fragment.RemoteControlFragment;
 import com.xyz.digital.photo.app.ui.fragment.SetFragment;
 import com.xyz.digital.photo.app.ui.fragment.WiFiDeviceFragment;
 import com.xyz.digital.photo.app.util.Constants;
-import com.xyz.digital.photo.app.util.PubUtils;
 import com.xyz.digital.photo.app.util.ToastUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -57,17 +58,16 @@ public class MainActivity extends BaseActivity {
     /**    设置      */
     private SetFragment mSetFragment;
 
-    private boolean mLoginMain;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        EventBus.getDefault().register(this);
 
         initView();
         initFragment(savedInstanceState);
-        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -75,10 +75,10 @@ public class MainActivity extends BaseActivity {
         super.onNewIntent(intent);
         String type = intent.getStringExtra("type");
         if(Constants.MAIN_DEVICE_POHOTO_MANAGER.equals(type)) {
-            mLoginMain = true;
+            DeviceManager.getInstance().setLoginMainState(true);
             currentFragment(4);
         } else if(Constants.MAIN_DEVICE_LIST.equals(type)) {
-            mLoginMain = false;
+            DeviceManager.getInstance().setLoginMainState(false);
             currentFragment(0);
         }
     }
@@ -145,7 +145,7 @@ public class MainActivity extends BaseActivity {
             // 设备
             tabIndex = 0;
             fragmentIndex = 0;
-            if(mLoginMain) {
+            if(DeviceManager.getInstance().isLoginMain()) {
                 fragmentIndex = 4;
             }
         } else if (view == mainPhotoBt) {
@@ -161,10 +161,10 @@ public class MainActivity extends BaseActivity {
             tabIndex = 3;
             fragmentIndex = 3;
         }
-//        if(tabIndex > 0 && !DeviceManager.getInstance().isConnect()) {
-//            ToastUtil.showToast(MainActivity.this, "请您先连接设备");
-//            return;
-//        }
+        if(tabIndex > 0 && !DeviceManager.getInstance().isConnect()) {
+            ToastUtil.showToast(this, AppContext.getInstance().getSString(R.string.pleace_connect_txt));
+            return;
+        }
         currentTab(tabIndex);
         currentFragment(fragmentIndex);
     }
@@ -239,7 +239,7 @@ public class MainActivity extends BaseActivity {
         }
 
         if ((System.currentTimeMillis() - mExitTime) > 2000) {
-            ToastUtil.showToast(this, "再按一次退出程序");
+            ToastUtil.showToast(this, AppContext.getInstance().getSString(R.string.exit_txt));
             mExitTime = System.currentTimeMillis();
         } else {
             super.onBackPressed();
@@ -251,6 +251,5 @@ public class MainActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
-        PubUtils.deleteTempFile();
     }
 }

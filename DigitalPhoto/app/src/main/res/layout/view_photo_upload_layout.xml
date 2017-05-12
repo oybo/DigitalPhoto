@@ -17,7 +17,7 @@
             android:layout_width="200dip"
             android:layout_height="45dip"
             android:background="@drawable/selector_blue_bt_layout"
-            android:text="上传到设备"
+            android:text="@string/upload_device_txt"
             android:textColor="#FFFFFF"
             android:textSize="14sp"/>
 

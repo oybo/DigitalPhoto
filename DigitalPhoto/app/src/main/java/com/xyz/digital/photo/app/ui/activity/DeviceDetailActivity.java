@@ -13,6 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.actions.actcommunication.ActCommunication;
+import com.xyz.digital.photo.app.AppContext;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.DeviceImageAdapter;
 import com.xyz.digital.photo.app.bean.EventBase;
@@ -55,13 +56,14 @@ public class DeviceDetailActivity extends BaseActivity implements View.OnClickLi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_detail);
         ButterKnife.bind(this);
+        EventBus.getDefault().register(this);
 
         initView();
         initData();
     }
 
     private void initView() {
-        initTopBarOnlyTitle("设备详情");
+        initTopBarOnlyTitle(AppContext.getInstance().getSString(R.string.device_defult_txt));
 
         deviceDetailPhotoRview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         deviceDetailPhotoRview.setHasFixedSize(true);
@@ -70,8 +72,6 @@ public class DeviceDetailActivity extends BaseActivity implements View.OnClickLi
     }
 
     private void initData() {
-        EventBus.getDefault().register(this);
-
         setRemoteCount(0);
         setDiskSize("0", "0", "online");
         setUDiskSize("0", "0", "online");
@@ -132,7 +132,7 @@ public class DeviceDetailActivity extends BaseActivity implements View.OnClickLi
     }
 
     private void setRemoteCount(int size) {
-        String imangeCount = "共有<font color=\"#12B7F5\"> " + size + " </font>个媒体文件";
+        String imangeCount = "<font color=\"#12B7F5\"> " + size + " </font>" + AppContext.getInstance().getSString(R.string.count_file_txt);
         deviceDetailImageCountTxt.setText(Html.fromHtml(imangeCount));
     }
 
@@ -164,16 +164,16 @@ public class DeviceDetailActivity extends BaseActivity implements View.OnClickLi
                 long allSize = PubUtils.conversionSize(allSizeStr);
                 long usableSize = PubUtils.conversionSize(usableSizeStr);
                 // 总空间
-                deviceDiskAllSizeTxt.setText(html2Str("本机存储容量:<font color=\"#DF6432\"> " + PubUtils.formatFileLen(allSize) + " </font>"));
+                deviceDiskAllSizeTxt.setText(html2Str(AppContext.getInstance().getSString(R.string.device_size_txt) + "<font color=\"#DF6432\"> " + PubUtils.formatFileLen(allSize) + " </font>"));
                 // 已用空间
-                deviceDiskUsedSizeTxt.setText(html2Str("已用:<font color=\"#DF6432\"> " + PubUtils.formatFileLen(allSize - usableSize) + " </font>"));
+                deviceDiskUsedSizeTxt.setText(html2Str(AppContext.getInstance().getSString(R.string.device_yiyong_size_txt) + "<font color=\"#DF6432\"> " + PubUtils.formatFileLen(allSize - usableSize) + " </font>"));
                 // 可用空间
-                deviceDiskUsableSizeTxt.setText(html2Str("可用:<font color=\"#DF6432\"> " + PubUtils.formatFileLen(usableSize) + " </font>"));
+                deviceDiskUsableSizeTxt.setText(html2Str(AppContext.getInstance().getSString(R.string.device_keyong_size_txt) + "<font color=\"#DF6432\"> " + PubUtils.formatFileLen(usableSize) + " </font>"));
                 // 百分比
                 deviceProgressBar.setMax((int) allSize);
                 deviceProgressBar.setProgress((int) (allSize - usableSize));
             } else {
-                deviceDiskAllSizeTxt.setText(html2Str("本机存储容量:<font color=\"#DF6432\"> 未发现设备 </font>"));
+                deviceDiskAllSizeTxt.setText(html2Str(AppContext.getInstance().getSString(R.string.device_size_txt) + "<font color=\"#DF6432\"> "+AppContext.getInstance().getSString(R.string.device_no_size_txt)+" </font>"));
                 deviceDiskUsedSizeTxt.setVisibility(View.GONE);
                 deviceDiskUsableSizeTxt.setVisibility(View.GONE);
                 deviceProgressBar.setVisibility(View.GONE);
@@ -190,13 +190,13 @@ public class DeviceDetailActivity extends BaseActivity implements View.OnClickLi
                 long allSize = PubUtils.conversionSize(allSizeStr);
                 long usableSize = PubUtils.conversionSize(usableSizeStr);
                 // 总空间
-                usbDiskAllSizeTxt.setText(html2Str("U盘存储容量:<font color=\"#DF6432\"> " + PubUtils.formatFileLen(allSize) + " </font>"));
+                usbDiskAllSizeTxt.setText(html2Str(AppContext.getInstance().getSString(R.string.device_u_size_txt) + "<font color=\"#DF6432\"> " + PubUtils.formatFileLen(allSize) + " </font>"));
                 // 已用空间
-                usbDiskUsedSizeTxt.setText(html2Str("已用:<font color=\"#DF6432\"> " + PubUtils.formatFileLen(allSize - usableSize) + " </font>"));
+                usbDiskUsedSizeTxt.setText(html2Str(AppContext.getInstance().getSString(R.string.device_yiyong_size_txt) + "<font color=\"#DF6432\"> " + PubUtils.formatFileLen(allSize - usableSize) + " </font>"));
                 // 可用空间
-                usbDiskUsableSizeTxt.setText(html2Str("可用:<font color=\"#DF6432\"> " + PubUtils.formatFileLen(usableSize) + " </font>"));
+                usbDiskUsableSizeTxt.setText(html2Str(AppContext.getInstance().getSString(R.string.device_keyong_size_txt) + "<font color=\"#DF6432\"> " + PubUtils.formatFileLen(usableSize) + " </font>"));
             } else {
-                usbDiskAllSizeTxt.setText(html2Str("U盘存储容量:<font color=\"#DF6432\"> 未插入U盘 </font>"));
+                usbDiskAllSizeTxt.setText(html2Str(AppContext.getInstance().getSString(R.string.device_u_size_txt) + "<font color=\"#DF6432\"> "+AppContext.getInstance().getSString(R.string.device_no_u_size_txt)+" </font>"));
                 usbDiskUsedSizeTxt.setVisibility(View.GONE);
                 usbDiskUsableSizeTxt.setVisibility(View.GONE);
                 usbProgressBar.setVisibility(View.GONE);

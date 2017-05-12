@@ -13,6 +13,8 @@ import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 
+import com.xyz.digital.photo.app.AppContext;
+import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.util.ToastUtil;
 
 import java.net.InetAddress;
@@ -104,7 +106,7 @@ public class DevicePresenter implements DeviceContract.Presenter {
             }
             @Override
             public void onFailure(int reason) {
-                ToastUtil.showToast(mView._getActivity(), "连接失败");
+                ToastUtil.showToast(mView._getActivity(), AppContext.getInstance().getSString(R.string.connect_faild_txt));
             }
         });
     }

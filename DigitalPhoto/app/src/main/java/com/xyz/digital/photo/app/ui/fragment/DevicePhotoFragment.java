@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.actions.actfilemanager.ActFileInfo;
+import com.xyz.digital.photo.app.AppContext;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.DeviceListMediaAdapter;
 import com.xyz.digital.photo.app.adapter.DeviceMediaAdapter;
@@ -81,7 +82,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
     private DeviceListMediaAdapter mListAdapter;
     private int mDeletePosition;
 
-    private static final String PATH = "本机存储:";
+    private static final String PATH = AppContext.getInstance().getSString(R.string.device_the_txt);
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -116,7 +117,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
 
     private void initData() {
         // 默认图表模式
-        showModel(MEDIA_SHOW_TYPE.CHART);
+        showModel(DeviceManager.getInstance().getShowType());
         EventBus.getDefault().register(this);
     }
 
@@ -152,7 +153,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
     @Override
     public void onClick(View view) {
         if (DeviceManager.getInstance().isDownloading()) {
-            ToastUtil.showToast(getActivity(), "正在下载,请稍后");
+            ToastUtil.showToast(getActivity(), AppContext.getInstance().getSString(R.string.downloading_txt));
             return;
         }
         switch (view.getId()) {
@@ -174,27 +175,9 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 break;
             case R.id.device_photo_choose_tab:
                 // 切换设备
-                new AsyncTask<Void, Void, Void>() {
-                    @Override
-                    protected void onPreExecute() {
-                        super.onPreExecute();
-                        showLoading();
-                    }
-                    @Override
-                    protected Void doInBackground(Void... voids) {
-                        DeviceManager.getInstance().disConnect();
-                        return null;
-                    }
-
-                    @Override
-                    protected void onPostExecute(Void aVoid) {
-                        super.onPostExecute(aVoid);
-                        hideLoading();
-                        Intent intent = new Intent(getActivity(), MainActivity.class);
-                        intent.putExtra("type", Constants.MAIN_DEVICE_LIST);
-                        startActivity(intent);
-                    }
-                }.execute();
+                Intent intent = new Intent(getActivity(), MainActivity.class);
+                intent.putExtra("type", Constants.MAIN_DEVICE_LIST);
+                startActivity(intent);
                 break;
             case R.id.device_photo_model_type:
                 // 点击切换浏览模式
@@ -219,6 +202,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
 
     private void showModel(MEDIA_SHOW_TYPE type) {
         mShowModelType = type;
+        DeviceManager.getInstance().setShowType(type);
         if (type == MEDIA_SHOW_TYPE.CHART) {
             // 图表模式
             mListLayout.setVisibility(View.GONE);
@@ -243,22 +227,11 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 mListAdapter.setOnInViewClickListener(R.id.item_menu_download_bt, this);
                 mListAdapter.setOnInViewClickListener(R.id.item_menu_delete_bt, this);
                 mListAdapter.setOnInViewClickListener(R.id.item_child_arrows_image, this);
-
-                mListAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(View itemView, int pos) {
-                        final ActFileInfo info = DeviceManager.getInstance().getRemoteDeviceFiles().get(pos);
-                        if (info.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
-                            // 点击文件夹
-                            showLoading();
-                            String requestPath = DeviceManager.getInstance().setRemoteCurrentPath(info.getFileName());
-                            mUpperView.setText(PATH + requestPath);
-                        } else if (info.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
-                            // 点击文件
-                        }
-                    }
-                });
+                mListAdapter.setOnInViewClickListener(R.id.item_layout, this);
             }
+        }
+        if(mShowMediaType == null) {
+            mShowMediaType = MEDIA_FILE_TYPE.IMAGE;
         }
         showFiles(mShowMediaType, true);
     }
@@ -294,6 +267,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
     }
 
     private void refreshAdapter(final MEDIA_FILE_TYPE type) {
+        mUpperView.setText(PATH + mRemoteCurrentPath);
         new AsyncTask<Void, Void, List<FileInfo>>() {
             @Override
             protected void onPreExecute() {
@@ -308,20 +282,50 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 int len = DeviceManager.getInstance().getRemoteDeviceFiles().size();
                 for (int i = 0; i < len; i++) {
                     ActFileInfo actFileInfo = DeviceManager.getInstance().getRemoteDeviceFiles().get(i);
-                    if(PubUtils.isTypeFile(actFileInfo.getFileName(), type)) {
-                        FileInfo fileInfo = new FileInfo();
-                        fileInfo.setFileName(actFileInfo.getFileName());
-                        fileInfo.setFileType(actFileInfo.getFileType());
-                        fileInfo.setPosition(i);
-                        fileInfo.setType(type);
-                        if(type == MEDIA_FILE_TYPE.ALL) {
-                            MEDIA_FILE_TYPE type1 = PubUtils.getFileType(fileInfo.getFileName());
-                            if(type1 == null) {
-                                continue;
+
+                    if(mShowModelType == MEDIA_SHOW_TYPE.CHART) {
+                        // 图表
+                        if(PubUtils.isTypeFile(actFileInfo.getFileName(), type)) {
+                            FileInfo fileInfo = new FileInfo();
+                            fileInfo.setFileName(actFileInfo.getFileName());
+                            fileInfo.setFileType(actFileInfo.getFileType());
+                            fileInfo.setPosition(i);
+                            fileInfo.setType(type);
+                            if(type == MEDIA_FILE_TYPE.ALL) {
+                                MEDIA_FILE_TYPE type1 = PubUtils.getFileType(fileInfo.getFileName());
+                                if(type1 == null) {
+                                    continue;
+                                }
+                                fileInfo.setType(type1);
                             }
-                            fileInfo.setType(type1);
+                            result.add(fileInfo);
                         }
-                        result.add(fileInfo);
+                    } else {
+                        // 列表
+                        if(actFileInfo.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
+                            FileInfo fileInfo = new FileInfo();
+                            fileInfo.setFileName(actFileInfo.getFileName());
+                            fileInfo.setFileType(actFileInfo.getFileType());
+                            fileInfo.setPosition(i);
+                            fileInfo.setType(type);
+                            result.add(fileInfo);
+                        } else {
+                            if(PubUtils.isTypeFile(actFileInfo.getFileName(), type)) {
+                                FileInfo fileInfo = new FileInfo();
+                                fileInfo.setFileName(actFileInfo.getFileName());
+                                fileInfo.setFileType(actFileInfo.getFileType());
+                                fileInfo.setPosition(i);
+                                fileInfo.setType(type);
+                                if(type == MEDIA_FILE_TYPE.ALL) {
+                                    MEDIA_FILE_TYPE type1 = PubUtils.getFileType(fileInfo.getFileName());
+                                    if(type1 == null) {
+                                        continue;
+                                    }
+                                    fileInfo.setType(type1);
+                                }
+                                result.add(fileInfo);
+                            }
+                        }
                     }
                 }
 
@@ -414,7 +418,13 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 // 列表模式删除
                 showLoading();
                 mDeletePosition = position;
-                DeviceManager.getInstance().deleteFile(mListAdapter.getItem(position).getFileName());
+                fileInfo = mListAdapter.getItem(position);
+                if(fileInfo.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
+                    // 文件夹
+                    DeviceManager.getInstance().deleteDirectory(mListAdapter.getItem(position).getFileName());
+                } else {
+                    DeviceManager.getInstance().deleteFile(mListAdapter.getItem(position).getFileName());
+                }
                 break;
             case R.id.item_child_arrows_image:
                 // 列表模式播放
@@ -422,6 +432,18 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 play = addPlay(fileInfo);
                 if(play) {
                     mListAdapter.notifyDataSetChanged();
+                }
+                break;
+            case R.id.item_layout:
+                // item事件
+                final ActFileInfo actFileInfo = DeviceManager.getInstance().getRemoteDeviceFiles().get(position);
+                if (actFileInfo.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
+                    // 点击文件夹
+                    showLoading();
+                    String requestPath = DeviceManager.getInstance().setRemoteCurrentPath(actFileInfo.getFileName());
+                    mUpperView.setText(PATH + requestPath);
+                } else if (actFileInfo.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
+                    // 点击文件
                 }
                 break;
         }
@@ -466,7 +488,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 int state = downloadInfo.getState();
                 if(state == 0) {
                     // 等待下载
-                    pieView.setText("等待");
+                    pieView.setText(AppContext.getInstance().getSString(R.string.download_wait_txt));
                 } else if(state == 1) {
                     // 下载中
                     int progress = Integer.parseInt(PubUtils.getSHCollagen(downloadInfo.getTotal(), downloadInfo.getProcessed()));
@@ -474,10 +496,10 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                     pieView.setText((Math.round(progress * 100) * 1.0f / 100) + "%");
                 } else if (state == -1) {
                     // 下载出错
-                    pieView.setText("错误");
+                    pieView.setText(AppContext.getInstance().getSString(R.string.error_txt));
                 } else if (state == 2) {
                     // 下载成功
-                    pieView.setText("成功");
+                    pieView.setText(AppContext.getInstance().getSString(R.string.download_success_txt));
                     if(mShowModelType == MEDIA_SHOW_TYPE.CHART) {
                         // 图表模式
                         for(FileInfo fileInfo : mChartAdapter.getList()) {

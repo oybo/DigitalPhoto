@@ -134,6 +134,10 @@ public class SelectDialog extends Dialog implements android.view.View.OnClickLis
                     // 开机播放模式
                     id = PreferenceUtils.getInstance().getInt(SetFragment.mStartPlayModel_key, 0);
                     break;
+                case 8:
+                    // 选择语言
+                    id = PreferenceUtils.getInstance().getInt(SetFragment.mSelectLanguage_key, 0);
+                    break;
             }
 
             txt.setSelected(id == position ? true : false);

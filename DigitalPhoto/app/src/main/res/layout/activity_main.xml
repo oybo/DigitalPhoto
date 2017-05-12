@@ -39,7 +39,7 @@
                 android:drawableTop="@drawable/tab_device_selector"
                 android:gravity="center"
                 android:onClick="onTabClicked"
-                android:text="设备"
+                android:text="@string/main_tab_device_txt"
                 android:textColor="@drawable/selector_actionbar_txt"
                 android:textSize="12sp"/>
 
@@ -54,7 +54,7 @@
                 android:gravity="center"
                 android:onClick="onTabClicked"
                 android:paddingBottom="3dip"
-                android:text="相册"
+                android:text="@string/main_tab_image_txt"
                 android:textColor="@drawable/selector_actionbar_txt"
                 android:textSize="12sp"/>
 
@@ -68,7 +68,7 @@
                 android:gravity="center"
                 android:onClick="onTabClicked"
                 android:paddingBottom="3dip"
-                android:text="遥控"
+                android:text="@string/main_tab_yaokong_txt"
                 android:textColor="@drawable/selector_actionbar_txt"
                 android:textSize="12sp"/>
 
@@ -82,7 +82,7 @@
                 android:gravity="center"
                 android:onClick="onTabClicked"
                 android:paddingBottom="3dip"
-                android:text="设置"
+                android:text="@string/main_tab_set_txt"
                 android:textColor="@drawable/selector_actionbar_txt"
                 android:textSize="12sp"/>
         </LinearLayout>

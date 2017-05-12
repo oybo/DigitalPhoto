@@ -17,7 +17,6 @@ public class EnvironmentUtil {
 
     public static boolean isSdCard(Context context) {
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            ToastUtil.showToast(context, "暂无外部存储设备");
             return false;
         }
         return true;

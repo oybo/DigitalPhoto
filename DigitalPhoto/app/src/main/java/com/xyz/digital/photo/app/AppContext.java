@@ -2,8 +2,6 @@ package com.xyz.digital.photo.app;
 
 import android.app.Application;
 
-import com.tencent.bugly.crashreport.CrashReport;
-
 /**
  * Created by O on 2017/3/17.
  */
@@ -21,9 +19,14 @@ public class AppContext extends Application {
         super.onCreate();
         mInstance =this;
 
-        CrashReport.initCrashReport(getApplicationContext(), "c5f1dd860f", false);
-
     }
 
+    public String getSString(int stringId) {
+        return getResources().getString(stringId);
+    }
+
+    public String getSString(int stringId, String value) {
+        return String.format(getResources().getString(stringId), value);
+    }
 
 }

@@ -61,6 +61,17 @@ public class TimeUtil {
 		return dateString;
 	}
 	/**
+	 * 获取当前时间 年月日
+	 *
+	 * @return
+	 */
+	public static String getCurToday() {
+		SimpleDateFormat formatter = new SimpleDateFormat(FORMAT_OTHER_YEAR);
+		Date currentTime = new Date();
+		String dateString = formatter.format(currentTime);
+		return dateString;
+	}
+	/**
 	 * 获取当前时间 小时:分;秒 HH:mm:ss
 	 * 
 	 * @return
@@ -70,18 +81,6 @@ public class TimeUtil {
 		Date currentTime = new Date();
 		String dateString = formatter.format(currentTime);
 		return dateString;
-	}
-	// 将long型的时间转成xxxx年xx月xx日 星期x
-	public static String parselongToString(long time) {
-		Date date = new Date();
-		date.setTime(time);
-		int year = date.getYear() + YEAR_BASE;
-		int month = date.getMonth() + 1;
-		int date2 = date.getDate();
-		int day = date.getDay();
-		String s = year + "年" + month + "月" + date2 + "日" + " "
-				+ getDayOfWeek(day);
-		return s;
 	}
 
 	/**
@@ -199,86 +198,6 @@ public class TimeUtil {
 		date.setTime(aSeconds * SECOND_MILLISECONDS);
 		SimpleDateFormat sdf = new SimpleDateFormat(formatter);
 		return sdf.format(date);
-	}
-
-	/**
-	 * 获取当前epoch时间
-	 * 
-	 * @return
-	 */
-	public static long getNowTime() {
-		Date current = new Date();
-		return current.getTime();
-	}
-
-	/**
-	 * 获取当前epoch时间
-	 * 
-	 * @return
-	 */
-	public static long getNowTicks() {
-		return getNowTime() / SECOND_MILLISECONDS;
-	}
-
-	public static String getDayOfWeek(int mWeek) {
-		String days[] = { "星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日" };
-		String dayOfWeek = "";
-		if (mWeek >= 1 && mWeek <= 7) {
-			dayOfWeek = days[mWeek - 1];
-		}else if ( mWeek == 0){
-			dayOfWeek = days[6];
-		}
-		return dayOfWeek;
-	}
-
-	public static void sleep(int time) {
-		try {
-			Thread.sleep(time);
-		} catch (Exception e) {
-		}
-	}
-
-	/**
-	 * 智能显示时间差值
-	 *
-	 * 如 2小时前 / 10分钟前 / 3天前
-	 *
-	 * @param longTime
-	 * @return
-	 */
-	public static String autoShowLastTime(String longTime){
-		String result = "";
-		try {
-			long ltime = Long.parseLong(longTime);
-			long curr = System.currentTimeMillis();
-
-			float hoursF = (curr - ltime * 1000) / (60*60*1000);  // 小时
-			int hours = (int)hoursF; // 四舍五入
-			if(hours > 0) {
-                int day = 24;
-                if(hours < day) {
-                    result += String.valueOf(hours) + "小时前";
-                } else if(hours >= day && hours < day * 2) {
-                    result = "1天前";
-                } else if(hours >= day*2 && hours < day*3) {
-                    result = "2天前";
-                } else {
-                    result = TimeUtil.getFormattedDateString(ltime, TimeUtil.FORMAT_OTHER_YEAR);
-                }
-            }
-            else
-            {
-                float minusF = (curr - ltime * 1000) / (60*1000);  // 分钟
-                int minus = (int)minusF; // 四舍五入
-                if(minus > 0)
-                    result += String.valueOf(minus) + "分钟前";
-                else
-                    result = "刚刚";
-            }
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
-		}
-		return result;
 	}
 
 	/**

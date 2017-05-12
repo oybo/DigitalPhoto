@@ -9,11 +9,11 @@
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
 
     <!-- 腾讯bugly=====================  -->
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.READ_LOGS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.READ_LOGS"/>
     <!-- 腾讯bugly=====================  -->
 
     <!--  WiFi直连需要的权限  -->
@@ -59,7 +59,8 @@
             android:windowSoftInputMode="adjustResize|stateHidden"/>
 
         <!--  设备详情页面   -->
-        <activity android:name=".ui.activity.DeviceDetailActivity"/>
+        <activity android:name=".ui.activity.DeviceDetailActivity"
+                  android:launchMode="singleTop"/>
 
         <activity android:name=".ui.activity.ShowImageListActivity"/>
 

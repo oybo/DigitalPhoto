@@ -1,5 +1,9 @@
 package com.xyz.digital.photo.app.util;
 
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+
 import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 
 import java.io.File;
@@ -12,6 +16,25 @@ import static com.xyz.digital.photo.app.manager.DeviceManager.mRemoteCurrentPath
  */
 
 public class PubUtils {
+
+    /**
+     * 获取应用的版本名称（用于显示给用户时使用）
+     * 使用 x.yy.mmdd 格式, 如 1.12.0906
+     *
+     * @param context
+     * @return
+     */
+    public static String getSoftVersion(Context context) {
+        String version = "1.0";
+        PackageManager packageManager = context.getPackageManager();
+        try {
+            PackageInfo packageInfo = packageManager.getPackageInfo(context.getPackageName(), 0);
+            version = packageInfo.versionName;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "V" + version;
+    }
 
     /**
      * 计算文件夹的总大小
@@ -179,26 +202,30 @@ public class PubUtils {
     }
 
     public static boolean isTypeFile(String fileName, MEDIA_FILE_TYPE type) {
-        if(type == MEDIA_FILE_TYPE.ALL) {
-            return true;
-        }
-        // 获取文件后缀名并转化为写，用于后续比较
-        String fileType = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length()).toLowerCase();
-        // 创建类型数组
-        String[] img = null;
-        if (type == MEDIA_FILE_TYPE.IMAGE) {
-            img = new String[]{"bmp", "jpg", "jpeg", "png", "tiff", "gif", "pcx", "tga", "exif", "fpx", "svg", "psd",
-                    "cdr", "pcd", "dxf", "ufo", "eps", "ai", "raw", "wmf"};
-        } else if (type == MEDIA_FILE_TYPE.AUDIO) {
-            img = new String[]{"mp3", "wma", "wav", "mod", "ra", "cd", "md", "asf", "aac", "vqf", "ape", "mid", "ogg",
-                    "m4a", "vqf"};
-        } else if (type == MEDIA_FILE_TYPE.VIDEO) {
-            img = new String[]{"mp4", "avi", "mov", "wmv", "asf", "navi", "3gp", "mkv", "f4v", "rmvb", "webm"};
-        }
-        for (int i = 0; i < img.length; i++) {
-            if (img[i].equals(fileType)) {
+        try {
+            if(type == MEDIA_FILE_TYPE.ALL) {
                 return true;
             }
+            // 获取文件后缀名并转化为写，用于后续比较
+            String fileType = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length()).toLowerCase();
+            // 创建类型数组
+            String[] img = null;
+            if (type == MEDIA_FILE_TYPE.IMAGE) {
+                img = new String[]{"bmp", "jpg", "jpeg", "png", "tiff", "gif", "pcx", "tga", "exif", "fpx", "svg", "psd",
+                        "cdr", "pcd", "dxf", "ufo", "eps", "ai", "raw", "wmf"};
+            } else if (type == MEDIA_FILE_TYPE.AUDIO) {
+                img = new String[]{"mp3", "wma", "wav", "mod", "ra", "cd", "md", "asf", "aac", "vqf", "ape", "mid", "ogg",
+                        "m4a", "vqf"};
+            } else if (type == MEDIA_FILE_TYPE.VIDEO) {
+                img = new String[]{"mp4", "avi", "mov", "wmv", "asf", "navi", "3gp", "mkv", "f4v", "rmvb", "webm"};
+            }
+            for (int i = 0; i < img.length; i++) {
+                if (img[i].equals(fileType)) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return false;
     }

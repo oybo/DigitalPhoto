@@ -8,7 +8,6 @@ import com.xyz.digital.photo.app.bean.MediaFileBean;
 import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 import com.xyz.digital.photo.app.bean.e.MEDIA_SHOW_TYPE;
 import com.xyz.digital.photo.app.mvp.Photo.MultiMediaUtils;
-import com.xyz.digital.photo.app.util.ToastUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,7 +40,6 @@ public class DeviceMediaPresenter implements DeviceMediaContract.Presenter {
     public void showMediaFiles(final MEDIA_FILE_TYPE type) {
 
         if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            ToastUtil.showToast(mView._getActivity(), "暂无外部存储设备");
             return;
         }
 

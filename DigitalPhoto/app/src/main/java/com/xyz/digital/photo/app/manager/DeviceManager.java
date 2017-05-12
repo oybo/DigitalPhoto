@@ -9,26 +9,34 @@ import com.actions.actfilemanager.ACTFileEventListener;
 import com.actions.actfilemanager.ActFileInfo;
 import com.actions.actfilemanager.ActFileManager;
 import com.xyz.digital.photo.app.AppContext;
+import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.bean.DownloadInfo;
 import com.xyz.digital.photo.app.bean.EventBase;
 import com.xyz.digital.photo.app.bean.FileInfo;
 import com.xyz.digital.photo.app.bean.UploadInfo;
 import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
+import com.xyz.digital.photo.app.bean.e.MEDIA_SHOW_TYPE;
 import com.xyz.digital.photo.app.util.Constants;
 import com.xyz.digital.photo.app.util.EnvironmentUtil;
 import com.xyz.digital.photo.app.util.PubUtils;
+import com.xyz.digital.photo.app.util.TimeUtil;
 import com.xyz.digital.photo.app.util.ToastUtil;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
 
 import static com.actions.actfilemanager.ActFileManager.downloadFile;
 
@@ -39,6 +47,11 @@ import static com.actions.actfilemanager.ActFileManager.downloadFile;
 public class DeviceManager {
 
     private static DeviceManager mInstance;
+
+    private boolean mLoginMain;
+
+    /**   作为相框服务器上文件集合    */
+    private Map<String, ActFileInfo> mRemoteFileMaps = new HashMap<>();
 
     private List<ActFileInfo> mRemoteFileList = new ArrayList<>();
     private ActFileManager actFileManager = new ActFileManager();
@@ -54,6 +67,14 @@ public class DeviceManager {
             }
         }
         return mInstance;
+    }
+
+    public void setLoginMainState(boolean state) {
+        mLoginMain = state;
+    }
+
+    public boolean isLoginMain() {
+        return mLoginMain;
     }
 
     public String setRemoteCurrentPath(String fileName) {
@@ -84,13 +105,33 @@ public class DeviceManager {
         }
     }
 
+    private MEDIA_SHOW_TYPE mShowType = MEDIA_SHOW_TYPE.CHART;
+
+    public void setShowType(MEDIA_SHOW_TYPE type) {
+        mShowType = type;
+    }
+
+    public MEDIA_SHOW_TYPE getShowType() {
+        return mShowType;
+    }
+
     /**
      * 返回当前相框所有文件
      *
      * @return
      */
     public List<ActFileInfo> getRemoteDeviceFiles() {
-        return mRemoteFileList;
+        if(mShowType == MEDIA_SHOW_TYPE.LIST) {
+            return mRemoteFileList;
+        } else {
+            List<ActFileInfo> tempFiles = new ArrayList<>();
+            for(ActFileInfo info : mRemoteFileList) {
+                if(info.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
+                    tempFiles.add(info);
+                }
+            }
+            return tempFiles;
+        }
     }
 
     public void removeFile(String fileName) {
@@ -123,6 +164,10 @@ public class DeviceManager {
         mUploadInfos.remove(filePath);
     }
 
+    public UploadInfo getCurUploadInfo() {
+        return mUploadInfo;
+    }
+
     public boolean isUpload(String filePath) {
         return mUploadInfos.containsKey(filePath);
     }
@@ -144,6 +189,22 @@ public class DeviceManager {
             return;
         }
         for (Map.Entry<String, UploadInfo> entry : mUploadInfos.entrySet()) {
+            // 发送命令查看剩余空间
+            String[] msg = new String[]{"cmd", "StorageRemain"};
+            ActCommunication.getInstance().sendMsg(msg);
+
+            // 新建今天日期命名文件夹
+            try {
+                String dirName = TimeUtil.getCurToday();
+                actFileManager.createDirectory(dirName);
+
+                if(mRemoteCurrentPath.equals("/")) {
+                    setRemoteCurrentPath(dirName);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             isUpload = true;
             mUploadInfo = entry.getValue();
             if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
@@ -227,6 +288,15 @@ public class DeviceManager {
 
     private String mDeleteRemotePath;
 
+    public void deleteDirectory(String fileName) {
+        if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
+            mDeleteRemotePath = mRemoteCurrentPath + fileName;
+        } else {
+            mDeleteRemotePath = mRemoteCurrentPath + "/" + fileName;
+        }
+        actFileManager.deleteDirectory(mDeleteRemotePath);
+    }
+
     public void deleteFile(String fileName) {
         if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
             mDeleteRemotePath = mRemoteCurrentPath + fileName;
@@ -272,25 +342,39 @@ public class DeviceManager {
         @Override
         public void onUploadCompleted(String remotePath, String localPath, int result) {
             // 上传完成回调
-            if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
-                ActCommunication.getInstance().onUploadFile(remotePath);
-                mUploadInfo.setState(2);
-                mUploadInfo.setFilePath(localPath);
-                sendUploadMessage(mUploadInfo);
-                removeUpload(mUploadInfo.getFilePath());
-                startUpload();
-            } else {
-                mUploadInfo.setState(-1);
-                mUploadInfo.setFilePath(localPath);
-                sendUploadMessage(mUploadInfo);
-                removeUpload(mUploadInfo.getFilePath());
-                ToastUtil.showToast(AppContext.getInstance(), mUploadInfo.getFileName() + "上传失败");
+            File sysFile = new File(EnvironmentUtil.getFilePath(), Constants.SYSTEM_FILE_NAME);
+            if(localPath.equals(sysFile.getAbsolutePath())) {
+                // 属于系统配置文件
+                // 执行刷新命令
+                ActCommunication.getInstance().sendMsg(new String[]{"cmd", "cfgfileupdate"});
             }
-            isUpload = false;
+            if(mUploadInfo != null) {
+                if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
+                    ActCommunication.getInstance().onUploadFile(remotePath);
+                    mUploadInfo.setState(2);
+                    mUploadInfo.setFilePath(localPath);
+                    sendUploadMessage(mUploadInfo);
+                    removeUpload(mUploadInfo.getFilePath());
+                    startUpload();
+                } else {
+                    mUploadInfo.setState(-1);
+                    mUploadInfo.setFilePath(localPath);
+                    sendUploadMessage(mUploadInfo);
+                    removeUpload(mUploadInfo.getFilePath());
+                    ToastUtil.showToast(AppContext.getInstance(), mUploadInfo.getFileName() + AppContext.getInstance().getSString(R.string.no_more_data_txt));
+                }
+                isUpload = false;
+            }
         }
 
         @Override
         public void onDownloadCompleted(String remotePath, String localPath, int result) {
+            File sysFile = new File(EnvironmentUtil.getFilePath(), Constants.SYSTEM_FILE_NAME);
+            if(localPath.equals(sysFile.getAbsolutePath())) {
+                // 属于系统配置文件
+                readSysConfigFile();
+            }
+
             if(tempFiles.containsKey(remotePath)) {
                 // 属于临时文件
                 if (result != ACTFileEventListener.OPERATION_SUCESSFULLY) {
@@ -312,14 +396,13 @@ public class DeviceManager {
                     sendDownloadMessage(mDownloadInfo);
                     removeDownload(mDownloadInfo.getFilePath());
                     startDownload();
-                    ToastUtil.showToast(AppContext.getInstance(), mDownloadInfo.getFileName() + "下载成功");
-
+                    ToastUtil.showToast(AppContext.getInstance(), mDownloadInfo.getFileName() + AppContext.getInstance().getSString(R.string.download_ok_txt));
                 } else {
                     mDownloadInfo.setState(-1);
                     mDownloadInfo.setFilePath(localPath);
                     sendDownloadMessage(mDownloadInfo);
                     removeDownload(mDownloadInfo.getFilePath());
-                    ToastUtil.showToast(AppContext.getInstance(), mDownloadInfo.getFileName() + "下载失败");
+                    ToastUtil.showToast(AppContext.getInstance(), mDownloadInfo.getFileName() + AppContext.getInstance().getSString(R.string.download_error_txt));
                 }
                 isDownload = false;
             }
@@ -331,6 +414,13 @@ public class DeviceManager {
             boolean success;
             if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
                 ActCommunication.getInstance().onDeleteFile(mDeleteRemotePath);
+                try {
+                    String fileName = mDeleteRemotePath.substring(mDeleteRemotePath.lastIndexOf("/") + 1, mDeleteRemotePath.length());
+                    removeRemoteFileMap(fileName);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 success = true;
                 refreshRemoteFiles();
             } else {
@@ -341,7 +431,9 @@ public class DeviceManager {
             eventBase.setData(success);
             EventBus.getDefault().post(eventBase);
 
-            Toast.makeText(AppContext.getInstance(), success ? "删除成功" : "删除失败", Toast.LENGTH_SHORT).show();
+            Toast.makeText(AppContext.getInstance(), success ?
+                    AppContext.getInstance().getSString(R.string.delete_success_txt):
+                    AppContext.getInstance().getSString(R.string.delete_faild_txt), Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -349,24 +441,16 @@ public class DeviceManager {
             isResposeFiles = true;
             if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
                 List<ActFileInfo> remoteFileList = (ArrayList) filelist;
-                for(ActFileInfo fileInfo : remoteFileList) {
-                    if(fileInfo.getFileName().equals(Constants.SYSTEM_FILE_NAME)) {
-                        remoteFileList.remove(fileInfo);
-                        break;
-                    }
-                }
                 if (remoteFileList != null) {
                     mRemoteFileList.clear();
-                    mRemoteFileList.addAll(remoteFileList);
-                    // 更新文件系统
-                    EventBase eventBase = new EventBase();
-                    eventBase.setAction(Constants.REFRESH_DEVICE_FILE);
-                    EventBus.getDefault().post(eventBase);
-                    // 下载系统配置文件
-                    downloadSysConfig();
                     // 下载临时文件
-                    for(ActFileInfo actFileInfo : mRemoteFileList) {
+                    for(ActFileInfo actFileInfo : remoteFileList) {
+                        if(actFileInfo.getFileName().equals(Constants.SYSTEM_FILE_NAME)) {
+                            continue;
+                        }
+                        mRemoteFileList.add(actFileInfo);
                         if(actFileInfo.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
+                            mRemoteFileMaps.put(actFileInfo.getFileName(), actFileInfo);
                             // 属于文件，并且是图片类型就下载
                             if(PubUtils.getFileType(actFileInfo.getFileName()) == MEDIA_FILE_TYPE.IMAGE) {
                                 // 下载临时文件
@@ -383,6 +467,10 @@ public class DeviceManager {
                             }
                         }
                     }
+                    // 刷新文件列表
+                    EventBase eventBase = new EventBase();
+                    eventBase.setAction(Constants.REFRESH_DEVICE_FILE);
+                    EventBus.getDefault().post(eventBase);
                 }
             }
         }
@@ -402,7 +490,9 @@ public class DeviceManager {
             eventBase.setData(success);
             EventBus.getDefault().post(eventBase);
 
-            Toast.makeText(AppContext.getInstance(), success ? "删除成功" : "删除失败", Toast.LENGTH_SHORT).show();
+            Toast.makeText(AppContext.getInstance(), success ?
+                    AppContext.getInstance().getSString(R.string.delete_success_txt):
+                    AppContext.getInstance().getSString(R.string.delete_faild_txt), Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -412,7 +502,7 @@ public class DeviceManager {
         @Override
         public void onDisconnectCompleted(int result) {
             if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
-                Toast.makeText(AppContext.getInstance(), "连接已断开", Toast.LENGTH_SHORT).show();
+                Toast.makeText(AppContext.getInstance(), AppContext.getInstance().getSString(R.string.connect_disconnect_txt), Toast.LENGTH_SHORT).show();
                 connect();
             } else {
             }
@@ -437,8 +527,22 @@ public class DeviceManager {
         }
     }
 
+    public void addRemoteFileMap(String fileName) {
+        mRemoteFileMaps.put(fileName, null);
+    }
+
+    public void removeRemoteFileMap(String fileName) {
+        mRemoteFileMaps.remove(fileName);
+    }
+
+    public boolean isExist(String fileName) {
+        return mRemoteFileMaps.containsKey(fileName);
+    }
+
     public void disConnect() {
         isConnect = false;
+        mLoginMain = false;
+        mRemoteFileMaps.clear();
 //        ActCommunication.getInstance().disconnect();
 //        actFileManager.disconnect();
     }
@@ -476,14 +580,16 @@ public class DeviceManager {
 
         @Override
         public void onDeviceConnected() {
-            ToastUtil.showToast(AppContext.getInstance(), "连接成功");
+            Toast.makeText(AppContext.getInstance(), AppContext.getInstance().getSString(R.string.connect_success_txt), Toast.LENGTH_SHORT).show();
             sendConnectState(true);
             isConnect = true;
+            // 下载系统配置文件
+            downloadSysConfig();
         }
 
         @Override
         public void onDeviceDisconnect() {
-            ToastUtil.showToast(AppContext.getInstance(), "连接已断开");
+            Toast.makeText(AppContext.getInstance(), AppContext.getInstance().getSString(R.string.connect_disconnect_txt), Toast.LENGTH_SHORT).show();
             sendConnectState(false);
             isConnect = false;
         }
@@ -536,6 +642,13 @@ public class DeviceManager {
                 for (OnCmdBackListener listener : mCmdListeners) {
                     listener.onBrightness(Integer.parseInt(status[3]));
                 }
+            } else if(action.equals("storageInfo")) {
+                String size = status[3];
+                long allSize = PubUtils.conversionSize(size);
+                if(allSize < 100) {
+                    // 空间不足
+                    ToastUtil.showToast(AppContext.getInstance(), AppContext.getInstance().getSString(R.string.residue_device_size_txt) + size);
+                }
             }
         }
     };
@@ -553,25 +666,56 @@ public class DeviceManager {
         void onBrightness(int value);
     }
 
-    private boolean downloadSysConfig;
+    private LinkedHashMap<String, String> propertiesMap = new LinkedHashMap<String, String>();
 
     /**
      * 下载系统配置文件
      */
     public void downloadSysConfig() {
-        if(!downloadSysConfig) {
-            try {
-                File sysFile = new File(EnvironmentUtil.getFilePath(), Constants.SYSTEM_FILE_NAME);
-                if(sysFile.exists()) {
-                    sysFile.delete();
-                }
-                int ss = actFileManager.downloadFile("/" + Constants.SYSTEM_FILE_NAME, sysFile.getAbsolutePath());
-                downloadSysConfig = (ss == 0);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        try {
+            File sysFile = new File(EnvironmentUtil.getFilePath(), Constants.SYSTEM_FILE_NAME);
+            int ss = actFileManager.downloadFile("/" + Constants.SYSTEM_FILE_NAME, sysFile.getAbsolutePath());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
 
+    private void readSysConfigFile() {
+        new Thread(){
+            @Override
+            public void run() {
+                super.run();
+                File sysFile = new File(EnvironmentUtil.getFilePath(), Constants.SYSTEM_FILE_NAME);
+                String read;
+                FileReader fileread = null;
+                try {
+                    fileread = new FileReader(sysFile);
+                    BufferedReader bufread = new BufferedReader(fileread);
+                    try {
+                        while ((read = bufread.readLine()) != null) {
+                            try {
+                                String[] strs = read.split("=");
+                                propertiesMap.put(strs[0], strs[1]);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } finally {
+                    if(fileread != null) {
+                        try {
+                            fileread.close();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }.start();
     }
 
     /**
@@ -580,34 +724,7 @@ public class DeviceManager {
     public void uploadSysConfig() {
         try {
             File sysFile = new File(EnvironmentUtil.getFilePath(), Constants.SYSTEM_FILE_NAME);
-            if(sysFile.exists()) {
-                sysFile.delete();
-            }
             int ss = actFileManager.uploadFile(sysFile.getAbsolutePath(), "/" + Constants.SYSTEM_FILE_NAME);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private Map<String, String> propertiesMap = new HashMap<String, String>();
-
-    private void getProperties() {
-        try {
-            Properties properties = new Properties();
-            File sysFile = new File(EnvironmentUtil.getFilePath(), Constants.SYSTEM_FILE_NAME);
-            FileInputStream fis = new FileInputStream(sysFile);
-            properties.load(fis);
-            Set<Object> keySet = properties.keySet();
-            for (Object object : keySet) {
-                String key = (String) object;
-                String value = (String) properties.get(key);
-                System.out.println(key + "=" + value);
-
-                String s = new String(value.getBytes(), "UTF-8");
-                String ss = new String(value.getBytes(), "GBK");
-                System.out.println(s + "=" + ss);
-                propertiesMap.put(key, value);
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -615,13 +732,56 @@ public class DeviceManager {
 
     public String getpropertiesValue(String key) {
         if(propertiesMap.size() == 0) {
-            getProperties();
+            readSysConfigFile();
         }
-        String value = "";
-        value = propertiesMap.get(key);
-
-        return value;
+        return propertiesMap.get(key);
     }
+
+    public void setpropertiesValue(String key, String value) {
+        try {
+            // 刷新
+            propertiesMap.put(key, value);
+            // 修改文件
+            saveTxtByStr();
+            // 上传
+            uploadSysConfig();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** */
+    /**
+     */
+    private void saveTxtByStr() {
+        OutputStreamWriter write = null;
+        BufferedWriter writer = null;
+        try {
+            File sysFile = new File(EnvironmentUtil.getFilePath(), Constants.SYSTEM_FILE_NAME);
+            sysFile.delete();
+            sysFile.createNewFile();
+            write = new OutputStreamWriter(new FileOutputStream(sysFile), "UTF-8");
+            writer = new BufferedWriter(write);
+            for (Map.Entry<String, String> entry : propertiesMap.entrySet()) {
+                writer.append(entry.getKey() + "=" + entry.getValue() + "\r\n");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if(writer != null) {
+                    writer.close();
+                }
+                if(write != null) {
+                    write.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+/**   ====================添加播放文件=========================  */
 
     private Map<String, String> mPlayFiles = new HashMap<>();
 

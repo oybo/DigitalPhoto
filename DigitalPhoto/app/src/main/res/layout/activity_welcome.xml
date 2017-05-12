@@ -12,7 +12,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="150dip"
         android:background="@drawable/selector_welcom_begin_view"
-        android:text="立即体验"
+        android:text="@string/welcome_txt"
         android:textColor="#FFFFFF"
         android:textSize="14sp" />
 
