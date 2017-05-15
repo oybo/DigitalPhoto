@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ZXFAP</string>
+    <string name="app_name">ZXFFRAME</string>
 
     <string name="app_info_txt">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;Point to point photo frame work in wifi AP+app mode.Photo frame work as a wifi AP,mobile phone connect to wifi AP and log in photo frame. APP support upload files to photo frame, and view files, delete or play files in the photo frame\;Download files from photo frame to mobile phone\;Support remote control photo frame and modify photo frames configuration and so on</string>
 

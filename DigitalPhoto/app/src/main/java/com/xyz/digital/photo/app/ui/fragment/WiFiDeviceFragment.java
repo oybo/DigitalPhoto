@@ -5,10 +5,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -30,6 +30,7 @@ import com.xyz.digital.photo.app.mvp.wifi.WiFiPresenter;
 import com.xyz.digital.photo.app.ui.BaseFragment;
 import com.xyz.digital.photo.app.ui.activity.LoginActivity;
 import com.xyz.digital.photo.app.util.Constants;
+import com.xyz.digital.photo.app.util.PubUtils;
 import com.xyz.digital.photo.app.util.ToastUtil;
 import com.xyz.digital.photo.app.view.LoadingView;
 import com.xyz.digital.photo.app.view.SimpleDividerItemDecoration;
@@ -95,7 +96,10 @@ public class WiFiDeviceFragment extends BaseFragment implements WiFiContract.Vie
         }
     }
 
+    private ScanResult mScanResult;
+
     private void initData() {
+        registerBroadcast();
         initWifi();
         mPresenter = new WiFiPresenter(this);
         mAdapter = new WifiAdapter(getActivity(), mWifiManager);
@@ -113,40 +117,21 @@ public class WiFiDeviceFragment extends BaseFragment implements WiFiContract.Vie
             @Override
             public void onItemClick(View itemView, int pos) {
                 // 去连接登录
-                final ScanResult scanResult = mAdapter.getItem(pos);
-                if(!isConnectTheWifi(scanResult)) {
+                mScanResult = mAdapter.getItem(pos);
+                if (PubUtils.isConnectTheWifi(mWifiManager.getConnectionInfo(), mScanResult)) {
+                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    return;
+                }
+                showLoading();
+                if (!isConnectTheWifi(mScanResult)) {
                     DeviceManager.getInstance().disConnect();
                 }
-                new AsyncTask<Void, Void, Boolean>() {
-                    @Override
-                    protected void onPreExecute() {
-                        super.onPreExecute();
-                        showLoading();
-                    }
-
-                    @Override
-                    protected Boolean doInBackground(Void... params) {
-                        boolean success = mPresenter.connect(mWifiManager, scanResult);
-                        try {
-                            Thread.sleep(200);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        return success;
-                    }
-
-                    @Override
-                    protected void onPostExecute(Boolean success) {
-                        super.onPostExecute(success);
-                        if (success) {
-                            startActivity(new Intent(getActivity(), LoginActivity.class));
-                        } else {
-                            ToastUtil.showToast(getActivity(), AppContext.getInstance().getSString(R.string.connect_faild_txt));
-                        }
-                        mAdapter.notifyDataSetChanged();
-                        hideLoading();
-                    }
-                }.execute();
+                boolean success = mPresenter.connect(mWifiManager, mScanResult);
+                if (!success) {
+                    ToastUtil.showToast(getActivity(), AppContext.getInstance().getSString(R.string.connect_faild_txt));
+                    mAdapter.notifyDataSetChanged();
+                    hideLoading();
+                }
             }
         });
     }
@@ -258,6 +243,22 @@ public class WiFiDeviceFragment extends BaseFragment implements WiFiContract.Vie
                     case WifiManager.WIFI_STATE_DISABLED:
                         break;
                 }
+            } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
+                NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+                if (info.getState().equals(NetworkInfo.State.DISCONNECTED)) {
+                    mAdapter.notifyDataSetChanged();
+                } else if (info.getState().equals(NetworkInfo.State.CONNECTED)) {
+                    if (mScanResult != null) {
+                        if (PubUtils.isConnectTheWifi(mWifiManager.getConnectionInfo(), mScanResult)) {
+                            startActivity(new Intent(getActivity(), LoginActivity.class));
+                        } else {
+                            ToastUtil.showToast(getActivity(), AppContext.getInstance().getSString(R.string.connect_faild_txt));
+                        }
+                        mAdapter.notifyDataSetChanged();
+                        hideLoading();
+                        mScanResult = null;
+                    }
+                }
             }
         }
     };
@@ -269,13 +270,8 @@ public class WiFiDeviceFragment extends BaseFragment implements WiFiContract.Vie
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         getActivity().registerReceiver(mReceiver, filter);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        registerBroadcast();
     }
 
     @Override

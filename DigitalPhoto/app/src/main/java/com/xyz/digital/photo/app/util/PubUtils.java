@@ -3,6 +3,8 @@ package com.xyz.digital.photo.app.util;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiInfo;
 
 import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 
@@ -16,6 +18,21 @@ import static com.xyz.digital.photo.app.manager.DeviceManager.mRemoteCurrentPath
  */
 
 public class PubUtils {
+
+    public static boolean isConnectTheWifi(WifiInfo wifiInfo, ScanResult wifi) {
+        boolean connect = false;
+        try {
+            if (wifiInfo != null) {
+                if ((wifiInfo.getSSID().toString().replace("\"", "")).equals(wifi.SSID.toString().replace("\"", "")) &&
+                        (wifiInfo.getBSSID().toString().replace("\"", "")).equals(wifi.BSSID.toString().replace("\"", ""))) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return connect;
+    }
 
     /**
      * 获取应用的版本名称（用于显示给用户时使用）

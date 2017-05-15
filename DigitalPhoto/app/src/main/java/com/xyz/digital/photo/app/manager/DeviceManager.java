@@ -56,6 +56,8 @@ public class DeviceManager {
     private List<ActFileInfo> mRemoteFileList = new ArrayList<>();
     private ActFileManager actFileManager = new ActFileManager();
 
+    private boolean mFristLoadTag;
+
     public static String mRemoteCurrentPath = "/";
 
     public static DeviceManager getInstance() {
@@ -441,6 +443,18 @@ public class DeviceManager {
             isResposeFiles = true;
             if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
                 List<ActFileInfo> remoteFileList = (ArrayList) filelist;
+                if(remoteFileList != null && mRemoteCurrentPath.equals("/") && !mFristLoadTag) {
+                    for(ActFileInfo fileInfo : remoteFileList) {
+                        if(fileInfo.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
+                            String dirName = TimeUtil.getCurToday();
+                            if(dirName.equals(fileInfo.getFileName())) {
+                                mFristLoadTag = true;
+                                setRemoteCurrentPath(dirName);
+                                return;
+                            }
+                        }
+                    }
+                }
                 if (remoteFileList != null) {
                     mRemoteFileList.clear();
                     // 下载临时文件
@@ -733,6 +747,9 @@ public class DeviceManager {
     public String getpropertiesValue(String key) {
         if(propertiesMap.size() == 0) {
             readSysConfigFile();
+        }
+        if(!propertiesMap.containsKey(key)) {
+            return "0";
         }
         return propertiesMap.get(key);
     }

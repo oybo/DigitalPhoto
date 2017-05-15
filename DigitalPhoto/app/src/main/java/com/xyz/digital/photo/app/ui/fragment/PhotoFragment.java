@@ -246,8 +246,13 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                     // 点击单个上传
                     MediaFileBean file = mChartAdapter.getItem(position);
                     if(!DeviceManager.getInstance().isUpload(file.getFilePath())) {
+                        boolean isUploading = DeviceManager.getInstance().isUploading();
+                        // 执行上传
                         mChartAdapter.select(position);
-                        uploadFiles();
+                        mChartAdapter.addUpload(position);
+                        if(!isUploading) {
+                            DeviceManager.getInstance().startUpload();
+                        }
                     }
                     break;
             }
@@ -263,8 +268,13 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                     // 点击单个上传
                     FolderBean file = mListAdapter.getItem(position);
                     if(!DeviceManager.getInstance().isUpload(file.getTopImagePath())) {
+                        boolean isUploading = DeviceManager.getInstance().isUploading();
+                        // 执行上传
                         mListAdapter.select(position);
-                        uploadFiles();
+                        mListAdapter.addUpload(position);
+                        if(!isUploading) {
+                            DeviceManager.getInstance().startUpload();
+                        }
                     }
                     break;
             }
@@ -398,9 +408,9 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                     }
                 } else {
                     if(mListLayout.getVisibility() == View.VISIBLE) {
-                        mSelectNumTxt.setText(AppContext.getInstance().getSString(R.string.select_z_txt, String.valueOf(mListAdapter.clearSelectAll())));
+                        mSelectNumTxt.setText(AppContext.getInstance().getSString(R.string.select_z_txt, String.valueOf(mListAdapter.selectAll())));
                     } else {
-                        mSelectNumTxt.setText(AppContext.getInstance().getSString(R.string.select_z_txt, String.valueOf(mChartAdapter.clearSelectAll())));
+                        mSelectNumTxt.setText(AppContext.getInstance().getSString(R.string.select_z_txt, String.valueOf(mChartAdapter.selectAll())));
                     }
                 }
                 checkSelectAll();
@@ -461,15 +471,17 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
         if(mListLayout.getVisibility() == View.VISIBLE) {
             // 列表模式
             List<FolderBean> uploads = mListAdapter.getSelectFiles();
+            boolean start = false;
             boolean isUploading = DeviceManager.getInstance().isUploading();
             for (int i = 0; i < uploads.size(); i++) {
                 FolderBean bean = uploads.get(i);
                 if(!mListAdapter.isUpload(bean.getTopImagePath())) {
                     // 执行上传
+                    start = true;
                     mListAdapter.addUpload(bean.getPosition());
                 }
             }
-            if(!isUploading) {
+            if(!isUploading && start) {
                 DeviceManager.getInstance().startUpload();
             }
         } else {
@@ -619,6 +631,24 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
         }
     }
 
+    private void clear(UploadInfo uploadInfo) {
+        if(mListLayout.getVisibility() == View.VISIBLE) {
+            for(FolderBean bean : mListAdapter.getList()) {
+                if(uploadInfo.getFilePath().equals(bean.getTopImagePath())) {
+                    mListAdapter.select(bean.getPosition());
+                    return;
+                }
+            }
+        } else {
+            for(MediaFileBean bean : mChartAdapter.getList()) {
+                if(uploadInfo.getFilePath().equals(bean.getFilePath())) {
+                    mChartAdapter.select(bean.getPosition());
+                    return;
+                }
+            }
+        }
+    }
+
     private synchronized void refresh(UploadInfo uploadInfo) {
         try {
             ProgressPieView pieView;
@@ -640,6 +670,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                 } else if (state == -1) {
                     // 上传出错
                     pieView.setText(AppContext.getInstance().getSString(R.string.error_txt));
+                    clear(uploadInfo);
                 } else if (state == 2) {
                     // 上传成功
                     pieView.setText(AppContext.getInstance().getSString(R.string.download_success_txt));
@@ -664,6 +695,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                             }
                         }
                     }
+                    clear(uploadInfo);
                 }
             }
         } catch (NumberFormatException e) {

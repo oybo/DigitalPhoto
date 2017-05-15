@@ -150,7 +150,7 @@ public class SetFragment extends BaseFragment implements View.OnClickListener {
             PreferenceUtils.getInstance().putInt(sp_key, Integer.parseInt(p));
 
             txtView.setText(values[Integer.parseInt(p)]);
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

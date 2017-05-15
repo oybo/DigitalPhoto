@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">正芯峰</string>
+    <string name="app_name">正芯烽相册</string>
 
     <string name="app_info_txt">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;“点对点”相框采用无线热点+APP的工作模式，相框作为无线热点，手机通过APP连接热点并登入相框。APP支持上传文件到相框，查看、删除和播放相框上的文件；下载文件到手机，遥控器操作、修改相框系统设置等功能。</string>
 

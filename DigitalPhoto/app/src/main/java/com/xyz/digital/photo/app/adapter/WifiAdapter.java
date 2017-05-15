@@ -2,7 +2,6 @@ package com.xyz.digital.photo.app.adapter;
 
 import android.content.Context;
 import android.net.wifi.ScanResult;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.view.View;
 import android.widget.ImageView;
@@ -10,6 +9,7 @@ import android.widget.ImageView;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.adapter.base.RecyclerViewHolder;
+import com.xyz.digital.photo.app.util.PubUtils;
 
 /**
  * Created by O on 2017/3/20.
@@ -38,29 +38,12 @@ public class WifiAdapter extends BaseRecyclerAdapter<ScanResult> {
 
         ImageView connectState = holder.getImageView(R.id.item_wifi_device_status_txt);
 
-        if(isConnectTheWifi(item)) {
+        if(PubUtils.isConnectTheWifi(mWifiManager.getConnectionInfo(), item)) {
             connectState.setImageResource(R.drawable.green_icon);
             connectState.setVisibility(View.VISIBLE);
         } else {
             connectState.setVisibility(View.GONE);
         }
     }
-
-    private boolean isConnectTheWifi(ScanResult wifi) {
-        boolean connect = false;
-        try {
-            WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
-            if (wifiInfo != null) {
-                if ((wifiInfo.getSSID().toString().replace("\"", "")).equals(wifi.SSID.toString().replace("\"", "")) &&
-                        (wifiInfo.getBSSID().toString().replace("\"", "")).equals(wifi.BSSID.toString().replace("\"", ""))) {
-                    return true;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return connect;
-    }
-
 
 }
