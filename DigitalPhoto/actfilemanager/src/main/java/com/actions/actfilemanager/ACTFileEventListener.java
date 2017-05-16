@@ -69,4 +69,11 @@ public interface ACTFileEventListener {
      * @param result disconnect result
      */
     public void onDisconnectCompleted(int result);
+
+    /**
+     * Called when rename is done
+     *
+     * @param result rename result
+     */
+    public void onRenameCompleted(int result);
 }

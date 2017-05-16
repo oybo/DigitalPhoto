@@ -24,6 +24,7 @@
 #define OP_TYPE_QUIT        7
 #define OP_TYPE_PWD         8
 #define OP_TYPE_CWD         9
+#define OP_TYPE_RENAME      10
 
 #define MAX_PATH_LENGTH     1024
 #define MAX_URL_LENGTH      1024
@@ -60,11 +61,14 @@ typedef struct {
     int mType;
     char* mThumb; //url to retrive thumbnail of the file
 }FileInfo;*/
-#define MAX_NAME_LEN 64
+
+#define MAX_NAME_LEN (64)
+#define MAX_DATE_LEN (18)
 typedef struct {
     char mName[MAX_NAME_LEN];
-    //long mSize;
     int mType;
+	int64_t mSize;
+	char mDate[MAX_DATE_LEN];
 }FileInfo;
 
 #endif //COMMON_H

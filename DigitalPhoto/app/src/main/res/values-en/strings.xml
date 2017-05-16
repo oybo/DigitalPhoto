@@ -133,5 +133,9 @@
     <string name="set_play_pause_txt">PLAY/PAUSE</string>
     <string name="set_next_txt">NEXT</string>
 
+    <string name="set_ykq_calendar_txt">CALENDAR</string>
+    <string name="image_ykq_txt">PHOTO</string>
+    <string name="music_ykq_txt">MUSIC</string>
+    <string name="video_ykq_txt">VIDEO</string>
 
 </resources>

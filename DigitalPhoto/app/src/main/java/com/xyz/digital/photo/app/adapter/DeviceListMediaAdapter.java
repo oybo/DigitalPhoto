@@ -22,8 +22,6 @@ import com.xyz.digital.photo.app.view.ProgressPieView;
 
 import java.io.File;
 
-import static com.xyz.digital.photo.app.manager.DeviceManager.mRemoteCurrentPath;
-
 /**
  * Created by O on 2017/3/18.
  */
@@ -57,7 +55,7 @@ public class DeviceListMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
         } else if (item.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
             // 文件
             // 是否添加到了播放
-            String remotePath = mRemoteCurrentPath + item.getFileName();
+            String remotePath = DeviceManager.getInstance().getRemotePath(item.getFileName());
             if(DeviceManager.getInstance().isPlay(remotePath)) {
                 playImage.setImageResource(R.drawable.media_pause_icon);
             } else {

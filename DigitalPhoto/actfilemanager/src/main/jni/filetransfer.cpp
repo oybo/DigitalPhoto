@@ -3,6 +3,7 @@
 //
 #include <pthread.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "curl/curl.h"
 #include "filetransfer.h"
@@ -12,7 +13,7 @@ extern void postOperationProgress(int opcode, int processed,int total);
 extern void postUploadResponse(const char *remote_path, const char *file_path,int result);
 extern void postDownloadResponse(const char* url, const char* path, int result);
 
-static FileTransferManager* ftmanager;
+static FileTransferManager* ftmanager = NULL;
 
 static int transfer_add_request(FileTransferManager* ftm, int* opts, void** params, int optnum, int optype);
 static int transfer_clear_requests(FileTransferManager* ftm);
@@ -25,7 +26,6 @@ int fileTransferInit(const char* ip)
 {
     int ret = 0;
     CURLcode res;
-    pthread_attr_t attr;
 
     if(ip == NULL)
     {
@@ -33,8 +33,8 @@ int fileTransferInit(const char* ip)
         return -1;
     }
 
-    res = curl_global_init(CURL_GLOBAL_DEFAULT);
-    if(res != 0)
+    res = curl_global_init(CURL_GLOBAL_ALL);
+    if(res != CURLE_OK)
     {
         __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "something wrong when curl global init");
         return -1;
@@ -43,34 +43,29 @@ int fileTransferInit(const char* ip)
     ftmanager = (FileTransferManager *)malloc(sizeof(FileTransferManager));
     if(ftmanager == NULL)
     {
+        curl_global_cleanup();
         __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "error malloc ftmanager");
         return -1;
     }
+    
+    memset(ftmanager, 0, sizeof(FileTransferManager));
     ftmanager->mInited = 0;
     ftmanager->mCurlHandle = NULL;
-    memset(ftmanager->mIp, 0, 16);
     strcpy(ftmanager->mIp, ip);
     ftmanager->mPendingReqNum = 0;
     ftmanager->mAbort = 0;
 	ftmanager->mCurrentFile = NULL;
 
-    ret = pthread_attr_init(&attr);
-    if(ret != 0)
-    {
-        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "error malloc ftmanager");
-        free(ftmanager);
-        ftmanager = NULL;
-        return -1;
-    }
-
-    ret = pthread_create(&ftmanager->mTaskRunner, &attr, transfer_runner, ftmanager);
+    ret = pthread_create(&ftmanager->mTaskRunner, NULL, transfer_runner, ftmanager);
     if(ret != 0)
     {
         __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "error create transfer thread");
+        curl_global_cleanup();
         free(ftmanager);
         ftmanager = NULL;
         return -1;
     }
+    
     pthread_mutex_init(&ftmanager->mOnNewRequestMutex, NULL);
     pthread_cond_init(&ftmanager->mOnNewRequestCond, NULL);
 
@@ -79,26 +74,28 @@ int fileTransferInit(const char* ip)
 
 int fileTransferCleanup()
 {
-    int ret;
-    void *ret_p = &ret;
+    if(ftmanager == NULL)
+		return 0;
+	
+    //stop current task and clear all pending requests;
+    transfer_clear_requests(ftmanager);
 
-    if(ftmanager != NULL)
-    {
-        //stop current task and clear all pending requests;
-        transfer_clear_requests(ftmanager);
+    pthread_mutex_lock(&ftmanager->mOnNewRequestMutex);
+    ftmanager->mAbort = 1;
+    pthread_cond_broadcast(&ftmanager->mOnNewRequestCond);
+    pthread_mutex_unlock(&ftmanager->mOnNewRequestMutex);
+    
+    pthread_join(ftmanager->mTaskRunner, NULL);
+    pthread_mutex_destroy(&ftmanager->mOnNewRequestMutex);
+    pthread_cond_destroy(&ftmanager->mOnNewRequestCond);
 
-        //fixme: if no pending requests need a signal to wake up sleeping runner;
-
-        //fixme: need a lock here to protect mAbort?
-        ftmanager->mAbort = 1;
-        //pthread_join(ftmanager->mTaskRunner,&((void *)ret));
-        pthread_join(ftmanager->mTaskRunner,&ret_p);
-        pthread_mutex_destroy(&ftmanager->mOnNewRequestMutex);
-        pthread_cond_destroy(&ftmanager->mOnNewRequestCond);
-        free(ftmanager);
-        ftmanager = NULL;
-    }
-
+	if(ftmanager->mCurrentFile != NULL)
+        fclose(ftmanager->mCurrentFile);
+	if(ftmanager->mCurlHandle != NULL)
+        curl_easy_cleanup(ftmanager->mCurlHandle);
+	
+    free(ftmanager);
+    ftmanager = NULL;
     curl_global_cleanup();
 
     return 0;
@@ -118,7 +115,6 @@ int fileTransferUpload(const char* file_path,const char* remote_path)
         return -1;
     }
 
-	memset(url, 0, 1024);
 	strcpy(url, "ftp://");
 	strcat(url, ftmanager->mIp);
 	strcat(url, remote_path);
@@ -196,9 +192,9 @@ static int transfer_write_func(void *ptr, size_t size, size_t nmemb, void *strea
     int ret;
     FILE* fp = (FILE*)stream;
 
-    if(fp == NULL)
+    if((fp == NULL) || (ftmanager->mAbort == 1))
     {
-        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG,"null file pointer");
+        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG,"null file pointer or app quit");
         return -1;
     }
 
@@ -211,18 +207,15 @@ static int transfer_write_func(void *ptr, size_t size, size_t nmemb, void *strea
 //for uploaded data to read from file
 static int transfer_read_func(void *ptr, size_t size, size_t nmemb, void *stream)
 {
-    curl_off_t nread;
     FILE* fp = (FILE*)stream;
 
-    if(fp == NULL)
+    if((fp == NULL) || (ftmanager->mAbort == 1))
     {
-        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG,"null file pointer");
+        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG,"null file pointer or app quit");
         return CURL_READFUNC_ABORT;
     }
 
     size_t ret = fread(ptr, size, nmemb, fp);
-    nread = (curl_off_t)ret;
-
     if(ret == 0)
     {
         //end of file, all transferred
@@ -241,12 +234,13 @@ static int transfer_progress_func(void *ptr, curl_off_t dltotal, curl_off_t dlno
                                   curl_off_t ultotal, curl_off_t ulnow)
 {
     FileTransferManager* ftm = *((FileTransferManager**)ptr);
+    
     //__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "%s dltotal %lld dlnow %lld ultotal %lld ulnow %lld %ld",(const char *)ftm->mCurrentUrl,dltotal,dlnow,ultotal,ulnow,ftm->mCurrentTotalSize);
-    if(ftmanager->mCurrentOpType == OP_TYPE_DOWNLOAD)
+    if(ftm->mCurrentOpType == OP_TYPE_DOWNLOAD)
     {
         postOperationProgress(OP_TYPE_DOWNLOAD, dlnow,dltotal);
     }
-    else if(ftmanager->mCurrentOpType == OP_TYPE_UPLOAD)
+    else if(ftm->mCurrentOpType == OP_TYPE_UPLOAD)
     {
         postOperationProgress(OP_TYPE_UPLOAD, ulnow,ultotal);
     }
@@ -272,6 +266,7 @@ static int transfer_add_request(FileTransferManager* ftm, int* opts, void** para
     //add a request
     if(ftm->mPendingReqNum >= MAX_REQUESTS)
     {
+        pthread_mutex_unlock(&ftm->mOnNewRequestMutex);
         __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "too many pending requests");
         return -1;
     }
@@ -279,29 +274,27 @@ static int transfer_add_request(FileTransferManager* ftm, int* opts, void** para
     RequestOpt* reqp = (RequestOpt*)malloc(sizeof(RequestOpt));
     if(reqp == NULL)
     {
+        pthread_mutex_unlock(&ftm->mOnNewRequestMutex);
         __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "fail to malloc request");
         return -1;
     }
 
     for(i=0;i<optnum;i++)
     {
-        int paramsize = 0;
         reqp->mOptCmd[i]=opts[i];
         switch((CURLoption)opts[i])
         {
             case CURLOPT_URL:
             case CURLOPT_READDATA:
             case CURLOPT_WRITEDATA:
-
                 if(params[i] == NULL)
                 {
                     //dont assume error yet, let do_run thread to check
                     reqp->mOptParam[i] = params[i];
                     break;
                 }
-                paramsize = 1+strlen((char*)params[i]);
-                reqp->mOptParam[i] = (void*)malloc(paramsize);
-                memcpy(reqp->mOptParam[i], params[i], paramsize);
+
+                reqp->mOptParam[i] = strdup((char*)params[i]);
                 break;
             default:
                 reqp->mOptParam[i] = params[i];
@@ -365,20 +358,14 @@ static int transfer_clear_requests(FileTransferManager* ftm)
 static int transfer_retrieve_request(FileTransferManager* ftm, RequestOpt** req)
 {
     int i;
-    //lock and retrieve and move and unlock
-    pthread_mutex_lock(&ftm->mOnNewRequestMutex);
-    *req = ftm->mReqList[0];
 
+    *req = ftm->mReqList[0];
     for(i=1;i<ftm->mPendingReqNum;i++)
     {
         ftm->mReqList[i-1] = ftm->mReqList[i];
 		ftm->mReqList[i] = NULL;
     }
     ftm->mPendingReqNum--;
-
-    //clear all requests here, signal runner to wake up if it's waiting
-    //pthread_cond_broadcast(&ftm->mOnNewRequestCond);
-    pthread_mutex_unlock(&ftm->mOnNewRequestMutex);
 
     return 0;
 }
@@ -396,6 +383,7 @@ static void* transfer_runner(void *arg)
     }
 
     //run all requests in loop
+    pthread_mutex_lock(&ftm->mOnNewRequestMutex);
     while(ftm->mAbort == 0)
     {
         RequestOpt* req;
@@ -404,73 +392,72 @@ static void* transfer_runner(void *arg)
 
         if(ftm->mPendingReqNum > 0)
         {
-            //fixme: lock here
             transfer_retrieve_request(ftm, &req);
-            //fixme: unlock here
+            pthread_mutex_unlock(&ftm->mOnNewRequestMutex);
 
             ftm->mCurrentOpType = req->mType;
-            for(i=0;i<req->mOptNum;i++) {
+            for(i=0;i<req->mOptNum;i++)
+            {
                 switch(req->mOptCmd[i])
                 {
-                    case CURLOPT_URL:
-                        memset(ftm->mCurrentUrl, 0, MAX_URL_LENGTH);
-                        strcpy(ftm->mCurrentUrl,(const char*)req->mOptParam[i]);
-                        curl_easy_setopt(ftm->mCurlHandle, (CURLoption)req->mOptCmd[i], ftm->mCurrentUrl);
-                        break;
-                    case CURLOPT_READDATA:
-                        struct stat buf;
-                        int ret;
-                        if(ftmanager->mCurrentFile != NULL)
-                        {
-                            fclose(ftmanager->mCurrentFile);
-                            ftmanager->mCurrentFile = NULL;
-                        }
-                        ftmanager->mCurrentFile = fopen((const char*)req->mOptParam[i], "rb");
-                        if(ftmanager->mCurrentFile == NULL)
-                        {
-                            __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "cant open file!");
-                            goto release_request;
-                        }
-                        memset(ftm->mCurrentPath, 0, MAX_PATH_LENGTH);
-                        strcpy(ftm->mCurrentPath,(const char*)req->mOptParam[i]);
-
-                        ret = stat((const char*)req->mOptParam[i], &buf);
-                        if(ret != 0)
-                        {
-                            __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "cant stat file!");
-                            goto release_request;
-                        }
-                        ftm->mCurrentTotalSize = buf.st_size;
-                        ftm->mCurrentProcessed= 0;
-						curl_easy_setopt(ftm->mCurlHandle,CURLOPT_UPLOAD,1);
-                        curl_easy_setopt(ftm->mCurlHandle, (CURLoption)req->mOptCmd[i], ftm->mCurrentFile);
-						curl_easy_setopt(ftm->mCurlHandle, CURLOPT_INFILESIZE_LARGE,(curl_off_t)ftm->mCurrentTotalSize);
-
-                        break;
-                    case CURLOPT_WRITEDATA:					
-						//__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "transfer_runner %d",__LINE__);
-                        if(ftmanager->mCurrentFile != NULL)
-                        {
-                            fclose(ftmanager->mCurrentFile);
-                            ftmanager->mCurrentFile = NULL;
-                        }
-						//__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "transfer_runner %d %s",__LINE__,(const char*)req->mOptParam[i]);
-                        ftmanager->mCurrentFile = fopen((const char*)req->mOptParam[i], "wb");
-						__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "download %s mCurrentFile %p",(const char*)req->mOptParam[i],ftmanager->mCurrentFile);
-                        if(ftmanager->mCurrentFile == NULL)
-                        {
-                            __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "cant open file!");
-                            goto release_request;
-                        }
-						//__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "transfer_runner %d %s",__LINE__,(const char*)req->mOptParam[i]);
-                        memset(ftm->mCurrentPath, 0, MAX_PATH_LENGTH);
-                        strcpy(ftm->mCurrentPath,(const char*)req->mOptParam[i]);
-						curl_easy_setopt(ftm->mCurlHandle,CURLOPT_UPLOAD,0);
-                        curl_easy_setopt(ftm->mCurlHandle, (CURLoption)req->mOptCmd[i], ftm->mCurrentFile);
-						//__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "transfer_runner %d",__LINE__);
-                        break;
-                    default:
-                        curl_easy_setopt(ftm->mCurlHandle, (CURLoption)req->mOptCmd[i], req->mOptParam[i]);
+                case CURLOPT_URL:
+                    strcpy(ftm->mCurrentUrl,(const char*)req->mOptParam[i]);
+                    curl_easy_setopt(ftm->mCurlHandle, (CURLoption)req->mOptCmd[i], ftm->mCurrentUrl);
+                    break;
+                case CURLOPT_READDATA:
+                    struct stat buf;
+                    int ret;
+                    
+                    if(ftm->mCurrentFile != NULL)
+                    {
+                        fclose(ftm->mCurrentFile);
+                        ftm->mCurrentFile = NULL;
+                    }
+                    
+                    ftm->mCurrentFile = fopen((const char*)req->mOptParam[i], "rb");
+                    if(ftm->mCurrentFile == NULL)
+                    {
+                        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "cant open file!");
+                        goto release_request;
+                    }
+                    
+                    strcpy(ftm->mCurrentPath,(const char*)req->mOptParam[i]);
+                    ret = stat((const char*)req->mOptParam[i], &buf);
+                    if(ret != 0)
+                    {
+                        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "cant stat file!");
+                        goto release_request;
+                    }
+                    ftm->mCurrentTotalSize = buf.st_size;
+                    ftm->mCurrentProcessed= 0;
+					curl_easy_setopt(ftm->mCurlHandle,CURLOPT_UPLOAD,1);
+                    curl_easy_setopt(ftm->mCurlHandle, (CURLoption)req->mOptCmd[i], ftm->mCurrentFile);
+					curl_easy_setopt(ftm->mCurlHandle, CURLOPT_INFILESIZE_LARGE,(curl_off_t)ftm->mCurrentTotalSize);
+                    break;
+                case CURLOPT_WRITEDATA:					
+					//__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "transfer_runner %d",__LINE__);
+                    if(ftm->mCurrentFile != NULL)
+                    {
+                        fclose(ftm->mCurrentFile);
+                        ftm->mCurrentFile = NULL;
+                    }
+					//__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "transfer_runner %d %s",__LINE__,(const char*)req->mOptParam[i]);
+                    ftm->mCurrentFile = fopen((const char*)req->mOptParam[i], "wb");
+					__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "download %s mCurrentFile %p",(const char*)req->mOptParam[i],ftm->mCurrentFile);
+                    if(ftm->mCurrentFile == NULL)
+                    {
+                        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "cant open file!");
+                        goto release_request;
+                    }
+					//__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "transfer_runner %d %s",__LINE__,(const char*)req->mOptParam[i]);
+                    strcpy(ftm->mCurrentPath,(const char*)req->mOptParam[i]);
+					curl_easy_setopt(ftm->mCurlHandle,CURLOPT_UPLOAD,0);
+                    curl_easy_setopt(ftm->mCurlHandle, (CURLoption)req->mOptCmd[i], ftm->mCurrentFile);
+					//__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "transfer_runner %d",__LINE__);
+                    break;
+                default:
+                    curl_easy_setopt(ftm->mCurlHandle, (CURLoption)req->mOptCmd[i], req->mOptParam[i]);
+                    break;
                 }
 
             }
@@ -488,91 +475,62 @@ static void* transfer_runner(void *arg)
                 //fixme: error, need to notify?
                 switch(ftm->mCurrentOpType)
                 {
-                    case OP_TYPE_UPLOAD:
-                        postUploadResponse((const char *)ftm->mCurrentUrl,(const char *) ftmanager->mCurrentPath, -1);
-                        break;
-                    case OP_TYPE_DOWNLOAD:
-                        postDownloadResponse((const char *) ftm->mCurrentUrl, (const char *) ftmanager->mCurrentPath, -1);
-                        break;
+                case OP_TYPE_UPLOAD:
+                    postUploadResponse((const char *)ftm->mCurrentUrl,(const char *) ftm->mCurrentPath, -1);
+                    break;
+                case OP_TYPE_DOWNLOAD:
+					unlink(ftm->mCurrentPath);
+                    postDownloadResponse((const char *) ftm->mCurrentUrl, (const char *) ftm->mCurrentPath, -1);
+                    break;
                 }
             }
             else
             {
                 switch(ftm->mCurrentOpType)
                 {
-                    case OP_TYPE_UPLOAD:
-                        postUploadResponse((const char *)ftm->mCurrentUrl,(const char *) ftmanager->mCurrentPath, 0);
-                        break;
-                    case OP_TYPE_DOWNLOAD:
-                        postDownloadResponse((const char *) ftm->mCurrentUrl, (const char *) ftmanager->mCurrentPath, 0);
-                        break;
+                case OP_TYPE_UPLOAD:
+                    postUploadResponse((const char *)ftm->mCurrentUrl, (const char *)ftm->mCurrentPath, 0);
+                    break;
+                case OP_TYPE_DOWNLOAD:
+                    postDownloadResponse((const char *) ftm->mCurrentUrl, (const char *)ftm->mCurrentPath, 0);
+                    break;
                 }
             }
 
-            //release request;
-            release_request:
+//release request;
+release_request:
             if(ftm->mCurrentFile != NULL)
             {
-                fclose(ftmanager->mCurrentFile);
-                ftmanager->mCurrentFile = NULL;
+                fclose(ftm->mCurrentFile);
+                ftm->mCurrentFile = NULL;
             }
-			for (i = 0; i < req->mOptNum; i++) {
+			for (i = 0; i < req->mOptNum; i++)
+            {
 				switch ((CURLoption) req->mOptCmd[i])
 				{
-				    case CURLOPT_URL:
-                    case CURLOPT_READDATA:
-                    case CURLOPT_WRITEDATA:
-						if(req->mOptParam[i] != NULL)
-						{
-						    //dont assume error yet, let do_run thread to check
-						    free(req->mOptParam[i]);
-                            req->mOptParam[i] = NULL;
-                            break;
-						}
-						break;
-				    default:
+			    case CURLOPT_URL:
+                case CURLOPT_READDATA:
+                case CURLOPT_WRITEDATA:
+					if(req->mOptParam[i] != NULL)
+					{
+					    //dont assume error yet, let do_run thread to check
+					    free(req->mOptParam[i]);
                         req->mOptParam[i] = NULL;
-						break;
+                        break;
+					}
+					break;
+			    default:
+                    req->mOptParam[i] = NULL;
+					break;
 				}
 			}
             free(req);
-			//__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "transfer_runner %d",__LINE__);
+            pthread_mutex_lock(&ftm->mOnNewRequestMutex);
         }
         else
         {
-            //fixme: timed wait for request to come
-            //struct     timespec timed;
-            
-            //struct timeval now;
-            //if (gettimeofday(&now, NULL)) {
-            //    __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "error error getting system time");
-            //    return NULL;
-            //}
-
-            //timeout period is 5 sec
-            //now.tv_usec += 5000 * 1000;
-            //if (now.tv_usec >= 1000000) {
-            //    now.tv_sec += now.tv_usec / 1000000;
-            //    now.tv_usec = now.tv_usec % 1000000;
-            //}
-
-            // setup timeout
-            //timed.tv_sec  = now.tv_sec;
-            //timed.tv_nsec = now.tv_usec * 1000;        
-            
-            pthread_mutex_lock(&ftm->mOnNewRequestMutex);
 			pthread_cond_wait(&ftm->mOnNewRequestCond, &ftm->mOnNewRequestMutex);
-            //int wait_res = pthread_cond_timedwait(&ftm->mOnNewRequestCond, &ftm->mOnNewRequestMutex, &timed);
-            //if (wait_res != ETIMEDOUT) {
-            //    __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "error waiting on requests");
-            //    pthread_mutex_unlock(&ftm->mOnNewRequestMutex);
-            //    return NULL;
-            //}
-            
-            pthread_mutex_unlock(&ftm->mOnNewRequestMutex);
         }
-        //__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "transfer_runner %d",ftm->mPendingReqNum);
-
     }
 
     //quit and cleanup

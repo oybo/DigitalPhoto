@@ -184,8 +184,6 @@ public class DeviceManager {
     public void startUpload() {
         if (mUploadInfos.size() == 0) {
             mUploadInfo = null;
-            // 上传完成后命令回调一下
-            ActCommunication.getInstance().onUploadFinish();
             // 这里刷新下服务器文件列表
             refreshRemoteFiles();
             return;
@@ -468,7 +466,7 @@ public class DeviceManager {
                             // 属于文件，并且是图片类型就下载
                             if(PubUtils.getFileType(actFileInfo.getFileName()) == MEDIA_FILE_TYPE.IMAGE) {
                                 // 下载临时文件
-                                String remotePath = mRemoteCurrentPath + actFileInfo.getFileName();
+                                String remotePath = DeviceManager.getInstance().getRemotePath(actFileInfo.getFileName());
                                 String localPath = PubUtils.getTempLocalPath(actFileInfo.getFileName(), MEDIA_FILE_TYPE.IMAGE);
                                 if(!tempFiles.containsKey(remotePath)) {
                                     tempFiles.put(remotePath, localPath);
@@ -521,7 +519,22 @@ public class DeviceManager {
             } else {
             }
         }
+
+        @Override
+        public void onRenameCompleted(int result) {
+
+        }
     };
+
+    public String getRemotePath(String fileName) {
+        String path;
+        if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
+            path = mRemoteCurrentPath + fileName;
+        } else {
+            path = mRemoteCurrentPath + "/" + fileName;
+        }
+        return path;
+    }
 
     private Map<String, String> tempFiles = new HashMap<>();
     private int tempFileSize;

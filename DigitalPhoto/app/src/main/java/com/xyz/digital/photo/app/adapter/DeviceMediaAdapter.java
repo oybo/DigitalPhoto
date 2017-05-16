@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.actions.actcommunication.ActCommunication;
 import com.xyz.digital.photo.app.AppContext;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
@@ -20,8 +21,6 @@ import com.xyz.digital.photo.app.util.PubUtils;
 import com.xyz.digital.photo.app.view.ProgressPieView;
 
 import java.io.File;
-
-import static com.xyz.digital.photo.app.manager.DeviceManager.mRemoteCurrentPath;
 
 /**
  * Created by O on 2017/3/18.
@@ -51,7 +50,7 @@ public class DeviceMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
 
         // 是否添加到了播放
         ImageView playImage = holder.getImageView(R.id.item_device_media_play_image);
-        String remotePath = mRemoteCurrentPath + item.getFileName();
+        String remotePath = DeviceManager.getInstance().getRemotePath(item.getFileName());
 
         // 加载图片
         String tempFile = DeviceManager.getInstance().getTempFile(remotePath);
@@ -63,6 +62,9 @@ public class DeviceMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
                 imageView.setImageResource(R.drawable.defult_audio_icon);
             } else if (item.getType() == MEDIA_FILE_TYPE.VIDEO) {
                 imageView.setImageResource(R.drawable.defult_video_icon);
+
+                ActCommunication.getInstance().requestThumbnails(new String[]{ remotePath });
+
             } else {
                 imageView.setImageResource(R.drawable.defult_image_icon);
             }

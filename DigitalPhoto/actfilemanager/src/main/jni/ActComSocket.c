@@ -42,6 +42,7 @@
 #define AC_KEY_SIZE             "dataSize:"
 #define AC_MAX_IP_LEN              (16)
 #define AC_SOCKET_CNT              (2)
+#define AC_HELLO                  "CMD:VALUE\r\n"
 
 #define LOG_TAG    "ActCommunication"
 
@@ -57,7 +58,7 @@ typedef struct tcp_sock_s
 {
     int32_t mSockFd;
     int8_t bSockError;
-    int8_t mConnecting;   // 0: no connect, 1: connecting, 2: connected
+    int8_t mConnecting;   // 0: no connect, 1: connecting, 2: connected, 3: confirm
 
     //recv....
     char *pCmdBuffer;
@@ -115,6 +116,7 @@ enum
     kWhatDisconnect
 };
 
+static void _on_socket_connected(ac_server_t *as);
 
 static as_message_t *create_as_message(ac_server_t *s, int32_t type, int32_t generation, void *param1, void *param2)
 {
@@ -351,6 +353,16 @@ static int32_t _on_recv_cmd(ac_server_t *as, tcp_sock_t *pSock)
         goto OUT;
 
     p = pSock->pCmdBuffer;
+    if(pSock->mConnecting == 2)
+    {
+        if(strncmp(pSock->pCmdBuffer, AC_HELLO, strlen(AC_HELLO)) == 0)
+        {
+            pSock->mConnecting = 3;
+            _on_socket_connected(as);
+        }
+        return 0;
+    }
+    
     while(p != NULL)
     {
         pTail = strstr(p, "\r\n");
@@ -528,7 +540,7 @@ static void _on_socket_connected(ac_server_t *as)
 
     for(i=0; i<AC_SOCKET_CNT; i++)
     {
-        if(as->pSockList[i].mConnecting != 2)
+        if(as->pSockList[i].mConnecting != 3)
             return;
     }
 
@@ -549,7 +561,6 @@ static int32_t _send_data_to_client(ac_server_t *as, tcp_sock_t *pSock)
     if(pSock->mConnecting == 1)
     {
         pSock->mConnecting = 2;
-        _on_socket_connected(as);
         return 0;
     }
 
@@ -613,7 +624,7 @@ static void _as_monitor_network(ac_server_t *as)
         if(pSock->mSockFd < 0)
             continue;
 
-        if(pSock->mConnecting == 2)
+        if(pSock->mConnecting > 1)
         {
             FD_SET(pSock->mSockFd, &rs);
             maxFd = (maxFd > pSock->mSockFd) ? maxFd : pSock->mSockFd;
@@ -686,7 +697,7 @@ static void _as_send_msg(ac_server_t *as, ac_msg_t *pCmdMsg, int32_t data_len)
     else
         pSock = &as->pSockList[0];
 
-    if(pSock->mConnecting == 2)
+    if(pSock->mConnecting == 3)
     {
         pSock->pMsgList->pushBack(pSock->pMsgList, pCmdMsg);
         pCmdMsg->mRefCount++;

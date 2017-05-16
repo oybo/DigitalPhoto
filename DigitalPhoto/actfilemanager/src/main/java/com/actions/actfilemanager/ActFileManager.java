@@ -21,6 +21,7 @@ public class ActFileManager {
     public static final int OP_TYPE_DELETE_DIR = 5;
     public static final int OP_TYPE_CREATE_DIR = 6;
     public static final int OP_TYPE_QUIT = 7;
+    public static final int OP_TYPE_RENAME = 8;
 
     private static final String LOGTAG = "actfilemanager";
 
@@ -242,6 +243,28 @@ public class ActFileManager {
         }
     }
 
+    private synchronized void postRenameResponse(Object pfref, int result) {
+        ActFileManager mp = (ActFileManager) pfref;
+        if (mp == null) {
+            return;
+        }
+        Log.d(LOGTAG, "<JAVA> rename result = " + result);
+
+        try {
+            Message m = mp.mHandler.obtainMessage();
+            m.what = OP_TYPE_RENAME;
+            Bundle bundle = new Bundle();
+            if (result == 0)
+                bundle.putInt("result", ACTFileEventListener.OPERATION_SUCESSFULLY);
+            else
+                bundle.putInt("result", ACTFileEventListener.OPERATION_FAILED);
+            m.setData(bundle);
+            mp.mHandler.sendMessage(m);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private class EventHandler extends Handler {
         private ActFileManager mPf;
 
@@ -305,6 +328,11 @@ public class ActFileManager {
                 case OP_TYPE_QUIT: {
                     int result = msg.arg1;
                     mEventListener.onDisconnectCompleted(result);
+                    break;
+                }
+                case OP_TYPE_RENAME: {
+                    int result = bundle.getInt("result");
+                    mEventListener.onRenameCompleted(result);
                     break;
                 }
                 default:
@@ -381,4 +409,13 @@ public class ActFileManager {
      * @return if 0 means call successfully
      */
     public static native int downloadFile(String remotePath, String localPath);
+
+    /**
+     * rename file or move file to other directory
+     *
+     * @param from the file path to rename,like "/1/helloworld.tar"
+     * @param to  the file path rename to,like "/2/hi.tar"
+     * @return if 0 means call successfully
+     */
+    public static native int rename(String from, String to);
 }

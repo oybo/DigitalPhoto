@@ -14,7 +14,6 @@ typedef struct {
     pthread_t mTaskRunner;
     pthread_cond_t mOnNewRequestCond;
     pthread_mutex_t mOnNewRequestMutex;
-    pthread_mutex_t mReqListMutex;
     int mAbort;
 
     CURL* mCurlHandle;
@@ -28,9 +27,6 @@ typedef struct {
     int mCurrentOpType;
     char mCurrentUrl[MAX_URL_LENGTH];
     char mCurrentPath[MAX_PATH_LENGTH];
-
-    //fixme: need a lock here to protect mReqList
-
 }FileTransferManager;
 
 int fileTransferInit(const char* ip);

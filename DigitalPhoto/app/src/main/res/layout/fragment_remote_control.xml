@@ -144,7 +144,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/image_txt"
+                        android:text="@string/image_ykq_txt"
                         android:textColor="@drawable/selector_actionbar_txt"
                         android:textSize="13sp"/>
 
@@ -168,7 +168,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/music_txt"
+                        android:text="@string/music_ykq_txt"
                         android:textColor="@drawable/selector_actionbar_txt"
                         android:textSize="13sp"/>
 
@@ -192,7 +192,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/video_txt"
+                        android:text="@string/video_ykq_txt"
                         android:textColor="@drawable/selector_actionbar_txt"
                         android:textSize="13sp"/>
 
@@ -216,7 +216,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/set_calendar_txt"
+                        android:text="@string/set_ykq_calendar_txt"
                         android:textColor="@drawable/selector_actionbar_txt"
                         android:textSize="13sp"/>
 

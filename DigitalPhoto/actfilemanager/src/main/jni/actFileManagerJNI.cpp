@@ -16,7 +16,7 @@ static jmethodID postCreateDirectoryResponseID = NULL;
 static jmethodID postBrowseResponseID = NULL;
 static jmethodID postDownloadResponseID = NULL;
 static jmethodID postDisconnectResponseID = NULL;
-
+static jmethodID postRenameResponseID = NULL;
 
 
 static int fileTransferInited = 0;
@@ -44,6 +44,9 @@ JNIEXPORT jint JNICALL Java_com_actions_actfilemanager_browseFiles(JNIEnv *env, 
                                                                    jstring dirPath);
 JNIEXPORT jint JNICALL Java_com_actions_actfilemanager_downloadFile(JNIEnv *env, jobject instance,
                                                                     jstring url, jstring path);
+JNIEXPORT jint JNICALL
+Java_com_actions_actfilemanager_rename(JNIEnv *env, jobject instance, jstring from,
+                                             jstring to);
 }
 
 static JNINativeMethod gMethods[] = {
@@ -57,6 +60,7 @@ static JNINativeMethod gMethods[] = {
         {"deleteFile",   "(Ljava/lang/String;)I",                   (void *) Java_com_actions_actfilemanager_deleteFile},
         {"browseFiles",  "(Ljava/lang/String;)I",                   (void *) Java_com_actions_actfilemanager_browseFiles},
         {"downloadFile", "(Ljava/lang/String;Ljava/lang/String;)I", (void *) Java_com_actions_actfilemanager_downloadFile},
+		{"rename", "(Ljava/lang/String;Ljava/lang/String;)I", (void *) Java_com_actions_actfilemanager_rename},
 };
 
 /*  define the minimum version
@@ -115,6 +119,8 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     postDownloadResponseID = env->GetMethodID(clazz, "postDownloadResponse",
                                               "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;I)V");
 	postDisconnectResponseID = env->GetMethodID(clazz, "postDisconnectResponse",
+		                                        "(Ljava/lang/Object;I)V");
+	postRenameResponseID = env->GetMethodID(clazz, "postRenameResponse",
 		                                        "(Ljava/lang/Object;I)V");
 
     //if ExceptionOccurred
@@ -360,6 +366,10 @@ void postBrowseResponse(FileInfo **filelist, int fileCount, int result, const ch
                                          "Ljava/lang/String;");
         jfieldID mType = env->GetFieldID(fileInfoClazz, "mFileType",
                                          "I");
+		jfieldID mTime = env->GetFieldID(fileInfoClazz, "mModifyTime",
+                                         "Ljava/lang/String;");
+        jfieldID mSize = env->GetFieldID(fileInfoClazz, "mFileSize",
+                                         "I");
 
         for (i = 0; i < fileCount; i++) {
             FileInfo *file = mFileList + i;
@@ -376,15 +386,19 @@ void postBrowseResponse(FileInfo **filelist, int fileCount, int result, const ch
             }
 
             jstring strname = env->NewStringUTF(file->mName);
-            if (strname) {
-                env->SetObjectField(infoObj, mName, strname);
-            }
-            else {
+            if (!strname)
                 strname = env->NewStringUTF(" ");
-                env->SetObjectField(infoObj, mName, strname);
-            }
+			env->SetObjectField(infoObj, mName, strname);
             env->DeleteLocalRef(strname);
+			
+			jstring strtime = env->NewStringUTF(file->mDate);
+            if (!strtime)
+                strtime = env->NewStringUTF(" ");
+			env->SetObjectField(infoObj, mTime, strtime);
+            env->DeleteLocalRef(strtime);
+			
             env->SetIntField(infoObj, mType, file->mType);
+			env->SetIntField(infoObj, mSize, (int)file->mSize);
 
             env->CallBooleanMethod(listObj, addMethod, infoObj);
             env->DeleteLocalRef(infoObj);
@@ -440,6 +454,30 @@ void postDownloadResponse(const char *url, const char *path, int result) {
 
     env->DeleteLocalRef(jurl);
     env->DeleteLocalRef(jpath);
+    gJavaVM->DetachCurrentThread();
+    env = NULL;
+	__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "postDownloadResponse return");
+}
+
+void postRenameResponse(int result) {
+    if (cpObject == NULL) {
+        __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "notify param object==NULL! notify fail!");
+        return;
+    }
+
+    JNIEnv *env = NULL;
+    gJavaVM->AttachCurrentThread(&env, NULL);
+    if (env == NULL) {
+        __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "get env failed");
+        return;
+    }
+	__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "postRenameResponse result %d", result);
+
+    env->CallVoidMethod(cpObject, postRenameResponseID, cpObject, result);
+    if (env->ExceptionOccurred()) {
+        __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "notify --CallVoidMethod fail!");
+    }
+
     gJavaVM->DetachCurrentThread();
     env = NULL;
 	__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "postDownloadResponse return");
@@ -594,10 +632,6 @@ Java_com_actions_actfilemanager_browseFiles(JNIEnv *env, jobject instance, jstri
 		return -1;
 	}	
 
-    //ret = infoTransferGetCurrentDirectory();
-	//ret = infoTransferChangeCurrentDirectory(dirpath);
-	//ret = infoTransferListCurrentDirectory();
-    //ret = infoTransferBrowse(dirpath);
 	ret = infoTransferListInfo(dirpath);
 	env->ReleaseStringUTFChars(dirPath, dirpath);
     return ret;
@@ -622,10 +656,38 @@ Java_com_actions_actfilemanager_downloadFile(JNIEnv *env, jobject instance, jstr
         env->ReleaseStringUTFChars(url, strurl);
         return -1;
     }
-	__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "download file %s to %s",strurl,strpath);
+	//__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "download file %s to %s",strurl,strpath);
     ret = fileTransferDownload(strurl, strpath);
 
     env->ReleaseStringUTFChars(path, strpath);
     env->ReleaseStringUTFChars(url, strurl);
     return ret;
 }
+
+JNIEXPORT jint JNICALL
+Java_com_actions_actfilemanager_rename(JNIEnv *env, jobject instance, jstring from,
+                                             jstring to) {
+    int ret = 0;
+
+    const char *strfrom = env->GetStringUTFChars(from, 0);
+    if (strfrom == NULL) {
+        __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "path is NULL!");
+        return -1;
+    }
+
+    const char *strto = env->GetStringUTFChars(to, 0);
+    if (strto == NULL) {
+        __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "path is NULL!");
+		env->ReleaseStringUTFChars(from, strfrom);
+        return -1;
+    }
+	
+	//__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "rename file %s to %s",strfrom,strto);
+    ret = infoTransferRename(strfrom, strto);
+
+    env->ReleaseStringUTFChars(from, strfrom);
+    env->ReleaseStringUTFChars(to, strto);
+    return ret;
+}
+
+

@@ -14,6 +14,8 @@ public class ActFileInfo implements Parcelable {
 
     private String mFileName; //file name
     private int mFileType;
+    private String mModifyTime;
+    private int mFileSize;
 
     public ActFileInfo() {
 
@@ -40,6 +42,25 @@ public class ActFileInfo implements Parcelable {
         this.mFileType = mFileType;
     }
 
+    /**
+     * get modify time, time format: 2017/1/1
+     */
+    public String getModifyTime() {
+        return mModifyTime;
+    }
+
+    public void setModifyTime(String mModifyTime) {
+        this.mModifyTime = mModifyTime;
+    }
+
+    public int getFileSize() {
+        return mFileSize;
+    }
+
+    public void setFileSize(int mFileSize) {
+        this.mFileSize = mFileSize;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -48,8 +69,8 @@ public class ActFileInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mFileName);
-        //dest.writeString(mFileThumbUrl);
-        //dest.writeInt(mFileSize);
+        dest.writeString(mModifyTime);
+        dest.writeInt(mFileSize);
         dest.writeInt(mFileType);
     }
 
@@ -58,8 +79,8 @@ public class ActFileInfo implements Parcelable {
             ActFileInfo file = new ActFileInfo();
 
             file.mFileName = in.readString();
-            //file.mFileThumbUrl = in.readString();
-            //file.mFileSize = in.readInt();
+            file.mModifyTime = in.readString();
+            file.mFileSize = in.readInt();
             file.mFileType = in.readInt();
 
             return file;

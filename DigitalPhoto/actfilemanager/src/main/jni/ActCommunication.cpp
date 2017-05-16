@@ -18,7 +18,6 @@ static JNINativeMethod gMethods[] = {
     {"sendData",       "([Ljava/lang/Object;[B)I",        (void *)Java_com_actions_actcommunication_ActCommunication_sendData},
     {"connect",          "(Ljava/lang/String;)I",    (void *)Java_com_actions_actcommunication_ActCommunication_connect},
     {"disconnect",       "()I",    (void *)Java_com_actions_actcommunication_ActCommunication_disconnect},
-    {"readSystemCfgFile",       "()I",    (void *)Java_com_actions_actcommunication_ActCommunication_readSystemCfgFile},
 };
 
 /*  define the minimum version
@@ -336,11 +335,4 @@ Java_com_actions_actcommunication_ActCommunication_disconnect(JNIEnv *env, jobje
     }
     
     return 0;
-}
-
-JNIEXPORT jint JNICALL
-Java_com_actions_actcommunication_ActCommunication_readSystemCfgFile(JNIEnv *env, jobject instance) {
-
-
-    return 100;
 }
