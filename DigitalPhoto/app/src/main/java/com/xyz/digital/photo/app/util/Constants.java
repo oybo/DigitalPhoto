@@ -12,7 +12,10 @@ public class Constants {
     public static final int MAX_BRIGHTNESS = 16;
 
     public static final String SYSTEM_FILE_NAME = "sys_config.txt";
+    public static final String VIDEO_BMP_NAME = ".thb";
+    public static final String VIDEO_BMP_FILE_NAME = ".bmp";
 
+    public static final String DELETE_TEMP_DIR_TIME = "DELETE_TEMP_DIR_TIME";
     public static final String MAIN_DEVICE_POHOTO_MANAGER = "MAIN_DEVICE_POHOTO_MANAGER";
 
     public static final String MAIN_DEVICE_LIST = "MAIN_DEVICE_LIST";

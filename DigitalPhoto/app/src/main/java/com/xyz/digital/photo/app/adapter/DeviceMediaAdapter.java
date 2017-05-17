@@ -6,7 +6,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.actions.actcommunication.ActCommunication;
 import com.xyz.digital.photo.app.AppContext;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
@@ -53,7 +52,7 @@ public class DeviceMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
         String remotePath = DeviceManager.getInstance().getRemotePath(item.getFileName());
 
         // 加载图片
-        String tempFile = DeviceManager.getInstance().getTempFile(remotePath);
+        String tempFile = PubUtils.getTempLocalPath(item.getFileName(), true);
         if(!TextUtils.isEmpty(tempFile)) {
             ImageLoadManager.setImage(tempFile, imageView);
         } else {
@@ -62,9 +61,6 @@ public class DeviceMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
                 imageView.setImageResource(R.drawable.defult_audio_icon);
             } else if (item.getType() == MEDIA_FILE_TYPE.VIDEO) {
                 imageView.setImageResource(R.drawable.defult_video_icon);
-
-                ActCommunication.getInstance().requestThumbnails(new String[]{ remotePath });
-
             } else {
                 imageView.setImageResource(R.drawable.defult_image_icon);
             }

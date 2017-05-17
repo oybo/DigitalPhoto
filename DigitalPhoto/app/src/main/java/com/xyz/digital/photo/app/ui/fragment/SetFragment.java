@@ -1,5 +1,6 @@
 package com.xyz.digital.photo.app.ui.fragment;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -14,6 +15,7 @@ import com.xyz.digital.photo.app.ui.BaseFragment;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
 import com.xyz.digital.photo.app.util.PubUtils;
 import com.xyz.digital.photo.app.view.AppInfoDialog;
+import com.xyz.digital.photo.app.view.LoadingView;
 import com.xyz.digital.photo.app.view.SelectDialog;
 import com.xyz.digital.photo.app.view.SwitchButton;
 
@@ -53,6 +55,7 @@ public class SetFragment extends BaseFragment implements View.OnClickListener {
     @Bind(R.id.set_breakpoint_play_sb) SwitchButton mBreakpointPlayBt;
     @Bind(R.id.set_subtitle_sb) SwitchButton mSubtitleBt;
     @Bind(R.id.set_show_channel_sb) SwitchButton mShowChannelBt;
+    @Bind(R.id.view_loading) LoadingView mLoadingView;
 
     @Bind(R.id.set_version_txt) TextView mVersionTxt;
     @Bind(R.id.set_language_txt) TextView mLanguageTxt;
@@ -231,7 +234,30 @@ public class SetFragment extends BaseFragment implements View.OnClickListener {
             public void select(int position) {
                 PreferenceUtils.getInstance().putInt(mSelectLanguage_key, position);
                 mLanguageTxt.setText(mSelectLanguage[PreferenceUtils.getInstance().getInt(mSelectLanguage_key, 0)]);
-                getActivity().recreate();
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected void onPreExecute() {
+                        super.onPreExecute();
+                        mLoadingView.show();
+                    }
+
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        try {
+                            Thread.sleep(200);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Void aVoid) {
+                        super.onPostExecute(aVoid);
+                        getActivity().recreate();
+                        mLoadingView.hide();
+                    }
+                }.execute();
             }
         });
     }

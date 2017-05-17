@@ -187,35 +187,53 @@ public class PubUtils {
             @Override
             public void run() {
                 super.run();
-                try {
-                    FileUtil.deleteFolder(EnvironmentUtil.getTempFilePath());
-                } catch (Exception e) {
-                    e.printStackTrace();
+                String sp_str_time = PreferenceUtils.getInstance().getString(Constants.DELETE_TEMP_DIR_TIME, String.valueOf(System.currentTimeMillis()));
+                int day = TimeUtil.daysBetween(System.currentTimeMillis(), Long.parseLong(sp_str_time));
+                boolean isMonth = day >= 15;
+                if(isMonth) {
+                    try {
+                        FileUtil.deleteFolder(EnvironmentUtil.getTempFilePath());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    PreferenceUtils.getInstance().putString(Constants.DELETE_TEMP_DIR_TIME, String.valueOf(System.currentTimeMillis()));
                 }
             }
         }.start();
     }
 
-    public static String getTempLocalPath(String fileName, MEDIA_FILE_TYPE type) {
-        String localPath = "";
+    public static String getTempLocalPath(String fileName) {
+        if(fileName.endsWith(Constants.VIDEO_BMP_NAME)) {
+            fileName = fileName.substring(0, fileName.lastIndexOf(Constants.VIDEO_BMP_NAME));
+        }
+        return getTempLocalPath(fileName, false);
+    }
+
+    public static String getTempLocalPath(String fileName, boolean isCheckExits) {
+        // 属于视频文件
+        if(PubUtils.getFileType(fileName) == MEDIA_FILE_TYPE.VIDEO) {
+            fileName = fileName.substring(0, fileName.lastIndexOf(".")) + Constants.VIDEO_BMP_FILE_NAME;
+        }
         try {
-            if (type == MEDIA_FILE_TYPE.VIDEO) {
-                localPath = EnvironmentUtil.getTempFilePath();
-            } else if (type == MEDIA_FILE_TYPE.AUDIO) {
-                localPath = EnvironmentUtil.getTempFilePath();
+            String localPath = EnvironmentUtil.getTempFilePath();
+            if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
+                localPath = localPath + mRemoteCurrentPath + fileName;
             } else {
-                localPath = EnvironmentUtil.getTempFilePath();
+                localPath = localPath + mRemoteCurrentPath + "/" + fileName;
             }
-            localPath = localPath + mRemoteCurrentPath + fileName;
             File file = new File(localPath);
             File parentFile = new File(file.getParent());
             if (!parentFile.exists()) {
                 parentFile.mkdirs();
             }
+            if(isCheckExits && !new File(localPath).exists()) {
+                return "";
+            }
+            return localPath;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return localPath;
+        return "";
     }
 
     public static boolean isTypeFile(String fileName, MEDIA_FILE_TYPE type) {

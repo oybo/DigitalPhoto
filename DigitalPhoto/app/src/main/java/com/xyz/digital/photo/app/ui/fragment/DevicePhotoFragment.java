@@ -164,6 +164,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
             case R.id.fragment_photo_video_tab:
                 // 视频
                 showFiles(MEDIA_FILE_TYPE.VIDEO, false);
+                DeviceManager.getInstance().downloadTempFiles();
                 break;
             case R.id.fragment_photo_audio_tab:
                 // 音乐

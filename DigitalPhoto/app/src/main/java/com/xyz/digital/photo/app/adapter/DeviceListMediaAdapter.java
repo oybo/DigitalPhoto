@@ -63,7 +63,7 @@ public class DeviceListMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
             }
 
             // 图片
-            String tempFile = DeviceManager.getInstance().getTempFile(remotePath);
+            String tempFile = PubUtils.getTempLocalPath(item.getFileName(), true);
             if(!TextUtils.isEmpty(tempFile)) {
                 ImageLoadManager.setImage(tempFile, imageView);
             } else {

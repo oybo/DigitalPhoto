@@ -45,19 +45,21 @@ public abstract class BaseActivity extends AppCompatActivity {
         initSystemBarTint();
 
         //根据上次的语言设置，重新设置语言
-        int id = PreferenceUtils.getInstance().getInt(SetFragment.mSelectLanguage_key, 0);
-        String sta = id == 0 ? "zh" : "en";
-        switchLanguage(sta);
+        switchLanguage();
     }
 
-    protected void switchLanguage(String language) {
+    protected void switchLanguage() {
         //设置应用语言类型
         Resources resources = getResources();
         Configuration config = resources.getConfiguration();
         DisplayMetrics dm = resources.getDisplayMetrics();
-        if (language.equals("en")) {
+
+        int id = PreferenceUtils.getInstance().getInt(SetFragment.mSelectLanguage_key, 0);
+        if (id == 1) {
+            // 英文
             config.locale = Locale.ENGLISH;
         } else {
+            // 中文
             config.locale = Locale.getDefault();
         }
         resources.updateConfiguration(config, dm);

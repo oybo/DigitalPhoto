@@ -23,7 +23,6 @@ public class ImageLoadManager {
     }
 
     public static void setImage(String url, final ImageView imageView, int errorId) {
-
         try {
             Glide.with(imageView.getContext())
                     .load(url)

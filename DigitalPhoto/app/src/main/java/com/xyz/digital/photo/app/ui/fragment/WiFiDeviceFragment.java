@@ -47,12 +47,9 @@ import butterknife.ButterKnife;
 
 public class WiFiDeviceFragment extends BaseFragment implements WiFiContract.View {
 
-    @Bind(R.id.fragment_device_refresh_layout)
-    PtrClassicFrameLayout fragmentDeviceRefreshLayout;
-    @Bind(R.id.fragment_device_recyclerview)
-    RecyclerView fragmentDeviceRecyclerview;
-    @Bind(R.id.view_loading)
-    LoadingView mLoadingView;
+    @Bind(R.id.fragment_device_refresh_layout) PtrClassicFrameLayout fragmentDeviceRefreshLayout;
+    @Bind(R.id.fragment_device_recyclerview) RecyclerView fragmentDeviceRecyclerview;
+    @Bind(R.id.view_loading) LoadingView mLoadingView;
 
     private WiFiContract.Presenter mPresenter;
     private WifiManager mWifiManager;

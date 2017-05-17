@@ -7,6 +7,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
+import static android.R.attr.data;
+
 /**
  * 通讯模块接口 <br>
  * Created by hexibin on 2016/5/23.
@@ -526,6 +528,11 @@ public class ActCommunication
         return sendData(cmd, data.getBytes());
     }
 
+    public int requestThumbnails(String url) {
+        String[] cmd = new String[]{"cmd", "getThumbnail", "url", url};
+        return sendMsg(cmd);
+    }
+
     /**
      * 取消之前请求的缩略图，以便加快新的缩略图的获取
      * @param urls 图片url数组
@@ -601,4 +608,6 @@ public class ActCommunication
      * @return 成功返回0，失败返回-1
      */
     public native int sendData(Object[] cmd, byte[] data);
+
+    public native int readSystemCfgFile();
 }

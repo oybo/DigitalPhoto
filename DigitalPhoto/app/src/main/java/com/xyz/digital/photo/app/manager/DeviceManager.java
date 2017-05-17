@@ -381,7 +381,7 @@ public class DeviceManager {
                     tempFiles.remove(remotePath);
                 }
                 tempFileSize--;
-                if(tempFileSize <= 0) {
+                if((tempFileSize % 5 == 0) || (tempFileSize <= 0)) {
                     EventBase eventBase = new EventBase();
                     eventBase.setAction(Constants.REFRESH_DEVICE_FILE);
                     EventBus.getDefault().post(eventBase);
@@ -454,35 +454,38 @@ public class DeviceManager {
                     }
                 }
                 if (remoteFileList != null) {
+                    mDownloadTempList.clear();
                     mRemoteFileList.clear();
                     // 下载临时文件
                     for(ActFileInfo actFileInfo : remoteFileList) {
-                        if(actFileInfo.getFileName().equals(Constants.SYSTEM_FILE_NAME)) {
+                        String fileName = actFileInfo.getFileName();
+                        if(fileName.equals(Constants.SYSTEM_FILE_NAME)) {
                             continue;
                         }
-                        mRemoteFileList.add(actFileInfo);
                         if(actFileInfo.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
-                            mRemoteFileMaps.put(actFileInfo.getFileName(), actFileInfo);
+                            mRemoteFileMaps.put(fileName, actFileInfo);
+                            // 属于文件，并且属于视频缩略图.thb
+                            if(fileName.endsWith(Constants.VIDEO_BMP_NAME)) {
+                                mDownloadTempList.add(fileName);
+                            }
+                            else if(PubUtils.getFileType(fileName) == MEDIA_FILE_TYPE.VIDEO) {
+                                // 发送缩略图请求
+                                ActCommunication.getInstance().requestThumbnails(getRemotePath(fileName));
+                            }
                             // 属于文件，并且是图片类型就下载
-                            if(PubUtils.getFileType(actFileInfo.getFileName()) == MEDIA_FILE_TYPE.IMAGE) {
-                                // 下载临时文件
-                                String remotePath = DeviceManager.getInstance().getRemotePath(actFileInfo.getFileName());
-                                String localPath = PubUtils.getTempLocalPath(actFileInfo.getFileName(), MEDIA_FILE_TYPE.IMAGE);
-                                if(!tempFiles.containsKey(remotePath)) {
-                                    tempFiles.put(remotePath, localPath);
-                                    if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
-                                        downloadFile(mRemoteCurrentPath + actFileInfo.getFileName(), localPath);
-                                    } else {
-                                        downloadFile(mRemoteCurrentPath + "/" + actFileInfo.getFileName(), localPath);
-                                    }
-                                }
+                            else if(PubUtils.getFileType(fileName) == MEDIA_FILE_TYPE.IMAGE) {
+                                mDownloadTempList.add(fileName);
                             }
                         }
+                        mRemoteFileList.add(actFileInfo);
                     }
                     // 刷新文件列表
                     EventBase eventBase = new EventBase();
                     eventBase.setAction(Constants.REFRESH_DEVICE_FILE);
                     EventBus.getDefault().post(eventBase);
+
+                    // 下载临时文件
+                    downloadTempFiles();
                 }
             }
         }
@@ -526,6 +529,21 @@ public class DeviceManager {
         }
     };
 
+    private void downloadTempFile(String fileName) {
+        String remotePath = DeviceManager.getInstance().getRemotePath(fileName);
+        String localPath = PubUtils.getTempLocalPath(fileName);
+        if(!new File(localPath).exists()) {
+            if(!tempFiles.containsKey(remotePath)) {
+                tempFiles.put(remotePath, localPath);
+                if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
+                    downloadFile(mRemoteCurrentPath + fileName, localPath);
+                } else {
+                    downloadFile(mRemoteCurrentPath + "/" + fileName, localPath);
+                }
+            }
+        }
+    }
+
     public String getRemotePath(String fileName) {
         String path;
         if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
@@ -536,15 +554,17 @@ public class DeviceManager {
         return path;
     }
 
+    public synchronized void downloadTempFiles() {
+        // 下载临时文件
+        for(String fileName : mDownloadTempList) {
+            downloadTempFile(fileName);
+        }
+    }
+
+    private List<String> mDownloadTempList = new ArrayList<>();
+
     private Map<String, String> tempFiles = new HashMap<>();
     private int tempFileSize;
-
-    public String getTempFile(String remotePath) {
-        if(tempFiles.containsKey(remotePath)) {
-            return tempFiles.get(remotePath);
-        }
-        return null;
-    }
 
     private void refreshRemoteFiles() {
         if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
