@@ -21,8 +21,8 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.xyz.digital.photo.app.R;
-import com.xyz.digital.photo.app.ui.fragment.SetFragment;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
+import com.xyz.digital.photo.app.util.SysConfigHelper;
 import com.xyz.digital.photo.app.util.SystemBarUtil;
 import com.xyz.digital.photo.app.util.ToastUtil;
 import com.xyz.digital.photo.app.view.DialogTips;
@@ -54,7 +54,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         Configuration config = resources.getConfiguration();
         DisplayMetrics dm = resources.getDisplayMetrics();
 
-        int id = PreferenceUtils.getInstance().getInt(SetFragment.mSelectLanguage_key, 0);
+        int id = PreferenceUtils.getInstance().getInt(SysConfigHelper.mSelectLanguage_key, 0);
         if (id == 1) {
             // 英文
             config.locale = Locale.ENGLISH;

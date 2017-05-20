@@ -30,7 +30,7 @@
 
     <!--  上传和下载状态文字  -->
     <string name="loading_txt">Loading...</string>
-    <string name="no_more_data_txt">No more data...</string>
+    <string name="no_more_data_txt">Upload Failed</string>
 
     <string name="device_the_txt">Local:</string>
     <string name="device_defult_txt">Device detail</string>
@@ -75,6 +75,7 @@
     <string name="quanbucf_txt">All repeat</string>
     <string name="suijijchongf_txt">Random and repeat</string>
     <string name="close_txt">Close</string>
+    <string name="sys_config_txt">Configuration</string>
     <string name="image_txt">Photo</string>
     <string name="music_txt">Music</string>
     <string name="video_txt">Video</string>

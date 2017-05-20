@@ -12,6 +12,7 @@ public class ImageLoadManager {
 
     public static void setImage(String url, final ImageView imageView) {
         int errorImage = R.drawable.defult_image_icon;
+
         MEDIA_FILE_TYPE type = PubUtils.getFileType(url);
         if(type == MEDIA_FILE_TYPE.AUDIO) {
             errorImage = R.drawable.defult_audio_icon;

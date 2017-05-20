@@ -13,6 +13,9 @@ public class FileInfo {
     private int fileType;
     private MEDIA_FILE_TYPE type;
 
+    private String mModifyTime;
+    private int mFileSize;
+
     public int getPosition() {
         return position;
     }
@@ -43,5 +46,21 @@ public class FileInfo {
 
     public void setType(MEDIA_FILE_TYPE type) {
         this.type = type;
+    }
+
+    public String getmModifyTime() {
+        return mModifyTime;
+    }
+
+    public void setmModifyTime(String mModifyTime) {
+        this.mModifyTime = mModifyTime;
+    }
+
+    public int getmFileSize() {
+        return mFileSize;
+    }
+
+    public void setmFileSize(int mFileSize) {
+        this.mFileSize = mFileSize;
     }
 }

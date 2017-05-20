@@ -41,9 +41,9 @@ public class DeviceMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
 
         holder.setText(R.id.item_device_media_title_txt, item.getFileName());
 
-//        holder.setText(R.id.item_device_media_date_txt, item.getDate());
-//
-//        holder.setText(R.id.item_device_media_size_txt, item.getSize());
+        holder.setText(R.id.item_device_media_date_txt, item.getmModifyTime());
+
+        holder.setText(R.id.item_device_media_size_txt, PubUtils.formatFileLen(item.getmFileSize()));
 
         ImageView imageView = holder.getImageView(R.id.item_device_media_imange);
 
@@ -53,18 +53,14 @@ public class DeviceMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
 
         // 加载图片
         String tempFile = PubUtils.getTempLocalPath(item.getFileName(), true);
-        if(!TextUtils.isEmpty(tempFile)) {
-            ImageLoadManager.setImage(tempFile, imageView);
-        } else {
-            // 图片
-            if (item.getType() == MEDIA_FILE_TYPE.AUDIO) {
-                imageView.setImageResource(R.drawable.defult_audio_icon);
-            } else if (item.getType() == MEDIA_FILE_TYPE.VIDEO) {
-                imageView.setImageResource(R.drawable.defult_video_icon);
-            } else {
-                imageView.setImageResource(R.drawable.defult_image_icon);
+        if(TextUtils.isEmpty(tempFile)) {
+            if(item.getType() == MEDIA_FILE_TYPE.AUDIO) {
+                tempFile = "123.mp3";
+            } else if(item.getType() == MEDIA_FILE_TYPE.VIDEO) {
+                tempFile = "123.mp4";
             }
         }
+        ImageLoadManager.setImage(tempFile, imageView);
 
         if(DeviceManager.getInstance().isPlay(remotePath)) {
             playImage.setImageResource(R.drawable.media_pause_icon);

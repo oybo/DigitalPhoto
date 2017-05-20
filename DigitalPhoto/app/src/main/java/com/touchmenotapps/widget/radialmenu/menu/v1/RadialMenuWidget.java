@@ -24,12 +24,12 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.PopupWindow;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -168,6 +168,8 @@ public class RadialMenuWidget extends View {
 		init(context);
 	}
 
+	private RectF mRectF;
+
 	private void init(Context context) {
 		helper = new RadialMenuHelper();
 		mWindow = helper.initPopup(context);
@@ -177,6 +179,98 @@ public class RadialMenuWidget extends View {
 
 		determineWedges();
 		helper.onOpenAnimation(this, xPosition, yPosition, xSource, ySource);
+
+		this.post(new Runnable() {
+			@Override
+			public void run() {
+				mRectF = calcViewScreenLocation(RadialMenuWidget.this);
+			}
+		});
+	}
+
+	public void touchUp(boolean isOnclick) {
+		if (inCircle == true) {
+			if (Wedge2Shown == true) {
+				enabled = null;
+				animateOuterIn = true; // sets Wedge2Shown = false;
+			}
+			selected = null;
+			if(isOnclick) {
+				centerCircle.menuActiviated();
+			}
+
+		} else if (selected != null) {
+			for (int i = 0; i < Wedges.length; i++) {
+				RadialMenuWedge f = Wedges[i];
+				if (f == selected) {
+
+					// Checks if a inner ring is enabled if so closes the
+					// outer ring an
+					if (enabled != null) {
+						enabled = null;
+						animateOuterIn = true; // sets Wedge2Shown = false;
+						// If outer ring is not enabled, then executes event
+					} else {
+						if(isOnclick) {
+							menuEntries.get(i).menuActiviated();
+						}
+
+						// Figures out how many outer rings
+						if (menuEntries.get(i).getChildren() != null) {
+							determineOuterWedges(menuEntries.get(i));
+							enabled = f;
+							animateOuterOut = true; // sets Wedge2Shown =
+							// true;
+						} else {
+							Wedge2Shown = false;
+						}
+					}
+					selected = null;
+				}
+			}
+		} else if (selected2 != null) {
+			for (int i = 0; i < Wedges2.length; i++) {
+				RadialMenuWedge f = Wedges2[i];
+				if (f == selected2) {
+					animateOuterIn = true; // sets Wedge2Shown = false;
+					enabled = null;
+					selected = null;
+					if(isOnclick) {
+						wedge2Data.getChildren().get(i).menuActiviated();
+					}
+				}
+			}
+		} else {
+			// This is when something outside the circle or any of the rings
+			// is selected
+			dismiss();
+			// selected = null;
+			// enabled = null;
+		}
+		// selected = null;
+		selected2 = null;
+		inCircle = false;
+
+		invalidate();
+	}
+
+	private Runnable mRunnable = new Runnable() {
+		@Override
+		public void run() {
+			if(getTouchDelegate() == null) {
+				mHandler.removeCallbacks(mRunnable);
+				touchUp(false);
+				return;
+			}
+
+			mHandler.postDelayed(mRunnable, 500);
+		}
+	};
+
+	private Handler mHandler = new Handler();
+
+	private void startTimer() {
+		mHandler.postDelayed(mRunnable, 500);
 	}
 
 	@Override
@@ -256,68 +350,25 @@ public class RadialMenuWidget extends View {
 				inCircle = helper.pntInCircle(eventX, eventY, xPosition, yPosition,
 						cRadius);
 			}
-
+			startTimer();
 		} else if (state == MotionEvent.ACTION_UP) {
 			// execute commands...
 			// put in stuff here to "return" the button that was pressed.
-			if (inCircle == true) {
-				if (Wedge2Shown == true) {
-					enabled = null;
-					animateOuterIn = true; // sets Wedge2Shown = false;
-				}
-				selected = null;
-				centerCircle.menuActiviated();
-
-			} else if (selected != null) {
-				for (int i = 0; i < Wedges.length; i++) {
-					RadialMenuWedge f = Wedges[i];
-					if (f == selected) {
-
-						// Checks if a inner ring is enabled if so closes the
-						// outer ring an
-						if (enabled != null) {
-							enabled = null;
-							animateOuterIn = true; // sets Wedge2Shown = false;
-							// If outer ring is not enabled, then executes event
-						} else {
-							menuEntries.get(i).menuActiviated();
-
-							// Figures out how many outer rings
-							if (menuEntries.get(i).getChildren() != null) {
-								determineOuterWedges(menuEntries.get(i));
-								enabled = f;
-								animateOuterOut = true; // sets Wedge2Shown =
-														// true;
-							} else {
-								Wedge2Shown = false;
-							}
-						}
-						selected = null;
-					}
-				}
-			} else if (selected2 != null) {
-				for (int i = 0; i < Wedges2.length; i++) {
-					RadialMenuWedge f = Wedges2[i];
-					if (f == selected2) {
-						animateOuterIn = true; // sets Wedge2Shown = false;
-						enabled = null;
-						selected = null;
-						wedge2Data.getChildren().get(i).menuActiviated();
-					}
-				}
-			} else {
-				// This is when something outside the circle or any of the rings
-				// is selected
-				dismiss();
-				// selected = null;
-				// enabled = null;
-			}
-			// selected = null;
-			selected2 = null;
-			inCircle = false;
+			touchUp(true);
 		}
 		invalidate();
 		return true;
+	}
+
+	/**
+	 * 计算指定的 View 在屏幕中的坐标。
+	 */
+	public static RectF calcViewScreenLocation(View view) {
+		int[] location = new int[2];
+		// 获取控件在屏幕中的位置，返回的数组分别为控件左顶点的 x、y 的值
+		view.getLocationOnScreen(location);
+		return new RectF(location[0], location[1], location[0] + view.getWidth(),
+				location[1] + view.getHeight());
 	}
 
 	@Override

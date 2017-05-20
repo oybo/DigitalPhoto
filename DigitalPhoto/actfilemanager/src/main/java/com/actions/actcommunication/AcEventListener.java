@@ -47,4 +47,7 @@ public interface AcEventListener {
     public void onRecvThumbnail(String url, byte[] data);
 
     public void onRecvResult(String action, String[] status);
+
+    public void ThumbnailReady(String remoPath, boolean isReplyFailed);
+
 }

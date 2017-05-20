@@ -41,6 +41,10 @@ public class DeviceListMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
     @Override
     public void bindData(RecyclerViewHolder holder, int position, FileInfo item) {
 
+        holder.setText(R.id.item_list_time_txt, item.getmModifyTime());
+
+        holder.setText(R.id.item_list_size_txt, PubUtils.formatFileLen(item.getmFileSize()));
+
         holder.setText(R.id.item_list_title_txt, item.getFileName());
 
         ImageView imageView = holder.getImageView(R.id.item_list_image);
@@ -64,18 +68,15 @@ public class DeviceListMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
 
             // 图片
             String tempFile = PubUtils.getTempLocalPath(item.getFileName(), true);
-            if(!TextUtils.isEmpty(tempFile)) {
-                ImageLoadManager.setImage(tempFile, imageView);
-            } else {
-                // 图片
-                if (item.getType() == MEDIA_FILE_TYPE.AUDIO) {
-                    imageView.setImageResource(R.drawable.defult_audio_icon);
-                } else if (item.getType() == MEDIA_FILE_TYPE.VIDEO) {
-                    imageView.setImageResource(R.drawable.defult_video_icon);
-                } else {
-                    imageView.setImageResource(R.drawable.defult_image_icon);
+            if(TextUtils.isEmpty(tempFile)) {
+                if(item.getType() == MEDIA_FILE_TYPE.AUDIO) {
+                    tempFile = "123.mp3";
+                } else if(item.getType() == MEDIA_FILE_TYPE.VIDEO) {
+                    tempFile = "123.mp4";
                 }
             }
+            ImageLoadManager.setImage(tempFile, imageView);
+
             holder.getView(R.id.item_menu_download_bt).setVisibility(View.VISIBLE);
         }
 

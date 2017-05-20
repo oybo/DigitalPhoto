@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,11 +32,14 @@ import com.xyz.digital.photo.app.ui.activity.MainActivity;
 import com.xyz.digital.photo.app.util.Constants;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
 import com.xyz.digital.photo.app.util.PubUtils;
+import com.xyz.digital.photo.app.util.SysConfigHelper;
 import com.xyz.digital.photo.app.util.ToastUtil;
 import com.xyz.digital.photo.app.view.ChooseModePopView;
 import com.xyz.digital.photo.app.view.DividerItemDecoration;
 import com.xyz.digital.photo.app.view.LoadingView;
 import com.xyz.digital.photo.app.view.ProgressPieView;
+import com.xyz.digital.photo.app.view.SelectDialog;
+import com.xyz.digital.photo.app.view.SwitchButton;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -48,6 +52,23 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 
 import static com.xyz.digital.photo.app.manager.DeviceManager.mRemoteCurrentPath;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mAudioPlayModel;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mAudioPlayModel_key;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mBreakpointPlay_key;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mImageShowScale;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mImageShowScale_key;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mPlayOrder;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mPlayOrder_key;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mPlayTime;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mPlayTime_key;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mShowSpectrum_key;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mStartPlayModel;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mStartPlayModel_key;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mSubtitle_key;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mVideoPlayModel;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mVideoPlayModel_key;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mVideoShowScale;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mVideoShowScale_key;
 
 /**
  * Created by O on 2017/4/12.
@@ -55,10 +76,27 @@ import static com.xyz.digital.photo.app.manager.DeviceManager.mRemoteCurrentPath
 
 public class DevicePhotoFragment extends BaseFragment implements View.OnClickListener, BaseRecyclerAdapter.onInternalClickListener {
 
+    @Bind(R.id.set_image_show_ratio_txt) TextView mImageShowRatioTxt;
+    @Bind(R.id.set_image_play_time_txt) TextView mImagePlayTimeTxt;
+    @Bind(R.id.set_image_play_order_txt) TextView mImagePlayOrderTxt;
+    @Bind(R.id.set_video_show_scale_txt) TextView mVideoShowScaleTxt;
+    @Bind(R.id.set_video_play_model_txt) TextView mVideoPlayModelTxt;
+    @Bind(R.id.set_audio_play_model_txt) TextView mAudioPlayModelTxt;
+    @Bind(R.id.set_start_play_model_txt) TextView mStartPlayModelTxt;
+    @Bind(R.id.set_breakpoint_play_sb) SwitchButton mBreakpointPlayBt;
+    @Bind(R.id.set_subtitle_sb) SwitchButton mSubtitleBt;
+    @Bind(R.id.set_show_channel_sb) SwitchButton mShowChannelBt;
+    private SelectDialog mSelectDialog;
+    private List<String> mItemSelects = new ArrayList<>();
+    private int mItemType;
+    // -----------系统配置--------------------
+
     @Bind(R.id.device_photo_model_type) ImageView mModelTypeImage;
+    @Bind(R.id.device_media_sys_config_layout) LinearLayout mSysConfigLayout;
     @Bind(R.id.device_media_chart_recyclerview) RecyclerView mChartRecyclerView;
     @Bind(R.id.device_media_list_recyclerview) RecyclerView mListRecyclerView;
     @Bind(R.id.view_loading) LoadingView mLoadingView;
+    @Bind(R.id.fragment_sys_config_tab) TextView fragmentSysConfigTab;
     @Bind(R.id.fragment_photo_image_tab) TextView fragmentPhotoImageTab;
     @Bind(R.id.fragment_photo_video_tab) TextView fragmentPhotoVideoTab;
     @Bind(R.id.fragment_photo_audio_tab) TextView fragmentPhotoAudioTab;
@@ -88,6 +126,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_device_manager, container, false);
         ButterKnife.bind(this, view);
+        EventBus.getDefault().register(this);
         return view;
     }
 
@@ -108,24 +147,57 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
 
         mUpperView.setOnClickListener(this);
         mModelTypeImage.setOnClickListener(this);
+        fragmentSysConfigTab.setOnClickListener(this);
         fragmentPhotoImageTab.setOnClickListener(this);
         fragmentPhotoVideoTab.setOnClickListener(this);
         fragmentPhotoAudioTab.setOnClickListener(this);
         fragmentPhotoAllTab.setOnClickListener(this);
         getView().findViewById(R.id.device_photo_choose_tab).setOnClickListener(this);
+
+        // -------------系统配置----------------
+        getView().findViewById(R.id.set_image_show_ratio_layout).setOnClickListener(mSysOnClickListener);
+        getView().findViewById(R.id.set_image_play_time_layout).setOnClickListener(mSysOnClickListener);
+        getView().findViewById(R.id.set_image_play_order_layout).setOnClickListener(mSysOnClickListener);
+        getView().findViewById(R.id.set_video_show_scale_layout).setOnClickListener(mSysOnClickListener);
+        getView().findViewById(R.id.set_video_play_model_layout).setOnClickListener(mSysOnClickListener);
+        getView().findViewById(R.id.set_audio_play_model_layout).setOnClickListener(mSysOnClickListener);
+        getView().findViewById(R.id.set_start_play_model_layout).setOnClickListener(mSysOnClickListener);
+
+        setSwitchListener(mBreakpointPlayBt, SysConfigHelper.mBreakpointPlay_key);
+        setSwitchListener(mSubtitleBt, SysConfigHelper.mSubtitle_key);
+        setSwitchListener(mShowChannelBt, SysConfigHelper.mShowSpectrum_key);
+    }
+
+    private void setSwitchListener(SwitchButton switchButton, final String key) {
+        switchButton.setOnSwitchListener(new SwitchButton.OnSwitchListener() {
+            @Override
+            public void OnCheckListenr(boolean isCheck) {
+                DeviceManager.getInstance().setpropertiesValue(key, !isCheck ? "0" : "1");
+            }
+        });
     }
 
     private void initData() {
         // 默认图表模式
         showModel(DeviceManager.getInstance().getShowType());
-        EventBus.getDefault().register(this);
+
+        SysConfigHelper.initTxt();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public synchronized void onEventMainThread(EventBase eventBase) {
         String action = eventBase.getAction();
         if (action.equals(Constants.REFRESH_DEVICE_FILE)) {
-            refreshAdapter(mShowMediaType);
+            String tuue = (String) eventBase.getData();
+            if(!TextUtils.isEmpty(tuue)) {
+                if(mShowModelType == MEDIA_SHOW_TYPE.CHART) {
+                    mChartAdapter.notifyDataSetChanged();
+                } else {
+                    mListAdapter.notifyDataSetChanged();
+                }
+            } else {
+                refreshAdapter(mShowMediaType);
+            }
         } else if(action.equals(Constants.SEND_DELETE_FILE_RESULT)) {
             // 删除结果
             boolean success = (boolean) eventBase.getData();
@@ -152,10 +224,45 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
 
     @Override
     public void onClick(View view) {
+        if(view.getId() == R.id.fragment_sys_config_tab) {
+            // 系统配置
+            if (fragmentSysConfigTab.isSelected()) {
+                return;
+            }
+            setSelectTab(0);
+            mSysConfigLayout.setVisibility(View.VISIBLE);
+            mChartRecyclerView.setVisibility(View.GONE);
+            mListRecyclerView.setVisibility(View.GONE);
+            mModelTypeImage.setEnabled(false);
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected void onPreExecute() {
+                    super.onPreExecute();
+                    showLoading();
+                }
+
+                @Override
+                protected Void doInBackground(Void... params) {
+                    initConfig();
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    super.onPostExecute(aVoid);
+                    hideLoading();
+                }
+            }.execute();
+            return;
+        }
         if (DeviceManager.getInstance().isDownloading()) {
             ToastUtil.showToast(getActivity(), AppContext.getInstance().getSString(R.string.downloading_txt));
             return;
         }
+        mSysConfigLayout.setVisibility(View.GONE);
+        mChartRecyclerView.setVisibility(View.VISIBLE);
+        mListRecyclerView.setVisibility(View.VISIBLE);
+        mModelTypeImage.setEnabled(true);
         switch (view.getId()) {
             case R.id.fragment_photo_image_tab:
                 // 图片
@@ -164,7 +271,6 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
             case R.id.fragment_photo_video_tab:
                 // 视频
                 showFiles(MEDIA_FILE_TYPE.VIDEO, false);
-                DeviceManager.getInstance().downloadTempFiles();
                 break;
             case R.id.fragment_photo_audio_tab:
                 // 音乐
@@ -288,6 +394,8 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                         // 图表
                         if(PubUtils.isTypeFile(actFileInfo.getFileName(), type)) {
                             FileInfo fileInfo = new FileInfo();
+                            fileInfo.setmFileSize(actFileInfo.getFileSize());
+                            fileInfo.setmModifyTime(actFileInfo.getModifyTime());
                             fileInfo.setFileName(actFileInfo.getFileName());
                             fileInfo.setFileType(actFileInfo.getFileType());
                             fileInfo.setPosition(i);
@@ -305,6 +413,8 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                         // 列表
                         if(actFileInfo.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
                             FileInfo fileInfo = new FileInfo();
+                            fileInfo.setmFileSize(actFileInfo.getFileSize());
+                            fileInfo.setmModifyTime(actFileInfo.getModifyTime());
                             fileInfo.setFileName(actFileInfo.getFileName());
                             fileInfo.setFileType(actFileInfo.getFileType());
                             fileInfo.setPosition(i);
@@ -362,11 +472,15 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
     }
 
     private void setSelectTab(int id) {
+        fragmentSysConfigTab.setSelected(false);
         fragmentPhotoImageTab.setSelected(false);
         fragmentPhotoVideoTab.setSelected(false);
         fragmentPhotoAudioTab.setSelected(false);
         fragmentPhotoAllTab.setSelected(false);
         switch (id) {
+            case 0:
+                fragmentSysConfigTab.setSelected(true);
+                break;
             case 1:
                 fragmentPhotoImageTab.setSelected(true);
                 break;
@@ -437,13 +551,13 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 break;
             case R.id.item_layout:
                 // item事件
-                final ActFileInfo actFileInfo = DeviceManager.getInstance().getRemoteDeviceFiles().get(position);
-                if (actFileInfo.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
+                fileInfo = mListAdapter.getItem(position);
+                if (fileInfo.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
                     // 点击文件夹
                     showLoading();
-                    String requestPath = DeviceManager.getInstance().setRemoteCurrentPath(actFileInfo.getFileName());
+                    String requestPath = DeviceManager.getInstance().setRemoteCurrentPath(fileInfo.getFileName());
                     mUpperView.setText(PATH + requestPath);
-                } else if (actFileInfo.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
+                } else if (fileInfo.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
                     // 点击文件
                 }
                 break;
@@ -533,4 +647,159 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         super.onDestroy();
         EventBus.getDefault().unregister(this);
     }
+
+    private void initConfig() {
+        // 图片显示比例
+        initProperties(mImageShowScale_key, mImageShowScale_key, mImageShowRatioTxt, mImageShowScale);
+        // 幻灯片放映时间
+        initProperties(mPlayTime_key, mPlayTime_key, mImagePlayTimeTxt, mPlayTime);
+        // 幻灯片播放顺序
+        initProperties(mPlayOrder_key, mPlayOrder_key, mImagePlayOrderTxt, mPlayOrder);
+        // 视频显示比例
+        initProperties(mVideoShowScale_key, mVideoShowScale_key, mVideoShowScaleTxt, mVideoShowScale);
+        // 视频播放模式
+        initProperties(mVideoPlayModel_key, mVideoPlayModel_key, mVideoPlayModelTxt, mVideoPlayModel);
+        // 音乐播放模式
+        initProperties(mAudioPlayModel_key, mAudioPlayModel_key, mAudioPlayModelTxt, mAudioPlayModel);
+        // 开机播放模式
+        initProperties(mStartPlayModel_key, mStartPlayModel_key, mStartPlayModelTxt, mStartPlayModel);
+
+        // 断点播放功能-开关
+        initSwitch(mBreakpointPlay_key, mBreakpointPlayBt);
+        // 字幕-开关
+        initSwitch(mSubtitle_key, mSubtitleBt);
+        // 显示频谱-开关
+        initSwitch(mShowSpectrum_key, mShowChannelBt);
+    }
+
+    private void initSwitch(String key, final SwitchButton switchButton) {
+        try {
+            final String p = DeviceManager.getInstance().getpropertiesValue(key);
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    switchButton.setCheck(Integer.parseInt(p) == 0 ? false : true);
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 初始化配置文件
+    private void initProperties(String p_key, String sp_key, final TextView txtView, final String[] values) {
+        try {
+            final String p = DeviceManager.getInstance().getpropertiesValue(p_key);
+            PreferenceUtils.getInstance().putInt(sp_key, Integer.parseInt(p));
+
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    txtView.setText(values[Integer.parseInt(p)]);
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private View.OnClickListener mSysOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            mItemSelects.clear();
+            switch (v.getId()) {
+                case R.id.set_image_show_ratio_layout:
+                    // 图片显示比例
+                    mItemType = 1;
+                    for (String str : mImageShowScale) {
+                        mItemSelects.add(str);
+                    }
+                    break;
+                case R.id.set_image_play_time_layout:
+                    // 幻灯片放映时间
+                    mItemType = 2;
+                    for (String str : mPlayTime) {
+                        mItemSelects.add(str);
+                    }
+                    break;
+                case R.id.set_image_play_order_layout:
+                    // 幻灯片播放顺序
+                    mItemType = 3;
+                    for (String str : mPlayOrder) {
+                        mItemSelects.add(str);
+                    }
+                    break;
+                case R.id.set_video_show_scale_layout:
+                    // 视频显示比例
+                    mItemType = 4;
+                    for (String str : mVideoShowScale) {
+                        mItemSelects.add(str);
+                    }
+                    break;
+                case R.id.set_video_play_model_layout:
+                    // 视频播放模式
+                    mItemType = 5;
+                    for (String str : mVideoPlayModel) {
+                        mItemSelects.add(str);
+                    }
+                    break;
+                case R.id.set_audio_play_model_layout:
+                    // 音乐播放模式
+                    mItemType = 6;
+                    for (String str : mAudioPlayModel) {
+                        mItemSelects.add(str);
+                    }
+                    break;
+                case R.id.set_start_play_model_layout:
+                    // 开机播放模式
+                    mItemType = 7;
+                    for (String str : mStartPlayModel) {
+                        mItemSelects.add(str);
+                    }
+                    break;
+            }
+            showSelectDialog(mItemType, mItemSelects);
+        }
+    };
+
+    private void showSelectDialog(final int type, final List<String> itemSelects) {
+        mSelectDialog = new SelectDialog(getActivity());
+        mSelectDialog.show(type, itemSelects, new SelectDialog.OnSelectListener() {
+            @Override
+            public void select(int position) {
+                switch (type) {
+                    case 1:
+                        // 图片显示比例
+                        DeviceManager.getInstance().setpropertiesValue(mImageShowScale_key, String.valueOf(position));
+                        break;
+                    case 2:
+                        // 幻灯片放映时间
+                        DeviceManager.getInstance().setpropertiesValue(mPlayTime_key, String.valueOf(position));
+                        break;
+                    case 3:
+                        // 幻灯片播放顺序
+                        DeviceManager.getInstance().setpropertiesValue(mPlayOrder_key, String.valueOf(position));
+                        break;
+                    case 4:
+                        // 视频显示比例
+                        DeviceManager.getInstance().setpropertiesValue(mVideoShowScale_key, String.valueOf(position));
+                        break;
+                    case 5:
+                        // 视频播放模式
+                        DeviceManager.getInstance().setpropertiesValue(mVideoPlayModel_key, String.valueOf(position));
+                        break;
+                    case 6:
+                        // 音乐播放模式
+                        DeviceManager.getInstance().setpropertiesValue(mAudioPlayModel_key, String.valueOf(position));
+                        break;
+                    case 7:
+                        // 开机播放模式
+                        DeviceManager.getInstance().setpropertiesValue(mStartPlayModel_key, String.valueOf(position));
+                        break;
+                }
+                initConfig();
+            }
+        });
+    }
+
 }

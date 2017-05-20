@@ -30,7 +30,7 @@
 
     <!--  上传和下载状态文字  -->
     <string name="loading_txt">正在加载。。。</string>
-    <string name="no_more_data_txt">没有更多数据了。。。</string>
+    <string name="no_more_data_txt">上传失败</string>
 
     <string name="device_the_txt">本机存储:</string>
     <string name="device_defult_txt">设备详情</string>
@@ -75,6 +75,7 @@
     <string name="quanbucf_txt">全部重复</string>
     <string name="suijijchongf_txt">随机+重复</string>
     <string name="close_txt">关</string>
+    <string name="sys_config_txt">系统配置</string>
     <string name="image_txt">图片</string>
     <string name="music_txt">音乐</string>
     <string name="video_txt">视频</string>

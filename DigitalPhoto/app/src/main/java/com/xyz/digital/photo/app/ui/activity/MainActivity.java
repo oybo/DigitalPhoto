@@ -79,10 +79,8 @@ public class MainActivity extends BaseActivity {
         super.onNewIntent(intent);
         String type = intent.getStringExtra("type");
         if(Constants.MAIN_DEVICE_POHOTO_MANAGER.equals(type)) {
-            DeviceManager.getInstance().setLoginMainState(true);
             currentFragment(4);
         } else if(Constants.MAIN_DEVICE_LIST.equals(type)) {
-            DeviceManager.getInstance().setLoginMainState(false);
             currentFragment(0);
         }
     }
@@ -149,7 +147,7 @@ public class MainActivity extends BaseActivity {
             // 设备
             tabIndex = 0;
             fragmentIndex = 0;
-            if(DeviceManager.getInstance().isLoginMain()) {
+            if(DeviceManager.getInstance().isConnect()) {
                 fragmentIndex = 4;
             }
         } else if (view == mainPhotoBt) {

@@ -12,8 +12,8 @@ import android.widget.TextView;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.adapter.base.RecyclerViewHolder;
-import com.xyz.digital.photo.app.ui.fragment.SetFragment;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
+import com.xyz.digital.photo.app.util.SysConfigHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,35 +108,35 @@ public class SelectDialog extends Dialog implements android.view.View.OnClickLis
             switch (mType) {
                 case 1:
                     // 图片显示比例
-                    id = PreferenceUtils.getInstance().getInt(SetFragment.mImageShowScale_key, 0);
+                    id = PreferenceUtils.getInstance().getInt(SysConfigHelper.mImageShowScale_key, 0);
                     break;
                 case 2:
                     // 幻灯片放映时间
-                    id = PreferenceUtils.getInstance().getInt(SetFragment.mPlayTime_key, 0);
+                    id = PreferenceUtils.getInstance().getInt(SysConfigHelper.mPlayTime_key, 0);
                     break;
                 case 3:
                     // 幻灯片播放顺序
-                    id = PreferenceUtils.getInstance().getInt(SetFragment.mPlayOrder_key, 0);
+                    id = PreferenceUtils.getInstance().getInt(SysConfigHelper.mPlayOrder_key, 0);
                     break;
                 case 4:
                     // 视频显示比例
-                    id = PreferenceUtils.getInstance().getInt(SetFragment.mVideoShowScale_key, 0);
+                    id = PreferenceUtils.getInstance().getInt(SysConfigHelper.mVideoShowScale_key, 0);
                     break;
                 case 5:
                     // 视频播放模式
-                    id = PreferenceUtils.getInstance().getInt(SetFragment.mVideoPlayModel_key, 0);
+                    id = PreferenceUtils.getInstance().getInt(SysConfigHelper.mVideoPlayModel_key, 0);
                     break;
                 case 6:
                     // 音乐播放模式
-                    id = PreferenceUtils.getInstance().getInt(SetFragment.mAudioPlayModel_key, 0);
+                    id = PreferenceUtils.getInstance().getInt(SysConfigHelper.mAudioPlayModel_key, 0);
                     break;
                 case 7:
                     // 开机播放模式
-                    id = PreferenceUtils.getInstance().getInt(SetFragment.mStartPlayModel_key, 0);
+                    id = PreferenceUtils.getInstance().getInt(SysConfigHelper.mStartPlayModel_key, 0);
                     break;
                 case 8:
                     // 选择语言
-                    id = PreferenceUtils.getInstance().getInt(SetFragment.mSelectLanguage_key, 0);
+                    id = PreferenceUtils.getInstance().getInt(SysConfigHelper.mSelectLanguage_key, 0);
                     break;
             }
 

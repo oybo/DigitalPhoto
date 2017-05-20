@@ -13,42 +13,69 @@ import static android.R.attr.data;
  * 通讯模块接口 <br>
  * Created by hexibin on 2016/5/23.
  */
-public class ActCommunication
-{
-    /** 图片文件类型 */
+public class ActCommunication {
+    /**
+     * 图片文件类型
+     */
     public static final int FILE_TYPE_PHOTO = 1;
-    /** 视频文件类型 */
+    /**
+     * 视频文件类型
+     */
     public static final int FILE_TYPE_VIDEO = 2;
-    /** 音乐文件类型 */
+    /**
+     * 音乐文件类型
+     */
     public static final int FILE_TYPE_MUSIC = 3;
-    /** 所有文件类型 */
+    /**
+     * 所有文件类型
+     */
     public static final int FILE_TYPE_ALL = 4;
 
     private static final int AC_RECV_MSG = 1;
     private static final int AC_RECV_DATA = 2;
     private static final int AC_STATUS_CHANGE = 3;
 
-    /** 最大音量 */
+    /**
+     * 最大音量
+     */
     public static final int MAX_VOLUME = 40;
-    /** 最小音量 */
+    /**
+     * 最小音量
+     */
     public static final int MIN_VOLUME = 0;
 
-    /** 循环模式：顺序 */
+    /**
+     * 循环模式：顺序
+     */
     public static final int LOOP_TYPE_SEQUENCE = 0;
-    /** 循环模式：循环所有文件 */
+    /**
+     * 循环模式：循环所有文件
+     */
     public static final int LOOP_TYPE_LOOPALL = 1;
-    /** 循环模式：循环单个文件 */
+    /**
+     * 循环模式：循环单个文件
+     */
     public static final int LOOP_TYPE_LOOPONE = 2;
-    /** 循环模式：随机 */
+    /**
+     * 循环模式：随机
+     */
     public static final int LOOP_TYPE_RANDOM = 3;
 
-    /** 播放器状态：停止 */
+    /**
+     * 播放器状态：停止
+     */
     public static final int PLAYER_STATUS_STOP = 0;
-    /** 播放器状态：正在播放 */
+    /**
+     * 播放器状态：正在播放
+     */
     public static final int PLAYER_STATUS_PLAYING = 1;
-    /** 播放器状态：暂停 */
+    /**
+     * 播放器状态：暂停
+     */
     public static final int PLAYER_STATUS_PAUSE = 2;
-    /** 播放器状态：出错 */
+    /**
+     * 播放器状态：出错
+     */
     public static final int PLAYER_STATUS_ERROR = 3;
 
     private static final String MSG_KEY_CMD = "cmd";
@@ -89,19 +116,18 @@ public class ActCommunication
 
     private static final String LOGTAG = "ActCommunication";
 
-    static
-    {
-        try{
+    static {
+        try {
             System.loadLibrary("actcommunication");
-        }catch (UnsatisfiedLinkError e) {
-            Log.e(LOGTAG,"UnsatisfiedLinkError:"+e.toString());
+        } catch (UnsatisfiedLinkError e) {
+            Log.e(LOGTAG, "UnsatisfiedLinkError:" + e.toString());
         }
     }
 
     private static ActCommunication ac = new ActCommunication();
     private EventHandler mHandler;
 
-    private ActCommunication(){
+    private ActCommunication() {
         nativeSetup(this);
         Looper looper;
         if ((looper = Looper.myLooper()) != null) {
@@ -115,14 +141,16 @@ public class ActCommunication
 
     /**
      * 获取通讯模块实例
+     *
      * @return 返回通讯模块实例
      */
-    public static ActCommunication getInstance(){
+    public static ActCommunication getInstance() {
         return ac;
     }
 
     /**
      * 设置事件监听器
+     *
      * @param listener 事件监听器
      */
     public void setEventListener(AcEventListener listener) {
@@ -211,28 +239,37 @@ public class ActCommunication
         }
 
         public void handleMessage(Message msg) {
-            if(mEventListener == null)
+            if (mEventListener == null)
                 return;
 
             Bundle bundle = msg.getData();
             switch (msg.what) {
                 case AC_RECV_MSG: {
                     String[] msgs = bundle.getStringArray("msg");
-                    if(!msgs[0].equals(MSG_KEY_CMD) || !msgs[1].equals(MSG_CMD_UPDATE_STATUS))
+                    try {
+                        if (msgs[2].equals("reply")) {
+                            String state = msgs[1];
+                            ActCommunication.this.mEventListener.ThumbnailReady(msgs[3], "ThumbnaiFailed".equals(state));
+                            break;
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    if (!msgs[0].equals(MSG_KEY_CMD) || !msgs[1].equals(MSG_CMD_UPDATE_STATUS))
                         break;
 
-                    for(int i=2; i<msgs.length; i+=2){
-                        if(msgs[i].equals(MSG_KEY_VOLUME)) {
+                    for (int i = 2; i < msgs.length; i += 2) {
+                        if (msgs[i].equals(MSG_KEY_VOLUME)) {
                             mEventListener.onRecvVolume(Integer.parseInt(msgs[i + 1]));
-                        } else if(msgs[i].equals(MSG_KEY_SEQUENCE)) {
+                        } else if (msgs[i].equals(MSG_KEY_SEQUENCE)) {
                             mEventListener.onRecvPlaySequence(Integer.parseInt(msgs[i + 1]));
-                        } else if(msgs[i].equals(MSG_KEY_TOTAL_TIME)) {
+                        } else if (msgs[i].equals(MSG_KEY_TOTAL_TIME)) {
                             mEventListener.onRecvTotalTime(Integer.parseInt(msgs[i + 1]));
-                        } else if(msgs[i].equals(MSG_KEY_CURRENT_TIME)) {
+                        } else if (msgs[i].equals(MSG_KEY_CURRENT_TIME)) {
                             mEventListener.onRecvCurrentTime(Integer.parseInt(msgs[i + 1]));
-                        } else if(msgs[i].equals(MSG_KEY_PLAYER_STATUS)) {
+                        } else if (msgs[i].equals(MSG_KEY_PLAYER_STATUS)) {
                             mEventListener.onRecvPlayerStatus(Integer.parseInt(msgs[i + 1]));
-                        } else if(msgs[i].equalsIgnoreCase("NandInfo") || msgs[i].equalsIgnoreCase("UdiskInfo")
+                        } else if (msgs[i].equalsIgnoreCase("NandInfo") || msgs[i].equalsIgnoreCase("UdiskInfo")
                                 || msgs[i].equalsIgnoreCase("brightness") || msgs[i].equalsIgnoreCase("storageInfo")) {
                             ActCommunication.this.mEventListener.onRecvResult(msgs[i], msgs);
                         }
@@ -242,12 +279,12 @@ public class ActCommunication
                 case AC_RECV_DATA: {
                     String[] msgs = bundle.getStringArray("msg");
                     byte[] data = bundle.getByteArray("data");
-                    if(!msgs[0].equals(MSG_KEY_CMD) || !msgs[1].equals(MSG_CMD_UPDATE_THUMBNAIL))
+                    if (!msgs[0].equals(MSG_KEY_CMD) || !msgs[1].equals(MSG_CMD_UPDATE_THUMBNAIL))
                         break;
 
-                    for(int i=2; i<msgs.length; i+=2){
-                        if(msgs[i].equals(MSG_KEY_URL)) {
-                            mEventListener.onRecvThumbnail(msgs[i+1], data);
+                    for (int i = 2; i < msgs.length; i += 2) {
+                        if (msgs[i].equals(MSG_KEY_URL)) {
+                            mEventListener.onRecvThumbnail(msgs[i + 1], data);
                         }
                     }
                     break;
@@ -255,7 +292,7 @@ public class ActCommunication
 
                 case AC_STATUS_CHANGE: {
                     String status = bundle.getString("status");
-                    if(status.equals("connect"))
+                    if (status.equals("connect"))
                         mEventListener.onDeviceConnected();
                     else
                         mEventListener.onDeviceDisconnect();
@@ -270,24 +307,22 @@ public class ActCommunication
 
     /**
      * 设置音量，音量取值范围：0~40
+     *
      * @param volume 要设置的音量值
      * @return 成功返回0，失败返回-1
      */
-    public int setVolume(int volume){
-        String[] cmd = new String[4];
-
-        cmd[0] = MSG_KEY_CMD;
-        cmd[1] = MSG_CMD_SET_VOLUME;
-        cmd[3] = MSG_KEY_VOLUME;
-        cmd[4] = Integer.toString(volume);
-        return sendMsg(cmd);
+    public int setVolume(int volume) {
+        String[] cmd = new String[]{"cmd", "setVolume", "volume", ""};
+        cmd[3] = Integer.toString(volume);
+        return this.sendMsg(cmd);
     }
 
     /**
      * 请求设备当前音量，音量值通过EventListener的onRecvVolume事件返回
+     *
      * @return 成功返回0，失败返回-1
      */
-    public int requestVolume(){
+    public int requestVolume() {
         String[] cmd = new String[2];
 
         cmd[0] = MSG_KEY_CMD;
@@ -297,11 +332,12 @@ public class ActCommunication
 
     /**
      * 播放文件
-     * @param url 要播放的文件在相框中的路径
+     *
+     * @param url      要播放的文件在相框中的路径
      * @param fileType 文件类型，FILE_TYPE_PHOTO, FILE_TYPE_MUSIC, FILE_TYPE_VIDEO
      * @return 成功返回0，失败返回-1
      */
-    public int playFile(String url, int fileType){
+    public int playFile(String url, int fileType) {
         String[] cmd = new String[6];
 
         cmd[0] = MSG_KEY_CMD;
@@ -315,9 +351,10 @@ public class ActCommunication
 
     /**
      * 暂停播放
+     *
      * @return 成功返回0，失败返回-1
      */
-    public int pause(){
+    public int pause() {
         String[] cmd = new String[2];
 
         cmd[0] = MSG_KEY_CMD;
@@ -327,9 +364,10 @@ public class ActCommunication
 
     /**
      * 恢复播放
+     *
      * @return 成功返回0，失败返回-1
      */
-    public int resume(){
+    public int resume() {
         String[] cmd = new String[2];
 
         cmd[0] = MSG_KEY_CMD;
@@ -339,10 +377,11 @@ public class ActCommunication
 
     /**
      * 播放器seek
+     *
      * @param timeMs 要seek到的时间点，单位毫秒
      * @return 成功返回0，失败返回-1
      */
-    public int seek(int timeMs){
+    public int seek(int timeMs) {
         String[] cmd = new String[4];
 
         cmd[0] = MSG_KEY_CMD;
@@ -354,9 +393,10 @@ public class ActCommunication
 
     /**
      * 停止播放
+     *
      * @return 成功返回0，失败返回-1
      */
-    public int stop(){
+    public int stop() {
         String[] cmd = new String[2];
 
         cmd[0] = MSG_KEY_CMD;
@@ -366,9 +406,10 @@ public class ActCommunication
 
     /**
      * 播放上一个文件
+     *
      * @return 成功返回0，失败返回-1
      */
-    public int prevFile(){
+    public int prevFile() {
         String[] cmd = new String[2];
 
         cmd[0] = MSG_KEY_CMD;
@@ -378,9 +419,10 @@ public class ActCommunication
 
     /**
      * 播放下一个文件
+     *
      * @return 成功返回0，失败返回-1
      */
-    public int nextFile(){
+    public int nextFile() {
         String[] cmd = new String[2];
 
         cmd[0] = MSG_KEY_CMD;
@@ -390,9 +432,10 @@ public class ActCommunication
 
     /**
      * 发送up消息
+     *
      * @return 成功返回0，失败返回-1
      */
-    public int sendKeyUp(){
+    public int sendKeyUp() {
         String[] cmd = new String[2];
 
         cmd[0] = MSG_KEY_CMD;
@@ -402,9 +445,10 @@ public class ActCommunication
 
     /**
      * 发送down消息
+     *
      * @return 成功返回0，失败返回-1
      */
-    public int sendKeyDown(){
+    public int sendKeyDown() {
         String[] cmd = new String[2];
 
         cmd[0] = MSG_KEY_CMD;
@@ -414,9 +458,10 @@ public class ActCommunication
 
     /**
      * 发送ok消息
+     *
      * @return 成功返回0，失败返回-1
      */
-    public int sendKeyOk(){
+    public int sendKeyOk() {
         String[] cmd = new String[2];
 
         cmd[0] = MSG_KEY_CMD;
@@ -426,9 +471,10 @@ public class ActCommunication
 
     /**
      * 发送return消息
+     *
      * @return 成功返回0，失败返回-1
      */
-    public int sendKeyReturn(){
+    public int sendKeyReturn() {
         String[] cmd = new String[2];
 
         cmd[0] = MSG_KEY_CMD;
@@ -438,9 +484,10 @@ public class ActCommunication
 
     /**
      * 关机
+     *
      * @return 成功返回0，失败返回-1
      */
-    public int powerOff(){
+    public int powerOff() {
         String[] cmd = new String[2];
 
         cmd[0] = MSG_KEY_CMD;
@@ -450,9 +497,10 @@ public class ActCommunication
 
     /**
      * 请求设备当前播放文件的总时间，通过EventListener的onRecvTotalTime事件返回
+     *
      * @return 成功返回0，失败返回-1
      */
-    public int requestTotalTime(){
+    public int requestTotalTime() {
         String[] cmd = new String[2];
 
         cmd[0] = MSG_KEY_CMD;
@@ -462,9 +510,10 @@ public class ActCommunication
 
     /**
      * 请求设备当前播放进度，通过EventListener的onRecvCurrentTime事件返回
+     *
      * @return 成功返回0，失败返回-1
      */
-    public int requestCurrentTime(){
+    public int requestCurrentTime() {
         String[] cmd = new String[2];
 
         cmd[0] = MSG_KEY_CMD;
@@ -474,9 +523,10 @@ public class ActCommunication
 
     /**
      * 请求设备当前播放状态，通过EventListener的onRecvPlayerStatus事件返回
+     *
      * @return 成功返回0，失败返回-1
      */
-    public int requestPlayerStatus(){
+    public int requestPlayerStatus() {
         String[] cmd = new String[2];
 
         cmd[0] = MSG_KEY_CMD;
@@ -486,10 +536,11 @@ public class ActCommunication
 
     /**
      * 设置播放循环模式
+     *
      * @param seq 取值 LOOP_TYPE_SEQUENCE、LOOP_TYPE_LOOPALL、LOOP_TYPE_LOOPONE、LOOP_TYPE_RANDOM
      * @return 成功返回0，失败返回-1
      */
-    public int setPlaySequence(int seq){
+    public int setPlaySequence(int seq) {
         String[] cmd = new String[4];
 
         cmd[0] = MSG_KEY_CMD;
@@ -501,9 +552,10 @@ public class ActCommunication
 
     /**
      * 请求设备当前播放顺序，通过EventListener的onRecvPlaySequence事件返回
+     *
      * @return 成功返回0，失败返回-1
      */
-    public int requestPlaySequence(){
+    public int requestPlaySequence() {
         String[] cmd = new String[2];
 
         cmd[0] = MSG_KEY_CMD;
@@ -513,16 +565,17 @@ public class ActCommunication
 
     /**
      * 请求图片的缩略图，缩略图收到后通过EventListener返回
+     *
      * @param urls 图片url数组
      * @return 成功返回0，失败返回-1
      */
-    public int requestThumbnails(String[] urls){
+    public int requestThumbnails(String[] urls) {
         String[] cmd = new String[2];
         cmd[0] = MSG_KEY_CMD;
         cmd[1] = MSG_CMD_GET_THUMBNAIL;
 
         String data = "";
-        for(int i=0; i<urls.length; i++){
+        for (int i = 0; i < urls.length; i++) {
             data += urls[i] + "\r\n";
         }
         return sendData(cmd, data.getBytes());
@@ -535,16 +588,17 @@ public class ActCommunication
 
     /**
      * 取消之前请求的缩略图，以便加快新的缩略图的获取
+     *
      * @param urls 图片url数组
      * @return 成功返回0，失败返回-1
      */
-    public int cancelThumbnails(String[] urls){
+    public int cancelThumbnails(String[] urls) {
         String[] cmd = new String[2];
         cmd[0] = MSG_KEY_CMD;
         cmd[1] = MSG_CMD_CANCEL_THUMBNAIL;
 
         String data = "";
-        for(int i=0; i<urls.length; i++){
+        for (int i = 0; i < urls.length; i++) {
             data += urls[i] + "\r\n";
         }
         return sendData(cmd, data.getBytes());
@@ -552,10 +606,11 @@ public class ActCommunication
 
     /**
      * 已经上传文件，通知相框端更新播放列表
+     *
      * @param url 文件在相框中的路径
      * @return 成功返回0，失败返回-1
      */
-    public int onUploadFile(String url){
+    public int onUploadFile(String url) {
         String[] cmd = new String[4];
 
         cmd[0] = MSG_KEY_CMD;
@@ -564,12 +619,14 @@ public class ActCommunication
         cmd[3] = url;
         return sendMsg(cmd);
     }
+
     /**
      * 已经删除文件，通知相框端更新播放列表
+     *
      * @param url 文件在相框中的路径
      * @return 成功返回0，失败返回-1
-     * */
-    public int onDeleteFile(String url){
+     */
+    public int onDeleteFile(String url) {
         String[] cmd = new String[4];
 
         cmd[0] = MSG_KEY_CMD;
@@ -583,6 +640,7 @@ public class ActCommunication
 
     /**
      * 连接服务器的消息通讯服务，连接成功后才能发送消息，连接成功或失败通过EventListener反馈
+     *
      * @param ip 要连接的服务器的ip地址
      * @return 成功返回0，失败返回-1
      */
@@ -590,12 +648,14 @@ public class ActCommunication
 
     /**
      * 断开与服务器的连接，断开后，无法发送消息到服务器。用于退出时释放资源
+     *
      * @return 成功返回0，失败返回-1
      */
     public native int disconnect();
 
     /**
      * 向设备端发送消息，
+     *
      * @param cmd 消息字符串数组，以[key, value, key, value....]的格式排放
      * @return 成功返回0，失败返回-1
      */
@@ -603,7 +663,8 @@ public class ActCommunication
 
     /**
      * 向设备端发送消息和二进制数据，
-     * @param cmd 消息字符串数组，以[key, value, key, value....]的格式排放
+     *
+     * @param cmd  消息字符串数组，以[key, value, key, value....]的格式排放
      * @param data 二进制数据数组
      * @return 成功返回0，失败返回-1
      */

@@ -89,7 +89,8 @@
                     android:layout_height="10dip"
                     android:layout_marginLeft="8dip"
                     android:layout_marginRight="8dip"
-                    android:background="#999999"/>
+                    android:background="#999999"
+                    android:visibility="gone"/>
 
                 <TextView
                     android:id="@+id/item_list_count_txt"
@@ -100,7 +101,8 @@
                     android:singleLine="true"
                     android:text="@string/weizhi_txt"
                     android:textColor="#666666"
-                    android:textSize="12sp"/>
+                    android:textSize="12sp"
+                    android:visibility="gone"/>
 
                 <View
                     android:layout_width="1dip"
