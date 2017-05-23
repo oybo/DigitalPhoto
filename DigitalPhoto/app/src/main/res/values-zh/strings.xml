@@ -106,7 +106,7 @@
     <string name="set_set_music_txt">音乐设置</string>
     <string name="set_tpxsbl_txt">图片显示比例</string>
     <string name="set_hdpfysj_txt">幻灯片放映时间</string>
-    <string name="set_hdpbfsx_txt">幻灯片播放顺序</string>
+    <string name="set_hdpbfsx_txt">幻灯片播放模式</string>
     <string name="set_spxsbl_txt">视频显示比例</string>
     <string name="set_spbfms_txt">视频播放模式</string>
     <string name="set_ddbfgn_txt">断点播放功能</string>
@@ -138,5 +138,10 @@
     <string name="image_ykq_txt">图片</string>
     <string name="music_ykq_txt">音乐</string>
     <string name="video_ykq_txt">视频</string>
+
+    <string name="set_calendar_one">一次</string>
+    <string name="set_calendar_every_one">每天</string>
+    <string name="set_calendar_workday">工作日</string>
+    <string name="set_calendar_weekend">周末</string>
 
 </resources>

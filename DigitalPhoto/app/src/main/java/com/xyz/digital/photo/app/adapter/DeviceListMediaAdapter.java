@@ -54,17 +54,19 @@ public class DeviceListMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
             // 文件夹
             playImage.setImageResource(R.drawable.btn_home_counterattack);
 
-            imageView.setImageResource(R.drawable.folder);
+            imageView.setImageResource(R.drawable.folder_blak);
             holder.getView(R.id.item_menu_download_bt).setVisibility(View.GONE);
         } else if (item.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
             // 文件
             // 是否添加到了播放
-            String remotePath = DeviceManager.getInstance().getRemotePath(item.getFileName());
-            if(DeviceManager.getInstance().isPlay(remotePath)) {
-                playImage.setImageResource(R.drawable.media_pause_icon);
-            } else {
-                playImage.setImageResource(R.drawable.media_play_icon);
-            }
+            playImage.setImageResource(R.drawable.selector_play);
+
+//            String remotePath = DeviceManager.getInstance().getRemotePath(item.getFileName());
+//            if(DeviceManager.getInstance().isPlay(remotePath)) {
+//                playImage.setImageResource(R.drawable.media_pause_icon);
+//            } else {
+//                playImage.setImageResource(R.drawable.media_play_icon);
+//            }
 
             // 图片
             String tempFile = PubUtils.getTempLocalPath(item.getFileName(), true);

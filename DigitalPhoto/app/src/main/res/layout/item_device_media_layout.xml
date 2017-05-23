@@ -58,7 +58,7 @@
                 android:layout_alignRight="@id/item_device_media_imange_layout"
                 android:layout_marginBottom="-30dip"
                 android:padding="5dip"
-                android:src="@drawable/media_play_icon"/>
+                android:src="@drawable/selector_play"/>
 
             <LinearLayout
                 android:id="@+id/item_device_media_download_layout"

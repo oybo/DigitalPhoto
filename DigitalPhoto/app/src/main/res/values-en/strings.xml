@@ -75,7 +75,7 @@
     <string name="quanbucf_txt">All repeat</string>
     <string name="suijijchongf_txt">Random and repeat</string>
     <string name="close_txt">Close</string>
-    <string name="sys_config_txt">Configuration</string>
+    <string name="sys_config_txt">Setup</string>
     <string name="image_txt">Photo</string>
     <string name="music_txt">Music</string>
     <string name="video_txt">Video</string>
@@ -106,7 +106,7 @@
     <string name="set_set_music_txt">Music Settings</string>
     <string name="set_tpxsbl_txt">Picture shows proportion</string>
     <string name="set_hdpfysj_txt">Slide show time</string>
-    <string name="set_hdpbfsx_txt">Slide play order</string>
+    <string name="set_hdpbfsx_txt">Slide play mode</string>
     <string name="set_spxsbl_txt">Video shows proportion</string>
     <string name="set_spbfms_txt">Video playback mode</string>
     <string name="set_ddbfgn_txt">Breakpoint play function</string>
@@ -138,5 +138,10 @@
     <string name="image_ykq_txt">PHOTO</string>
     <string name="music_ykq_txt">MUSIC</string>
     <string name="video_ykq_txt">VIDEO</string>
+
+    <string name="set_calendar_one">Once</string>
+    <string name="set_calendar_every_one">Every Day</string>
+    <string name="set_calendar_workday">Workday</string>
+    <string name="set_calendar_weekend">Weekend</string>
 
 </resources>

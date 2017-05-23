@@ -52,11 +52,19 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 
 import static com.xyz.digital.photo.app.manager.DeviceManager.mRemoteCurrentPath;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.calendar_alarm_freq;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.calendar_date;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mAlarmFrequency;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.mAudioPlayModel;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.mAudioPlayModel_key;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mAutoPowerRequency;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mBg_Music_key;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.mBreakpointPlay_key;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.mImageShowScale;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.mImageShowScale_key;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mNz_dskj_key;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mNz_dskj_off_key;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mNz_states_key;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.mPlayOrder;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.mPlayOrder_key;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.mPlayTime;
@@ -69,6 +77,7 @@ import static com.xyz.digital.photo.app.util.SysConfigHelper.mVideoPlayModel;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.mVideoPlayModel_key;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.mVideoShowScale;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.mVideoShowScale_key;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.sys_auto_power_freq;
 
 /**
  * Created by O on 2017/4/12.
@@ -83,9 +92,20 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
     @Bind(R.id.set_video_play_model_txt) TextView mVideoPlayModelTxt;
     @Bind(R.id.set_audio_play_model_txt) TextView mAudioPlayModelTxt;
     @Bind(R.id.set_start_play_model_txt) TextView mStartPlayModelTxt;
+    @Bind(R.id.set_calendar_riqi_txt) TextView mCalendarDateTxt;
+    @Bind(R.id.set_calendar_time_txt) TextView mCalendarTimeTxt;
+    @Bind(R.id.set_calendar_nz_time_txt) TextView mCalendarAlertTimeTxt;
+    @Bind(R.id.set_calendar_nz_frequency_txt) TextView mCalendarAlertFreqTxt;
+    @Bind(R.id.set_start_dskgjpl_txt) TextView mAutoPowerFreqTxt;
+    @Bind(R.id.set_start_open_time_txt) TextView mOpenTimeTxt;
+    @Bind(R.id.set_start_close_time_txt) TextView mCloseTimeTxt;
     @Bind(R.id.set_breakpoint_play_sb) SwitchButton mBreakpointPlayBt;
+    @Bind(R.id.set_bjyy_play_sb) SwitchButton mBgMusicBt;
     @Bind(R.id.set_subtitle_sb) SwitchButton mSubtitleBt;
     @Bind(R.id.set_show_channel_sb) SwitchButton mShowChannelBt;
+    @Bind(R.id.set_calendar_nzzt_sb) SwitchButton mCalendarNzztBt;
+    @Bind(R.id.set_calendar_timer_open_sb) SwitchButton mAutoPoweronBt;
+    @Bind(R.id.set_calendar_timer_close_sb) SwitchButton mAutoPoweronOffBt;
     private SelectDialog mSelectDialog;
     private List<String> mItemSelects = new ArrayList<>();
     private int mItemType;
@@ -101,7 +121,6 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
     @Bind(R.id.fragment_photo_video_tab) TextView fragmentPhotoVideoTab;
     @Bind(R.id.fragment_photo_audio_tab) TextView fragmentPhotoAudioTab;
     @Bind(R.id.fragment_photo_all_tab) TextView fragmentPhotoAllTab;
-    @Bind(R.id.device_media_list_layout) LinearLayout mListLayout;
     @Bind(R.id.remote_browser_frag_txt_upper) TextView mUpperView;
 
     /**
@@ -163,9 +182,15 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         getView().findViewById(R.id.set_audio_play_model_layout).setOnClickListener(mSysOnClickListener);
         getView().findViewById(R.id.set_start_play_model_layout).setOnClickListener(mSysOnClickListener);
 
+        setSwitchListener(mBgMusicBt, SysConfigHelper.mBg_Music_key);
         setSwitchListener(mBreakpointPlayBt, SysConfigHelper.mBreakpointPlay_key);
         setSwitchListener(mSubtitleBt, SysConfigHelper.mSubtitle_key);
         setSwitchListener(mShowChannelBt, SysConfigHelper.mShowSpectrum_key);
+
+        setSwitchListener(mBgMusicBt, SysConfigHelper.mBg_Music_key);
+        setSwitchListener(mCalendarNzztBt, SysConfigHelper.mNz_states_key);
+        setSwitchListener(mAutoPoweronBt, SysConfigHelper.mNz_dskj_key);
+        setSwitchListener(mAutoPoweronOffBt, SysConfigHelper.mNz_dskj_off_key);
     }
 
     private void setSwitchListener(SwitchButton switchButton, final String key) {
@@ -260,8 +285,11 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
             return;
         }
         mSysConfigLayout.setVisibility(View.GONE);
-        mChartRecyclerView.setVisibility(View.VISIBLE);
-        mListRecyclerView.setVisibility(View.VISIBLE);
+        if(mShowModelType == MEDIA_SHOW_TYPE.CHART) {
+            mChartRecyclerView.setVisibility(View.VISIBLE);
+        } else {
+            mListRecyclerView.setVisibility(View.VISIBLE);
+        }
         mModelTypeImage.setEnabled(true);
         switch (view.getId()) {
             case R.id.fragment_photo_image_tab:
@@ -312,7 +340,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         DeviceManager.getInstance().setShowType(type);
         if (type == MEDIA_SHOW_TYPE.CHART) {
             // 图表模式
-            mListLayout.setVisibility(View.GONE);
+            mListRecyclerView.setVisibility(View.GONE);
             mChartRecyclerView.setVisibility(View.VISIBLE);
             mModelTypeImage.setImageResource(R.drawable.mode_chrat_icon);
             if(mChartAdapter == null) {
@@ -321,11 +349,26 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 mChartAdapter.setOnInViewClickListener(R.id.item_device_media_download_txt, this);
                 mChartAdapter.setOnInViewClickListener(R.id.item_device_media_delete_txt, this);
                 mChartAdapter.setOnInViewClickListener(R.id.item_device_media_play_image, this);
+                mChartAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View itemView, int pos) {
+                        // item事件
+                        FileInfo fileInfo = mChartAdapter.getItem(pos);
+                        if (fileInfo.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
+                            // 点击文件夹
+                            showLoading();
+                            String requestPath = DeviceManager.getInstance().setRemoteCurrentPath(fileInfo.getFileName());
+                            mUpperView.setText(PATH + requestPath);
+                        } else if (fileInfo.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
+                            // 点击文件
+                        }
+                    }
+                });
             }
         } else if (type == MEDIA_SHOW_TYPE.LIST) {
             // 列表模式
             mChartRecyclerView.setVisibility(View.GONE);
-            mListLayout.setVisibility(View.VISIBLE);
+            mListRecyclerView.setVisibility(View.VISIBLE);
             mModelTypeImage.setImageResource(R.drawable.mode_list_icon);
             mUpperView.setText(PATH + mRemoteCurrentPath);
             if(mListAdapter == null) {
@@ -390,12 +433,18 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 for (int i = 0; i < len; i++) {
                     ActFileInfo actFileInfo = DeviceManager.getInstance().getRemoteDeviceFiles().get(i);
 
-                    if(mShowModelType == MEDIA_SHOW_TYPE.CHART) {
-                        // 图表
+                    if(actFileInfo.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
+                        FileInfo fileInfo = new FileInfo();
+                        fileInfo.setmFileSize(actFileInfo.getFileSize());
+                        fileInfo.setmModifyTime(actFileInfo.getModifyTime());
+                        fileInfo.setFileName(actFileInfo.getFileName());
+                        fileInfo.setFileType(actFileInfo.getFileType());
+                        fileInfo.setPosition(i);
+                        fileInfo.setType(type);
+                        result.add(fileInfo);
+                    } else {
                         if(PubUtils.isTypeFile(actFileInfo.getFileName(), type)) {
                             FileInfo fileInfo = new FileInfo();
-                            fileInfo.setmFileSize(actFileInfo.getFileSize());
-                            fileInfo.setmModifyTime(actFileInfo.getModifyTime());
                             fileInfo.setFileName(actFileInfo.getFileName());
                             fileInfo.setFileType(actFileInfo.getFileType());
                             fileInfo.setPosition(i);
@@ -408,34 +457,6 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                                 fileInfo.setType(type1);
                             }
                             result.add(fileInfo);
-                        }
-                    } else {
-                        // 列表
-                        if(actFileInfo.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
-                            FileInfo fileInfo = new FileInfo();
-                            fileInfo.setmFileSize(actFileInfo.getFileSize());
-                            fileInfo.setmModifyTime(actFileInfo.getModifyTime());
-                            fileInfo.setFileName(actFileInfo.getFileName());
-                            fileInfo.setFileType(actFileInfo.getFileType());
-                            fileInfo.setPosition(i);
-                            fileInfo.setType(type);
-                            result.add(fileInfo);
-                        } else {
-                            if(PubUtils.isTypeFile(actFileInfo.getFileName(), type)) {
-                                FileInfo fileInfo = new FileInfo();
-                                fileInfo.setFileName(actFileInfo.getFileName());
-                                fileInfo.setFileType(actFileInfo.getFileType());
-                                fileInfo.setPosition(i);
-                                fileInfo.setType(type);
-                                if(type == MEDIA_FILE_TYPE.ALL) {
-                                    MEDIA_FILE_TYPE type1 = PubUtils.getFileType(fileInfo.getFileName());
-                                    if(type1 == null) {
-                                        continue;
-                                    }
-                                    fileInfo.setType(type1);
-                                }
-                                result.add(fileInfo);
-                            }
                         }
                     }
                 }
@@ -518,7 +539,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 FileInfo fileInfo = mChartAdapter.getItem(position);
                 boolean play = addPlay(fileInfo);
                 if(play) {
-                    mChartAdapter.notifyDataSetChanged();
+                    mChartAdapter.notifyItemChanged(position);
                 }
                 break;
             case R.id.item_menu_download_bt:
@@ -546,7 +567,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 fileInfo = mListAdapter.getItem(position);
                 play = addPlay(fileInfo);
                 if(play) {
-                    mListAdapter.notifyDataSetChanged();
+                    mListAdapter.notifyItemChanged(position);
                 }
                 break;
             case R.id.item_layout:
@@ -569,10 +590,10 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
             // 如果是文件夹
             return false;
         }
-        if(DeviceManager.getInstance().isPlay(mRemoteCurrentPath + fileInfo.getFileName())) {
-            // 如果已经在播放里
-            return false;
-        }
+//        if(DeviceManager.getInstance().isPlay(mRemoteCurrentPath + fileInfo.getFileName())) {
+//            // 如果已经在播放里
+//            return false;
+//        }
 
         DeviceManager.getInstance().setPlayFile(fileInfo);
         return true;
@@ -663,13 +684,65 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         initProperties(mAudioPlayModel_key, mAudioPlayModel_key, mAudioPlayModelTxt, mAudioPlayModel);
         // 开机播放模式
         initProperties(mStartPlayModel_key, mStartPlayModel_key, mStartPlayModelTxt, mStartPlayModel);
+        // 日历日期
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String txt = DeviceManager.getInstance().getpropertiesValue(calendar_date);
+                mCalendarDateTxt.setText(txt);
+            }
+        });
+        // 日历时间
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String txt = DeviceManager.getInstance().getpropertiesValue("calendar_time");
+                mCalendarTimeTxt.setText(txt);
+            }
+        });
+        // 闹钟时间
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String txt = DeviceManager.getInstance().getpropertiesValue("calendar_alarm_time");
+                mCalendarAlertTimeTxt.setText(txt);
+            }
+        });
+        // 开机时间
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String txt = DeviceManager.getInstance().getpropertiesValue("sys_auto_on_time");
+                mOpenTimeTxt.setText(txt);
+            }
+        });
+        // 关机时间
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String txt = DeviceManager.getInstance().getpropertiesValue("sys_auto_off_time");
+                mCloseTimeTxt.setText(txt);
+            }
+        });
+        // 闹钟频率
+        initProperties(calendar_alarm_freq, calendar_alarm_freq, mCalendarAlertFreqTxt, mAlarmFrequency);
+        // 定时开关机频率
+        initProperties(sys_auto_power_freq, sys_auto_power_freq, mAutoPowerFreqTxt, mAutoPowerRequency);
 
+        // 背景音乐-开关
+        initSwitch(mBg_Music_key, mBgMusicBt);
         // 断点播放功能-开关
         initSwitch(mBreakpointPlay_key, mBreakpointPlayBt);
         // 字幕-开关
         initSwitch(mSubtitle_key, mSubtitleBt);
         // 显示频谱-开关
         initSwitch(mShowSpectrum_key, mShowChannelBt);
+        // 闹钟状态
+        initSwitch(mNz_states_key, mCalendarNzztBt);
+        // 定时开机
+        initSwitch(mNz_dskj_key, mAutoPoweronBt);
+        // 定时关机
+        initSwitch(mNz_dskj_off_key, mAutoPoweronOffBt);
     }
 
     private void initSwitch(String key, final SwitchButton switchButton) {

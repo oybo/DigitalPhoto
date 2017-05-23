@@ -24,7 +24,7 @@ public class WiFiPresenter implements WiFiContract.Presenter {
     @Override
     public boolean connect(final WifiManager mWifiManager, final ScanResult mScanResult) {
         final String security = Wifi.ConfigSec.getScanResultSecurity(mScanResult);
-        final WifiConfiguration config = Wifi.getWifiConfiguration(mWifiManager, mScanResult, security);
+        WifiConfiguration config = Wifi.getWifiConfiguration(mWifiManager, mScanResult, security);
 
         boolean connResult = false;
 

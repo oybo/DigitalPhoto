@@ -116,17 +116,19 @@ public class DeviceManager {
      * @return
      */
     public List<ActFileInfo> getRemoteDeviceFiles() {
-        if(mShowType == MEDIA_SHOW_TYPE.LIST) {
-            return mRemoteFileList;
-        } else {
-            List<ActFileInfo> tempFiles = new ArrayList<>();
-            for(ActFileInfo info : mRemoteFileList) {
-                if(info.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
-                    tempFiles.add(info);
-                }
-            }
-            return tempFiles;
-        }
+//        if(mShowType == MEDIA_SHOW_TYPE.LIST) {
+//            return mRemoteFileList;
+//        } else {
+//            List<ActFileInfo> tempFiles = new ArrayList<>();
+//            for(ActFileInfo info : mRemoteFileList) {
+//                if(info.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
+//                    tempFiles.add(info);
+//                }
+//            }
+//            return tempFiles;
+//        }
+
+        return mRemoteFileList;
     }
 
     public void removeFile(String fileName) {
