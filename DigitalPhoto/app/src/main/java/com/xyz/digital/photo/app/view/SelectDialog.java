@@ -138,6 +138,14 @@ public class SelectDialog extends Dialog implements android.view.View.OnClickLis
                     // 选择语言
                     id = PreferenceUtils.getInstance().getInt(SysConfigHelper.mSelectLanguage_key, 0);
                     break;
+                case 18:
+                    // 闹钟频率
+                    id = PreferenceUtils.getInstance().getInt(SysConfigHelper.calendar_alarm_freq, 0);
+                    break;
+                case 19:
+                    // 定时开关机频率
+                    id = PreferenceUtils.getInstance().getInt(SysConfigHelper.sys_auto_power_freq, 0);
+                    break;
             }
 
             txt.setSelected(id == position ? true : false);

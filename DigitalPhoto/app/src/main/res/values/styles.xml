@@ -111,4 +111,10 @@
         <item name="android:drawableLeft">@drawable/checkbox_login</item>
     </style>
 
+    <!-- 自定义日期时间选择器 -->
+    <style name="AnimBottom" parent="@android:style/Animation">
+        <item name="android:windowEnterAnimation">@anim/push_bottom_in</item>
+        <item name="android:windowExitAnimation">@anim/push_bottom_out</item>
+    </style>
+
 </resources>

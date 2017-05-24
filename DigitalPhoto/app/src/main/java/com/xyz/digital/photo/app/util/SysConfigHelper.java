@@ -17,6 +17,10 @@ public class SysConfigHelper {
     public static final String mAudioPlayModel_key = "music_play_mode";
     public static final String mStartPlayModel_key = "sys_startup_play";
     public static final String calendar_date = "calendar_date";
+    public static final String calendar_time = "calendar_time";
+    public static final String calendar_alarm_time = "calendar_alarm_time";
+    public static final String sys_auto_on_time = "sys_auto_on_time";
+    public static final String sys_auto_off_time = "sys_auto_off_time";
     public static final String mSelectLanguage_key = "select_language_key";
     public static final String calendar_alarm_freq = "calendar_alarm_freq";
     public static final String sys_auto_power_freq = "sys_auto_power_freq";
@@ -57,7 +61,10 @@ public class SysConfigHelper {
             AppContext.getInstance().getSString(R.string.set_calendar_every_one),
             AppContext.getInstance().getSString(R.string.set_calendar_workday),
             AppContext.getInstance().getSString(R.string.set_calendar_weekend)};
-    public static String[] mAutoPowerRequency = new String[]{ "Once", "Every Day", "Workday", "Weekend" };
+    public static String[] mAutoPowerRequency = new String[]{ AppContext.getInstance().getSString(R.string.set_calendar_one),
+            AppContext.getInstance().getSString(R.string.set_calendar_every_one),
+            AppContext.getInstance().getSString(R.string.set_calendar_workday),
+            AppContext.getInstance().getSString(R.string.set_calendar_weekend)};
     public static String[] mSelectLanguage = new String[] { "简体中文", "English"};
 
 

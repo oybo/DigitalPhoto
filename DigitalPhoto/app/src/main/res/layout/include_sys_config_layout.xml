@@ -385,6 +385,7 @@
                 <View style="@style/view_line_margin"/>
 
                 <RelativeLayout
+                    android:id="@+id/set_calendar_time_layout"
                     android:layout_width="match_parent"
                     android:layout_height="40dip">
 
@@ -435,6 +436,7 @@
                 <View style="@style/view_line_margin"/>
 
                 <RelativeLayout
+                    android:id="@+id/set_calendar_nz_time_layout"
                     android:layout_width="match_parent"
                     android:layout_height="40dip">
 
@@ -462,6 +464,7 @@
                 <View style="@style/view_line_margin"/>
 
                 <RelativeLayout
+                    android:id="@+id/set_calendar_nz_frequency_layout"
                     android:layout_width="match_parent"
                     android:layout_height="40dip">
 
@@ -532,6 +535,7 @@
                 <View style="@style/view_line_margin"/>
 
                 <RelativeLayout
+                    android:id="@+id/set_start_open_time_layout"
                     android:layout_width="match_parent"
                     android:layout_height="40dip">
 
@@ -582,6 +586,7 @@
                 <View style="@style/view_line_margin"/>
 
                 <RelativeLayout
+                    android:id="@+id/set_start_close_time_layout"
                     android:layout_width="match_parent"
                     android:layout_height="40dip">
 
@@ -609,6 +614,7 @@
                 <View style="@style/view_line_margin"/>
 
                 <RelativeLayout
+                    android:id="@+id/set_start_dskgjpl_layout"
                     android:layout_width="match_parent"
                     android:layout_height="40dip">
 

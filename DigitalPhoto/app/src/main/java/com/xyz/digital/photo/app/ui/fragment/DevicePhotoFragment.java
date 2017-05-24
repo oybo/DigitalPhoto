@@ -16,6 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.actions.actfilemanager.ActFileInfo;
+import com.picker.TimePickerHelper;
 import com.xyz.digital.photo.app.AppContext;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.DeviceListMediaAdapter;
@@ -53,7 +54,9 @@ import butterknife.ButterKnife;
 
 import static com.xyz.digital.photo.app.manager.DeviceManager.mRemoteCurrentPath;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.calendar_alarm_freq;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.calendar_alarm_time;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.calendar_date;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.calendar_time;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.mAlarmFrequency;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.mAudioPlayModel;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.mAudioPlayModel_key;
@@ -77,6 +80,8 @@ import static com.xyz.digital.photo.app.util.SysConfigHelper.mVideoPlayModel;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.mVideoPlayModel_key;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.mVideoShowScale;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.mVideoShowScale_key;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.sys_auto_off_time;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.sys_auto_on_time;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.sys_auto_power_freq;
 
 /**
@@ -106,6 +111,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
     @Bind(R.id.set_calendar_nzzt_sb) SwitchButton mCalendarNzztBt;
     @Bind(R.id.set_calendar_timer_open_sb) SwitchButton mAutoPoweronBt;
     @Bind(R.id.set_calendar_timer_close_sb) SwitchButton mAutoPoweronOffBt;
+    private TimePickerHelper mTimePickerHelper;
     private SelectDialog mSelectDialog;
     private List<String> mItemSelects = new ArrayList<>();
     private int mItemType;
@@ -181,6 +187,13 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         getView().findViewById(R.id.set_video_play_model_layout).setOnClickListener(mSysOnClickListener);
         getView().findViewById(R.id.set_audio_play_model_layout).setOnClickListener(mSysOnClickListener);
         getView().findViewById(R.id.set_start_play_model_layout).setOnClickListener(mSysOnClickListener);
+        getView().findViewById(R.id.set_calendar_nz_frequency_layout).setOnClickListener(mSysOnClickListener);
+        getView().findViewById(R.id.set_start_dskgjpl_layout).setOnClickListener(mSysOnClickListener);
+        getView().findViewById(R.id.set_calendar_layout).setOnClickListener(mSysOnClickListener);   // 日期
+        getView().findViewById(R.id.set_calendar_time_layout).setOnClickListener(mSysOnClickListener);  // 时间
+        getView().findViewById(R.id.set_calendar_nz_time_layout).setOnClickListener(mSysOnClickListener);  // 闹钟时间
+        getView().findViewById(R.id.set_start_open_time_layout).setOnClickListener(mSysOnClickListener);  // 开机时间
+        getView().findViewById(R.id.set_start_close_time_layout).setOnClickListener(mSysOnClickListener);  // 关机时间
 
         setSwitchListener(mBgMusicBt, SysConfigHelper.mBg_Music_key);
         setSwitchListener(mBreakpointPlayBt, SysConfigHelper.mBreakpointPlay_key);
@@ -191,6 +204,8 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         setSwitchListener(mCalendarNzztBt, SysConfigHelper.mNz_states_key);
         setSwitchListener(mAutoPoweronBt, SysConfigHelper.mNz_dskj_key);
         setSwitchListener(mAutoPoweronOffBt, SysConfigHelper.mNz_dskj_off_key);
+
+        mTimePickerHelper = new TimePickerHelper(getActivity());
     }
 
     private void setSwitchListener(SwitchButton switchButton, final String key) {
@@ -696,7 +711,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                String txt = DeviceManager.getInstance().getpropertiesValue("calendar_time");
+                String txt = DeviceManager.getInstance().getpropertiesValue(calendar_time);
                 mCalendarTimeTxt.setText(txt);
             }
         });
@@ -704,7 +719,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                String txt = DeviceManager.getInstance().getpropertiesValue("calendar_alarm_time");
+                String txt = DeviceManager.getInstance().getpropertiesValue(calendar_alarm_time);
                 mCalendarAlertTimeTxt.setText(txt);
             }
         });
@@ -712,7 +727,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                String txt = DeviceManager.getInstance().getpropertiesValue("sys_auto_on_time");
+                String txt = DeviceManager.getInstance().getpropertiesValue(sys_auto_on_time);
                 mOpenTimeTxt.setText(txt);
             }
         });
@@ -720,7 +735,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                String txt = DeviceManager.getInstance().getpropertiesValue("sys_auto_off_time");
+                String txt = DeviceManager.getInstance().getpropertiesValue(sys_auto_off_time);
                 mCloseTimeTxt.setText(txt);
             }
         });
@@ -830,6 +845,70 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                         mItemSelects.add(str);
                     }
                     break;
+                case R.id.set_calendar_nz_frequency_layout:
+                    // 闹钟频率
+                    mItemType = 18;
+                    for (String str : mAlarmFrequency) {
+                        mItemSelects.add(str);
+                    }
+                    break;
+                case R.id.set_start_dskgjpl_layout:
+                    // 定时开关机频率
+                    mItemType = 19;
+                    for (String str : mAutoPowerRequency) {
+                        mItemSelects.add(str);
+                    }
+                    break;
+                case R.id.set_calendar_layout:
+                    // 日期
+                    mTimePickerHelper.showDateDialog(new TimePickerHelper.OnPickerCallback() {
+                        @Override
+                        public void onTime(String time) {
+                            DeviceManager.getInstance().setpropertiesValue(calendar_date, time);
+                            mCalendarDateTxt.setText(time);
+                        }
+                    });
+                    return;
+                case R.id.set_calendar_time_layout:
+                    // 时间
+                    mTimePickerHelper.showTimeDialog(new TimePickerHelper.OnPickerCallback() {
+                        @Override
+                        public void onTime(String time) {
+                            DeviceManager.getInstance().setpropertiesValue(calendar_time, time);
+                            mCalendarTimeTxt.setText(time);
+                        }
+                    });
+                    return;
+                case R.id.set_calendar_nz_time_layout:
+                    // 闹钟时间
+                    mTimePickerHelper.showTimeDialog(new TimePickerHelper.OnPickerCallback() {
+                        @Override
+                        public void onTime(String time) {
+                            DeviceManager.getInstance().setpropertiesValue(calendar_alarm_time, time);
+                            mCalendarAlertTimeTxt.setText(time);
+                        }
+                    });
+                    return;
+                case R.id.set_start_open_time_layout:
+                    // 开机时间
+                    mTimePickerHelper.showTimeDialog(new TimePickerHelper.OnPickerCallback() {
+                        @Override
+                        public void onTime(String time) {
+                            DeviceManager.getInstance().setpropertiesValue(sys_auto_on_time, time);
+                            mOpenTimeTxt.setText(time);
+                        }
+                    });
+                    return;
+                case R.id.set_start_close_time_layout:
+                    // 关机时间
+                    mTimePickerHelper.showTimeDialog(new TimePickerHelper.OnPickerCallback() {
+                        @Override
+                        public void onTime(String time) {
+                            DeviceManager.getInstance().setpropertiesValue(sys_auto_off_time, time);
+                            mCloseTimeTxt.setText(time);
+                        }
+                    });
+                    return;
             }
             showSelectDialog(mItemType, mItemSelects);
         }
@@ -868,6 +947,14 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                     case 7:
                         // 开机播放模式
                         DeviceManager.getInstance().setpropertiesValue(mStartPlayModel_key, String.valueOf(position));
+                        break;
+                    case 18:
+                        // 闹钟频率
+                        DeviceManager.getInstance().setpropertiesValue(calendar_alarm_freq, String.valueOf(position));
+                        break;
+                    case 19:
+                        // 定时开关机频率
+                        DeviceManager.getInstance().setpropertiesValue(sys_auto_power_freq, String.valueOf(position));
                         break;
                 }
                 initConfig();
