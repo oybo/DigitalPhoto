@@ -55,9 +55,11 @@ public class DeviceMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
 
             holder.getView(R.id.item_device_media_download_layout).setVisibility(View.INVISIBLE);
             holder.getView(R.id.item_device_media_play_image).setVisibility(View.GONE);
+            holder.getView(R.id.item_device_media_size_txt).setVisibility(View.GONE);
         } else {
             holder.getView(R.id.item_device_media_download_layout).setVisibility(View.VISIBLE);
             holder.getView(R.id.item_device_media_play_image).setVisibility(View.VISIBLE);
+            holder.getView(R.id.item_device_media_size_txt).setVisibility(View.VISIBLE);
 
             // 加载图片
             String tempFile = PubUtils.getTempLocalPath(item.getFileName(), true);

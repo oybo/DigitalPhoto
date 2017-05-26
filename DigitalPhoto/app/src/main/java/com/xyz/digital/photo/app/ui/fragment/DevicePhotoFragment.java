@@ -448,22 +448,18 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 for (int i = 0; i < len; i++) {
                     ActFileInfo actFileInfo = DeviceManager.getInstance().getRemoteDeviceFiles().get(i);
 
+                    FileInfo fileInfo = new FileInfo();
+                    fileInfo.setmFileSize(actFileInfo.getFileSize());
+                    fileInfo.setmModifyTime(actFileInfo.getModifyTime());
+                    fileInfo.setFileName(actFileInfo.getFileName());
+                    fileInfo.setFileType(actFileInfo.getFileType());
+                    fileInfo.setPosition(i);
+                    fileInfo.setType(type);
+
                     if(actFileInfo.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
-                        FileInfo fileInfo = new FileInfo();
-                        fileInfo.setmFileSize(actFileInfo.getFileSize());
-                        fileInfo.setmModifyTime(actFileInfo.getModifyTime());
-                        fileInfo.setFileName(actFileInfo.getFileName());
-                        fileInfo.setFileType(actFileInfo.getFileType());
-                        fileInfo.setPosition(i);
-                        fileInfo.setType(type);
                         result.add(fileInfo);
                     } else {
                         if(PubUtils.isTypeFile(actFileInfo.getFileName(), type)) {
-                            FileInfo fileInfo = new FileInfo();
-                            fileInfo.setFileName(actFileInfo.getFileName());
-                            fileInfo.setFileType(actFileInfo.getFileType());
-                            fileInfo.setPosition(i);
-                            fileInfo.setType(type);
                             if(type == MEDIA_FILE_TYPE.ALL) {
                                 MEDIA_FILE_TYPE type1 = PubUtils.getFileType(fileInfo.getFileName());
                                 if(type1 == null) {

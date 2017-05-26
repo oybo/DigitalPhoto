@@ -1,11 +1,9 @@
 package com.xyz.digital.photo.app.mvp.Photo;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.ThumbnailUtils;
-import android.net.Uri;
 import android.provider.MediaStore;
 
 import com.xyz.digital.photo.app.bean.FolderBean;
@@ -27,6 +25,8 @@ import java.util.Map;
 
 public class MultiMediaUtils {
 
+
+
     /**
      * 获取sd卡所有的图片文件
      *
@@ -36,14 +36,9 @@ public class MultiMediaUtils {
     public static void getAllImages(Context context, HashMap<String, List<MediaFileBean>> mGruopMap) {
         Cursor mCursor = null;
         try {
-            Uri mImageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-            ContentResolver mContentResolver = context.getContentResolver();
-
-            //只查询jpeg和png的图片
-            mCursor = mContentResolver.query(mImageUri, null,
-                    MediaStore.Images.Media.MIME_TYPE + "=? or "
-                            + MediaStore.Images.Media.MIME_TYPE + "=?",
-                    new String[]{"image/jpeg", "image/png"}, MediaStore.Images.Media.DATE_MODIFIED);
+            mCursor = context.getContentResolver().query(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null,
+                    null, null, null);
 
             while (mCursor.moveToNext()) {
                 //获取路径
@@ -102,14 +97,11 @@ public class MultiMediaUtils {
      * @throws Exception
      */
     public static void getAllAudios(Context context, HashMap<String, List<MediaFileBean>> mGruopMap) {
-
         Cursor cursor = null;
         try {
             cursor = context.getContentResolver().query(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null,
-                    MediaStore.Audio.Media.MIME_TYPE + "=? or "
-                            + MediaStore.Audio.Media.MIME_TYPE + "=?",
-                    new String[]{"audio/mpeg", "audio/x-ms-wma"}, MediaStore.Audio.Media.DATE_MODIFIED);
+                    null, null, null);
 
             while (cursor.moveToNext()) {
                 //获取路径

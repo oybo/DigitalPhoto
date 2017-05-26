@@ -441,14 +441,14 @@ public class DeviceManager {
                             downloadSysConfig();
                             continue;
                         }
-                        if(fileInfo.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
-                            String dirName = TimeUtil.getCurToday();
-                            if(dirName.equals(fileInfo.getFileName())) {
-                                mFristLoadTag = true;
-                                setRemoteCurrentPath(dirName);
-                                return;
-                            }
-                        }
+//                        if(fileInfo.getFileType() == ActFileInfo.FILE_TYPE_DIRECTORY) {
+//                            String dirName = TimeUtil.getCurToday();
+//                            if(dirName.equals(fileInfo.getFileName())) {
+//                                mFristLoadTag = true;
+//                                setRemoteCurrentPath(dirName);
+//                                return;
+//                            }
+//                        }
                     }
                 }
                 if (remoteFileList != null) {

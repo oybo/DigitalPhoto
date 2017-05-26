@@ -56,8 +56,11 @@ public class DeviceListMediaAdapter extends BaseRecyclerAdapter<FileInfo> {
 
             imageView.setImageResource(R.drawable.folder_blak);
             holder.getView(R.id.item_menu_download_bt).setVisibility(View.GONE);
+            holder.getView(R.id.item_list_size_txt).setVisibility(View.GONE);
         } else if (item.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
             // 文件
+            holder.getView(R.id.item_list_size_txt).setVisibility(View.VISIBLE);
+
             // 是否添加到了播放
             playImage.setImageResource(R.drawable.selector_play);
 
