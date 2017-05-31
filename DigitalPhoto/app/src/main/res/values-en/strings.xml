@@ -144,4 +144,21 @@
     <string name="set_calendar_workday">Workday</string>
     <string name="set_calendar_weekend">Weekend</string>
 
+    <string name="set_system_reset">Whether to restore the factory Settings?</string>
+    <string name="set_bg_music">background music</string>
+    <string name="set_calendar_settings">Calendar Settings</string>
+    <string name="set_date_txt">Date</string>
+    <string name="set_time_txt">Time</string>
+    <string name="set_alarm_clock_state">Alarm clock state</string>
+    <string name="set_alarm_clock_time">Alarm clock time</string>
+    <string name="set_alarm_frequency">Alarm clock frequency</string>
+    <string name="set_timing_boot">Timing boot</string>
+    <string name="set_boot_time">Boot time</string>
+    <string name="set_timing_shutdown">Timing shutdown</string>
+    <string name="set_shutdown_time">Shutdown time</string>
+    <string name="set_switch_machine_frequency">Frequency of time switch machine</string>
+    <string name="set_volume_txt">Volume</string>
+    <string name="set_system_version_txt">System Version number</string>
+    <string name="set_system_eestore_setting_txt">Restore Settings</string>
+
 </resources>

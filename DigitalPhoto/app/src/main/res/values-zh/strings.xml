@@ -144,4 +144,21 @@
     <string name="set_calendar_workday">工作日</string>
     <string name="set_calendar_weekend">周末</string>
 
+    <string name="set_system_reset">是否恢复出厂设置?</string>
+    <string name="set_bg_music">背景音乐</string>
+    <string name="set_calendar_settings">日历设置</string>
+    <string name="set_date_txt">日期</string>
+    <string name="set_time_txt">时间</string>
+    <string name="set_alarm_clock_state">闹钟状态</string>
+    <string name="set_alarm_clock_time">闹钟时间</string>
+    <string name="set_alarm_frequency">闹钟频率</string>
+    <string name="set_timing_boot">定时开机</string>
+    <string name="set_boot_time">开机时间</string>
+    <string name="set_timing_shutdown">定时关机</string>
+    <string name="set_shutdown_time">关机时间</string>
+    <string name="set_switch_machine_frequency">定时开关机频率</string>
+    <string name="set_volume_txt">音量</string>
+    <string name="set_system_version_txt">系统版本号</string>
+    <string name="set_system_eestore_setting_txt">恢复出厂设置</string>
+
 </resources>

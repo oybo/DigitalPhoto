@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.actions.actcommunication.ActCommunication;
 import com.actions.actfilemanager.ActFileInfo;
 import com.picker.TimePickerHelper;
 import com.xyz.digital.photo.app.AppContext;
@@ -36,6 +37,7 @@ import com.xyz.digital.photo.app.util.PubUtils;
 import com.xyz.digital.photo.app.util.SysConfigHelper;
 import com.xyz.digital.photo.app.util.ToastUtil;
 import com.xyz.digital.photo.app.view.ChooseModePopView;
+import com.xyz.digital.photo.app.view.DialogTips;
 import com.xyz.digital.photo.app.view.DividerItemDecoration;
 import com.xyz.digital.photo.app.view.LoadingView;
 import com.xyz.digital.photo.app.view.ProgressPieView;
@@ -80,9 +82,14 @@ import static com.xyz.digital.photo.app.util.SysConfigHelper.mVideoPlayModel;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.mVideoPlayModel_key;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.mVideoShowScale;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.mVideoShowScale_key;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.mVolume;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.sys_auto_off_time;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.sys_auto_on_time;
 import static com.xyz.digital.photo.app.util.SysConfigHelper.sys_auto_power_freq;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.sys_lang_codes;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.sys_lang_codes_all;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.sys_ver;
+import static com.xyz.digital.photo.app.util.SysConfigHelper.sys_volume;
 
 /**
  * Created by O on 2017/4/12.
@@ -102,8 +109,11 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
     @Bind(R.id.set_calendar_nz_time_txt) TextView mCalendarAlertTimeTxt;
     @Bind(R.id.set_calendar_nz_frequency_txt) TextView mCalendarAlertFreqTxt;
     @Bind(R.id.set_start_dskgjpl_txt) TextView mAutoPowerFreqTxt;
+    @Bind(R.id.set_select_language_txt) TextView mSelectLanguageTxt;
+    @Bind(R.id.set_select_volume_txt) TextView mSelectVolumeTxt;
     @Bind(R.id.set_start_open_time_txt) TextView mOpenTimeTxt;
     @Bind(R.id.set_start_close_time_txt) TextView mCloseTimeTxt;
+    @Bind(R.id.set_system_version_txt) TextView mSysVersionTxt;
     @Bind(R.id.set_breakpoint_play_sb) SwitchButton mBreakpointPlayBt;
     @Bind(R.id.set_bjyy_play_sb) SwitchButton mBgMusicBt;
     @Bind(R.id.set_subtitle_sb) SwitchButton mSubtitleBt;
@@ -115,6 +125,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
     private SelectDialog mSelectDialog;
     private List<String> mItemSelects = new ArrayList<>();
     private int mItemType;
+    private DialogTips mDialogTips;
     // -----------系统配置--------------------
 
     @Bind(R.id.device_photo_model_type) ImageView mModelTypeImage;
@@ -194,6 +205,9 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         getView().findViewById(R.id.set_calendar_nz_time_layout).setOnClickListener(mSysOnClickListener);  // 闹钟时间
         getView().findViewById(R.id.set_start_open_time_layout).setOnClickListener(mSysOnClickListener);  // 开机时间
         getView().findViewById(R.id.set_start_close_time_layout).setOnClickListener(mSysOnClickListener);  // 关机时间
+        getView().findViewById(R.id.set_select_language_layout).setOnClickListener(mSysOnClickListener);  // 语言
+        getView().findViewById(R.id.set_select_volume_layout).setOnClickListener(mSysOnClickListener);  // 音量
+        getView().findViewById(R.id.set_system_reset_layout).setOnClickListener(mSysOnClickListener);  // 恢复出厂设置
 
         setSwitchListener(mBgMusicBt, SysConfigHelper.mBg_Music_key);
         setSwitchListener(mBreakpointPlayBt, SysConfigHelper.mBreakpointPlay_key);
@@ -739,6 +753,16 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         initProperties(calendar_alarm_freq, calendar_alarm_freq, mCalendarAlertFreqTxt, mAlarmFrequency);
         // 定时开关机频率
         initProperties(sys_auto_power_freq, sys_auto_power_freq, mAutoPowerFreqTxt, mAutoPowerRequency);
+        // 当前语言
+        final String language = DeviceManager.getInstance().getpropertiesValue(sys_lang_codes);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mSelectLanguageTxt.setText(language);
+            }
+        });
+        // 音量
+        initProperties(sys_volume, sys_volume, mSelectVolumeTxt, mVolume);
 
         // 背景音乐-开关
         initSwitch(mBg_Music_key, mBgMusicBt);
@@ -754,6 +778,15 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         initSwitch(mNz_dskj_key, mAutoPoweronBt);
         // 定时关机
         initSwitch(mNz_dskj_off_key, mAutoPoweronOffBt);
+
+        // 系统版本号
+        final String version = DeviceManager.getInstance().getpropertiesValue(sys_ver);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mSysVersionTxt.setText(version);
+            }
+        });
     }
 
     private void initSwitch(String key, final SwitchButton switchButton) {
@@ -905,6 +938,36 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                         }
                     });
                     return;
+                case R.id.set_select_language_layout:
+                    // 选择语言
+                    mItemType = 20;
+                    String ls = DeviceManager.getInstance().getpropertiesValue(sys_lang_codes_all);
+                    String[] languages = ls.split(";");
+                    for (String str : languages) {
+                        mItemSelects.add(str);
+                    }
+                    break;
+                case R.id.set_select_volume_layout:
+                    // 音量
+                    mItemType = 21;
+                    for (String str : mVolume) {
+                        mItemSelects.add(str);
+                    }
+                    break;
+                case R.id.set_system_reset_layout:
+                    // 恢复出厂设置
+                    mDialogTips = new DialogTips(getActivity());
+                    mDialogTips.setMessage(AppContext.getInstance().getSString(R.string.set_system_reset));
+                    mDialogTips.setOkListenner(new DialogTips.onDialogOkListenner() {
+                        @Override
+                        public void onClick() {
+                            ActCommunication.getInstance().sendMsg(new String[]{"cmd", "ResetSetting"});
+                        }
+                    });
+                    mDialogTips.setCancelListenner(null);
+                    mDialogTips.setCanceledOnTouchOutside(false);
+                    mDialogTips.show();
+                    return;
             }
             showSelectDialog(mItemType, mItemSelects);
         }
@@ -951,6 +1014,14 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                     case 19:
                         // 定时开关机频率
                         DeviceManager.getInstance().setpropertiesValue(sys_auto_power_freq, String.valueOf(position));
+                        break;
+                    case 20:
+                        // 当前语言
+                        DeviceManager.getInstance().setpropertiesValue(sys_lang_codes, itemSelects.get(position));
+                        break;
+                    case 21:
+                        // 音量
+                        DeviceManager.getInstance().setpropertiesValue(sys_volume, String.valueOf(position));
                         break;
                 }
                 initConfig();

@@ -24,6 +24,10 @@ public class SysConfigHelper {
     public static final String mSelectLanguage_key = "select_language_key";
     public static final String calendar_alarm_freq = "calendar_alarm_freq";
     public static final String sys_auto_power_freq = "sys_auto_power_freq";
+    public static final String sys_lang_codes = "sys_lang_codes";
+    public static final String sys_lang_codes_all = "sys_lang_codes_all";
+    public static final String sys_volume = "sys_volume";
+    public static final String sys_ver = "sys_ver";
 
     public static final String mBg_Music_key = "photo_bgm";
     public static final String mBreakpointPlay_key = "video_resume_enable";
@@ -65,6 +69,7 @@ public class SysConfigHelper {
             AppContext.getInstance().getSString(R.string.set_calendar_every_one),
             AppContext.getInstance().getSString(R.string.set_calendar_workday),
             AppContext.getInstance().getSString(R.string.set_calendar_weekend)};
+    public static String[] mVolume = new String[]{ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
     public static String[] mSelectLanguage = new String[] { "简体中文", "English"};
 
 
@@ -96,6 +101,13 @@ public class SysConfigHelper {
                 AppContext.getInstance().getSString(R.string.music_txt), AppContext.getInstance().getSString(R.string.video_txt), AppContext
                 .getInstance().getSString(R.string.image_music_txt),
                 AppContext.getInstance().getSString(R.string.set_calendar_txt)};
-        mSelectLanguage = new String[] { "简体中文", "English"};
+        mAlarmFrequency = new String[]{ AppContext.getInstance().getSString(R.string.set_calendar_one),
+                AppContext.getInstance().getSString(R.string.set_calendar_every_one),
+                AppContext.getInstance().getSString(R.string.set_calendar_workday),
+                AppContext.getInstance().getSString(R.string.set_calendar_weekend)};
+        mAutoPowerRequency = new String[]{ AppContext.getInstance().getSString(R.string.set_calendar_one),
+                AppContext.getInstance().getSString(R.string.set_calendar_every_one),
+                AppContext.getInstance().getSString(R.string.set_calendar_workday),
+                AppContext.getInstance().getSString(R.string.set_calendar_weekend)};
     }
 }

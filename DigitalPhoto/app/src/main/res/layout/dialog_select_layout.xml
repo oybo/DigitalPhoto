@@ -15,7 +15,8 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/view_select_dialog_recyclerview"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="0dip"
+            android:layout_weight="1"/>
 
         <View style="@style/view_line"/>
 

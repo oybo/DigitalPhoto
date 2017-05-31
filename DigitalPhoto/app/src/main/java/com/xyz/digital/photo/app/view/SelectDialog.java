@@ -7,16 +7,20 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.adapter.base.BaseRecyclerAdapter;
 import com.xyz.digital.photo.app.adapter.base.RecyclerViewHolder;
+import com.xyz.digital.photo.app.manager.DeviceManager;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
 import com.xyz.digital.photo.app.util.SysConfigHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.xyz.digital.photo.app.util.SysConfigHelper.sys_lang_codes;
 
 /**
  * Created by O on 2017/4/27.
@@ -104,6 +108,9 @@ public class SelectDialog extends Dialog implements android.view.View.OnClickLis
             TextView txt = (TextView) holder.getView(R.id.item_select_title_txt);
             txt.setText(item);
 
+            ImageView tagView = (ImageView) holder.getView(R.id.item_select_tag_txt);
+            tagView.setVisibility(View.INVISIBLE);
+
             int id = 0;
             switch (mType) {
                 case 1:
@@ -146,9 +153,24 @@ public class SelectDialog extends Dialog implements android.view.View.OnClickLis
                     // 定时开关机频率
                     id = PreferenceUtils.getInstance().getInt(SysConfigHelper.sys_auto_power_freq, 0);
                     break;
+                case 20:
+                    // 当前语言
+                    final String language = DeviceManager.getInstance().getpropertiesValue(sys_lang_codes);
+                    txt.setSelected(language.equals(item));
+                    if(txt.isSelected()) {
+                        tagView.setVisibility(View.VISIBLE);
+                    }
+                    return;
+                case 21:
+                    // 音量
+                    id = PreferenceUtils.getInstance().getInt(SysConfigHelper.sys_volume, 0);
+                    break;
             }
 
             txt.setSelected(id == position ? true : false);
+            if(txt.isSelected()) {
+                tagView.setVisibility(View.VISIBLE);
+            }
         }
     }
 

@@ -42,7 +42,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:text="背景音乐"
+                        android:text="@string/set_bg_music"
                         android:textColor="#000000"
                         android:textSize="14sp"/>
 
@@ -350,7 +350,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="日历设置"
+                    android:text="@string/set_calendar_settings"
                     android:textColor="#A3A3A3"
                     android:textSize="13sp"/>
 
@@ -365,7 +365,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:text="日期"
+                        android:text="@string/set_date_txt"
                         android:textColor="#000000"
                         android:textSize="14sp"/>
 
@@ -393,7 +393,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:text="时间"
+                        android:text="@string/set_time_txt"
                         android:textColor="#000000"
                         android:textSize="14sp"/>
 
@@ -420,7 +420,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:text="闹钟状态"
+                        android:text="@string/set_alarm_clock_state"
                         android:textColor="#000000"
                         android:textSize="14sp"/>
 
@@ -444,7 +444,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:text="闹钟时间"
+                        android:text="@string/set_alarm_clock_time"
                         android:textColor="#000000"
                         android:textSize="14sp"/>
 
@@ -472,7 +472,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:text="闹钟频率"
+                        android:text="@string/set_alarm_frequency"
                         android:textColor="#000000"
                         android:textSize="14sp"/>
 
@@ -512,6 +512,7 @@
                 <View style="@style/view_line_margin"/>
 
                 <RelativeLayout
+                    android:id="@+id/set_select_language_layout"
                     android:layout_width="match_parent"
                     android:layout_height="40dip">
 
@@ -519,7 +520,34 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:text="定时开机"
+                        android:text="@string/set_language_txt"
+                        android:textColor="#000000"
+                        android:textSize="14sp"/>
+
+                    <TextView
+                        android:id="@+id/set_select_language_txt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:drawablePadding="5dip"
+                        android:drawableRight="@drawable/set_next_icon"
+                        android:textColor="#A3A3A3"
+                        android:textSize="13sp"/>
+
+                </RelativeLayout>
+
+                <View style="@style/view_line_margin"/>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="40dip">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="@string/set_timing_boot"
                         android:textColor="#000000"
                         android:textSize="14sp"/>
 
@@ -543,7 +571,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:text="开机时间"
+                        android:text="@string/set_boot_time"
                         android:textColor="#000000"
                         android:textSize="14sp"/>
 
@@ -570,7 +598,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:text="定时关机"
+                        android:text="@string/set_timing_shutdown"
                         android:textColor="#000000"
                         android:textSize="14sp"/>
 
@@ -594,7 +622,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:text="关机时间"
+                        android:text="@string/set_shutdown_time"
                         android:textColor="#000000"
                         android:textSize="14sp"/>
 
@@ -622,12 +650,40 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:text="定时开关机频率"
+                        android:text="@string/set_switch_machine_frequency"
                         android:textColor="#000000"
                         android:textSize="14sp"/>
 
                     <TextView
                         android:id="@+id/set_start_dskgjpl_txt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:drawablePadding="5dip"
+                        android:drawableRight="@drawable/set_next_icon"
+                        android:textColor="#A3A3A3"
+                        android:textSize="13sp"/>
+
+                </RelativeLayout>
+
+                <View style="@style/view_line_margin"/>
+
+                <RelativeLayout
+                    android:id="@+id/set_select_volume_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dip">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="@string/set_volume_txt"
+                        android:textColor="#000000"
+                        android:textSize="14sp"/>
+
+                    <TextView
+                        android:id="@+id/set_select_volume_txt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentRight="true"
@@ -667,6 +723,57 @@
 
                 </RelativeLayout>
 
+                <View style="@style/view_line_margin"/>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="40dip">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="@string/set_system_version_txt"
+                        android:textColor="#000000"
+                        android:textSize="14sp"/>
+
+                    <TextView
+                        android:id="@+id/set_system_version_txt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:drawablePadding="5dip"
+                        android:textColor="#A3A3A3"
+                        android:textSize="13sp"/>
+
+                </RelativeLayout>
+
+                <View style="@style/view_line_margin"/>
+
+                <RelativeLayout
+                    android:id="@+id/set_system_reset_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dip">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="@string/set_system_eestore_setting_txt"
+                        android:textColor="#000000"
+                        android:textSize="14sp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:drawablePadding="5dip"
+                        android:drawableRight="@drawable/set_next_icon"
+                        android:textColor="#A3A3A3"
+                        android:textSize="13sp"/>
+                </RelativeLayout>
 
             </LinearLayout>
 
