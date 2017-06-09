@@ -247,7 +247,7 @@ public class ActCommunication {
                 case AC_RECV_MSG: {
                     String[] msgs = bundle.getStringArray("msg");
                     try {
-                        if (msgs[2].equals("reply")) {
+                        if (msgs.length > 2 && msgs[2].equals("reply")) {
                             String state = msgs[1];
                             ActCommunication.this.mEventListener.ThumbnailReady(msgs[3], "ThumbnaiFailed".equals(state));
                             break;

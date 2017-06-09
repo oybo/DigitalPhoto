@@ -14,12 +14,12 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingBottom="10dip">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dip"
                 android:orientation="horizontal">
 
                 <LinearLayout
@@ -141,9 +141,10 @@
                         android:scaleType="center"
                         android:src="@drawable/control_menu_image"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <com.xyz.digital.photo.app.view.SingleLineZoomTextView
+                        android:layout_width="match_parent"
+                        android:layout_height="20dip"
+                        android:gravity="center"
                         android:text="@string/image_ykq_txt"
                         android:textColor="@drawable/selector_actionbar_txt"
                         android:textSize="13sp"/>
@@ -165,9 +166,10 @@
                         android:scaleType="center"
                         android:src="@drawable/control_menu_music"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <com.xyz.digital.photo.app.view.SingleLineZoomTextView
+                        android:layout_width="match_parent"
+                        android:layout_height="20dip"
+                        android:gravity="center"
                         android:text="@string/music_ykq_txt"
                         android:textColor="@drawable/selector_actionbar_txt"
                         android:textSize="13sp"/>
@@ -189,9 +191,10 @@
                         android:scaleType="center"
                         android:src="@drawable/control_menu_video"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <com.xyz.digital.photo.app.view.SingleLineZoomTextView
+                        android:layout_width="match_parent"
+                        android:layout_height="20dip"
+                        android:gravity="center"
                         android:text="@string/video_ykq_txt"
                         android:textColor="@drawable/selector_actionbar_txt"
                         android:textSize="13sp"/>
@@ -213,9 +216,10 @@
                         android:scaleType="center"
                         android:src="@drawable/control_menu_calender"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <com.xyz.digital.photo.app.view.SingleLineZoomTextView
+                        android:layout_width="match_parent"
+                        android:layout_height="20dip"
+                        android:gravity="center"
                         android:text="@string/set_ykq_calendar_txt"
                         android:textColor="@drawable/selector_actionbar_txt"
                         android:textSize="13sp"/>
@@ -237,9 +241,10 @@
                         android:scaleType="center"
                         android:src="@drawable/control_menu_show_model"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <com.xyz.digital.photo.app.view.SingleLineZoomTextView
+                        android:layout_width="match_parent"
+                        android:layout_height="20dip"
+                        android:gravity="center"
                         android:text="@string/set_xsms_txt"
                         android:textColor="@drawable/selector_actionbar_txt"
                         android:textSize="13sp"/>
@@ -422,12 +427,11 @@
                                 android:textColor="@drawable/selector_actionbar_txt"
                                 android:textSize="11sp"/>
 
-                            <TextView
+                            <com.xyz.digital.photo.app.view.SingleLineZoomTextView
                                 android:layout_width="0dip"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:gravity="center"
-                                android:singleLine="true"
                                 android:text="@string/set_play_pause_txt"
                                 android:textColor="@drawable/selector_actionbar_txt"
                                 android:textSize="11sp"/>

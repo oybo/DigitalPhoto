@@ -1,5 +1,6 @@
 package com.xyz.digital.photo.app.manager;
 
+import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -57,7 +58,8 @@ public class DeviceManager {
     private List<ActFileInfo> mRemoteFileList = new ArrayList<>();
     private ActFileManager actFileManager = new ActFileManager();
 
-    private boolean mFristLoadTag;
+    private boolean mIsTodayFolder;
+    private String mDirName;
 
     public static String mRemoteCurrentPath = "/";
 
@@ -70,6 +72,11 @@ public class DeviceManager {
             }
         }
         return mInstance;
+    }
+
+    public DeviceManager() {
+        mDirName = TimeUtil.getCurToday();
+
     }
 
     public String setRemoteCurrentPath(String fileName) {
@@ -142,7 +149,7 @@ public class DeviceManager {
 
     //=====================1上传相关==开始=======================================
 
-    private Map<String, UploadInfo> mUploadInfos = new HashMap<>();
+    private LinkedHashMap<String, UploadInfo> mUploadInfos = new LinkedHashMap<>();
     private UploadInfo mUploadInfo;
     private boolean isUpload;
 
@@ -183,22 +190,43 @@ public class DeviceManager {
             refreshRemoteFiles();
             return;
         }
+
+        if(!mIsTodayFolder) {
+            // 新建今天日期命名文件夹
+            actFileManager.createDirectory(mDirName);
+            mIsTodayFolder = true;
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    super.onPostExecute(aVoid);
+                    if(mRemoteCurrentPath.equals("/")) {
+                        setRemoteCurrentPath(mDirName);
+                    }
+                    goUpload();
+                }
+            }.execute();
+        }
+        if(mRemoteCurrentPath.equals("/")) {
+            setRemoteCurrentPath(mDirName);
+        }
+        goUpload();
+    }
+
+    private void goUpload() {
         for (Map.Entry<String, UploadInfo> entry : mUploadInfos.entrySet()) {
             // 发送命令查看剩余空间
             String[] msg = new String[]{"cmd", "StorageRemain"};
             ActCommunication.getInstance().sendMsg(msg);
-
-            // 新建今天日期命名文件夹
-            try {
-                String dirName = TimeUtil.getCurToday();
-                actFileManager.createDirectory(dirName);
-
-                if(mRemoteCurrentPath.equals("/")) {
-                    setRemoteCurrentPath(dirName);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
 
             isUpload = true;
             mUploadInfo = entry.getValue();
@@ -434,7 +462,7 @@ public class DeviceManager {
             isResposeFiles = true;
             if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
                 List<ActFileInfo> remoteFileList = (ArrayList) filelist;
-                if(remoteFileList != null && mRemoteCurrentPath.equals("/") && !mFristLoadTag) {
+                if(remoteFileList != null && mRemoteCurrentPath.equals("/")) {
                     for(ActFileInfo fileInfo : remoteFileList) {
                         if(fileInfo.getFileName().equals(Constants.SYSTEM_FILE_NAME)) {
                             // 下载系统配置文件
@@ -457,6 +485,9 @@ public class DeviceManager {
                     // 下载临时文件
                     for(ActFileInfo actFileInfo : remoteFileList) {
                         String fileName = actFileInfo.getFileName();
+                        if(mDirName.equals(fileName)) {
+                            mIsTodayFolder = true;
+                        }
                         if(actFileInfo.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
                             mRemoteFileMaps.put(fileName, actFileInfo);
                             // 属于文件，并且属于视频缩略图.thb
