@@ -276,14 +276,15 @@ public class PubUtils {
                 return MEDIA_FILE_TYPE.IMAGE;
             }
         }
-        img = new String[]{"mp3", "wma", "wav", "mod", "ra", "cd", "md", "asf", "aac", "vqf", "ape", "mid", "ogg",
-                "m4a", "vqf"};
+        img = new String[]{"mp3", "flac", "ram", "aif", "wma", "wav", "mod", "ra", "cd", "md", "asf", "aac", "vqf", "ape", "mid", "ogg",
+                "m4a", "vqf", "amr"};
         for (int i = 0; i < img.length; i++) {
             if (img[i].equals(fileType)) {
                 return MEDIA_FILE_TYPE.AUDIO;
             }
         }
-        img = new String[]{"mp4", "avi", "mov", "wmv", "asf", "navi", "3gp", "mkv", "f4v", "rmvb", "webm"};
+        img = new String[]{"mp4", "flv", "avi", "mov", "wmv", "asf", "navi", "3gp", "3gpp", "evo",
+                "mkv", "f4v", "flv", "3g2", "divx", "m4v", "vob", "mpeg", "mpg", "rm", "rmvb", "webm"};
         for (int i = 0; i < img.length; i++) {
             if (img[i].equals(fileType)) {
                 return MEDIA_FILE_TYPE.VIDEO;

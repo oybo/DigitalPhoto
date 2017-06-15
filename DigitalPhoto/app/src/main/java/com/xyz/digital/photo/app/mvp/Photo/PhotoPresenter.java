@@ -84,6 +84,11 @@ public class PhotoPresenter implements PhotoContract.Presenter {
                     for(Map.Entry<String, List<MediaFileBean>> entry :  mGruopMap.entrySet()) {
                         files.addAll(entry.getValue());
                     }
+                    int len = files.size();
+                    for (int i = 0; i < len; i++) {
+                        MediaFileBean mediaFileBean = files.get(i);
+                        mediaFileBean.setPosition(i);
+                    }
                     mView.onCallbackMediasByChart(isRefreshModel, files);
                 }
 

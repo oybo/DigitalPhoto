@@ -184,7 +184,7 @@ public class FolderAdapter extends BaseRecyclerAdapter<FolderBean> {
 
     public void addUpload(int pos) {
         FolderBean bean = getItem(pos);
-        DeviceManager.getInstance().addUpload(bean.getTopImagePath(), bean.getFolderName());
+        DeviceManager.getInstance().addUpload(pos, bean.getTopImagePath(), bean.getFolderName());
         notifyItemChanged(pos);
     }
 

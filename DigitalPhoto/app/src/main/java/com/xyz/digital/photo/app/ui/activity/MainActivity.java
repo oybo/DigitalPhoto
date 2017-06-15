@@ -9,7 +9,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import com.xyz.digital.photo.app.AppContext;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.bean.EventBase;
@@ -23,11 +22,9 @@ import com.xyz.digital.photo.app.ui.fragment.SetFragment;
 import com.xyz.digital.photo.app.ui.fragment.WiFiDeviceFragment;
 import com.xyz.digital.photo.app.util.Constants;
 import com.xyz.digital.photo.app.util.ToastUtil;
-
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 

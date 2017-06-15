@@ -244,6 +244,10 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
                     break;
                 case R.id.item_child_isupload_txt:
                     // 点击单个上传
+                    if (DeviceManager.getInstance().isUploading()) {
+                        ToastUtil.showToast(getActivity(), AppContext.getInstance().getSString(R.string.uploading_txt));
+                        return;
+                    }
                     MediaFileBean file = mChartAdapter.getItem(position);
                     if(!DeviceManager.getInstance().isUpload(file.getFilePath())) {
                         boolean isUploading = DeviceManager.getInstance().isUploading();
@@ -265,6 +269,10 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
         public void OnClickListener(View parentV, View v, Integer position) {
             switch (v.getId()) {
                 case R.id.item_child_isupload_txt:
+                    if (DeviceManager.getInstance().isUploading()) {
+                        ToastUtil.showToast(getActivity(), AppContext.getInstance().getSString(R.string.uploading_txt));
+                        return;
+                    }
                     // 点击单个上传
                     FolderBean file = mListAdapter.getItem(position);
                     if(!DeviceManager.getInstance().isUpload(file.getTopImagePath())) {
@@ -488,11 +496,21 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
             // 图表模式
             List<MediaFileBean> uploads = mChartAdapter.getSelectFiles();
             boolean isUploading = DeviceManager.getInstance().isUploading();
-            for (int i = 0; i < uploads.size(); i++) {
-                MediaFileBean bean = uploads.get(i);
-                if(!mChartAdapter.isUpload(bean.getFilePath())) {
-                    // 添加上传
-                    mChartAdapter.addUpload(bean.getPosition());
+            if(isSelectAll()) {
+                for(MediaFileBean mediaFileBean : mChartAdapter.getList()) {
+                    if(!mChartAdapter.isUpload(mediaFileBean.getFilePath())) {
+                        // 添加上传
+                        DeviceManager.getInstance().addUpload(mediaFileBean.getPosition(), mediaFileBean.getFilePath(), mediaFileBean.getFileName());
+                    }
+                }
+                mChartAdapter.notifyDataSetChanged();
+            } else {
+                for (int i = 0; i < uploads.size(); i++) {
+                    MediaFileBean bean = uploads.get(i);
+                    if(!mChartAdapter.isUpload(bean.getFilePath())) {
+                        // 添加上传
+                        mChartAdapter.addUpload(bean.getPosition());
+                    }
                 }
             }
             if(!isUploading) {
@@ -551,6 +569,7 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
         if(mListLayout.getVisibility() == View.VISIBLE) {
             mListAdapter.showSelect(true);
         }
+        checkSelectAll();
     }
 
     private void hideSelect() {
@@ -652,10 +671,11 @@ public class PhotoFragment extends BaseFragment implements PhotoContract.View, V
     private synchronized void refresh(UploadInfo uploadInfo) {
         try {
             ProgressPieView pieView;
+            String tag = uploadInfo.getFilePath() + "=" + uploadInfo.getPosition();
             if(mListLayout.getVisibility() == View.VISIBLE) {
-                pieView = (ProgressPieView) mListRecyclerView.findViewWithTag("ProgressPieView" + uploadInfo.getFilePath());
+                pieView = (ProgressPieView) mListRecyclerView.findViewWithTag("ProgressPieView" + tag);
             } else {
-                pieView = (ProgressPieView) mChartRecyclerView.findViewWithTag("ProgressPieView" + uploadInfo.getFilePath());
+                pieView = (ProgressPieView) mChartRecyclerView.findViewWithTag("ProgressPieView" + tag);
             }
             if (pieView != null) {
                 int state = uploadInfo.getState();

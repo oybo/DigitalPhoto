@@ -1,6 +1,6 @@
 package com.xyz.digital.photo.app.manager;
 
-import android.os.AsyncTask;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -58,9 +58,6 @@ public class DeviceManager {
     private List<ActFileInfo> mRemoteFileList = new ArrayList<>();
     private ActFileManager actFileManager = new ActFileManager();
 
-    private boolean mIsTodayFolder;
-    private String mDirName;
-
     public static String mRemoteCurrentPath = "/";
 
     public static DeviceManager getInstance() {
@@ -72,11 +69,6 @@ public class DeviceManager {
             }
         }
         return mInstance;
-    }
-
-    public DeviceManager() {
-        mDirName = TimeUtil.getCurToday();
-
     }
 
     public String setRemoteCurrentPath(String fileName) {
@@ -157,8 +149,8 @@ public class DeviceManager {
         return isUpload;
     }
 
-    public void addUpload(String filePath, String fileName) {
-        UploadInfo uploadInfo = new UploadInfo(filePath, fileName);
+    public void addUpload(int position, String filePath, String fileName) {
+        UploadInfo uploadInfo = new UploadInfo(position, filePath, fileName);
         mUploadInfos.put(filePath, uploadInfo);
         // 这里刷新上传状态
         sendUploadMessage(uploadInfo);
@@ -190,34 +182,8 @@ public class DeviceManager {
             refreshRemoteFiles();
             return;
         }
-
-        if(!mIsTodayFolder) {
-            // 新建今天日期命名文件夹
-            actFileManager.createDirectory(mDirName);
-            mIsTodayFolder = true;
-            new AsyncTask<Void, Void, Void>() {
-                @Override
-                protected Void doInBackground(Void... params) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    return null;
-                }
-
-                @Override
-                protected void onPostExecute(Void aVoid) {
-                    super.onPostExecute(aVoid);
-                    if(mRemoteCurrentPath.equals("/")) {
-                        setRemoteCurrentPath(mDirName);
-                    }
-                    goUpload();
-                }
-            }.execute();
-        }
         if(mRemoteCurrentPath.equals("/")) {
-            setRemoteCurrentPath(mDirName);
+            setRemoteCurrentPath(TimeUtil.getCurToday());
         }
         goUpload();
     }
@@ -370,6 +336,10 @@ public class DeviceManager {
                 // 属于系统配置文件
                 // 执行刷新命令
                 ActCommunication.getInstance().sendMsg(new String[]{"cmd", "cfgfileupdate"});
+
+                if(!TextUtils.isEmpty(mSetdateDate)) {
+                    ActCommunication.getInstance().sendMsg(new String[]{"cmd", mSetdateDate});
+                }
             }
             if(mUploadInfo != null) {
                 if (result == ACTFileEventListener.OPERATION_SUCESSFULLY) {
@@ -378,7 +348,6 @@ public class DeviceManager {
                     mUploadInfo.setFilePath(localPath);
                     sendUploadMessage(mUploadInfo);
                     removeUpload(mUploadInfo.getFilePath());
-                    startUpload();
                 } else {
                     mUploadInfo.setState(-1);
                     mUploadInfo.setFilePath(localPath);
@@ -388,6 +357,7 @@ public class DeviceManager {
                 }
                 isUpload = false;
             }
+            startUpload();
         }
 
         @Override
@@ -485,9 +455,6 @@ public class DeviceManager {
                     // 下载临时文件
                     for(ActFileInfo actFileInfo : remoteFileList) {
                         String fileName = actFileInfo.getFileName();
-                        if(mDirName.equals(fileName)) {
-                            mIsTodayFolder = true;
-                        }
                         if(actFileInfo.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
                             mRemoteFileMaps.put(fileName, actFileInfo);
                             // 属于文件，并且属于视频缩略图.thb
@@ -656,6 +623,8 @@ public class DeviceManager {
             Toast.makeText(AppContext.getInstance(), AppContext.getInstance().getSString(R.string.connect_success_txt), Toast.LENGTH_SHORT).show();
             sendConnectState(true);
             isConnect = true;
+            // 新建今天日期命名文件夹
+            actFileManager.createDirectory(TimeUtil.getCurToday());
         }
 
         @Override
@@ -833,6 +802,12 @@ public class DeviceManager {
             return "0";
         }
         return propertiesMap.get(key);
+    }
+
+    private String mSetdateDate;
+
+    public void sendSetdateDate(String data) {
+        mSetdateDate = data;
     }
 
     public void setpropertiesValue(String key, String value) {

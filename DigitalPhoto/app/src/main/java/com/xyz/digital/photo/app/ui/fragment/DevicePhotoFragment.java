@@ -893,6 +893,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                     mTimePickerHelper.showDateDialog(new TimePickerHelper.OnPickerCallback() {
                         @Override
                         public void onTime(String time) {
+                            DeviceManager.getInstance().sendSetdateDate("cmd+Setdate+Date" + time);
                             DeviceManager.getInstance().setpropertiesValue(calendar_date, time);
                             mCalendarDateTxt.setText(time);
                         }
@@ -903,6 +904,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                     mTimePickerHelper.showTimeDialog(new TimePickerHelper.OnPickerCallback() {
                         @Override
                         public void onTime(String time) {
+                            DeviceManager.getInstance().sendSetdateDate("cmd+Settime+Time" + time);
                             DeviceManager.getInstance().setpropertiesValue(calendar_time, time);
                             mCalendarTimeTxt.setText(time);
                         }
@@ -913,6 +915,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                     mTimePickerHelper.showTimeDialog(new TimePickerHelper.OnPickerCallback() {
                         @Override
                         public void onTime(String time) {
+                            DeviceManager.getInstance().sendSetdateDate("cmd+Settime+Time" + time);
                             DeviceManager.getInstance().setpropertiesValue(calendar_alarm_time, time);
                             mCalendarAlertTimeTxt.setText(time);
                         }
@@ -923,6 +926,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                     mTimePickerHelper.showTimeDialog(new TimePickerHelper.OnPickerCallback() {
                         @Override
                         public void onTime(String time) {
+                            DeviceManager.getInstance().sendSetdateDate("cmd+Settime+Time" + time);
                             DeviceManager.getInstance().setpropertiesValue(sys_auto_on_time, time);
                             mOpenTimeTxt.setText(time);
                         }
@@ -933,6 +937,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                     mTimePickerHelper.showTimeDialog(new TimePickerHelper.OnPickerCallback() {
                         @Override
                         public void onTime(String time) {
+                            DeviceManager.getInstance().sendSetdateDate("cmd+Settime+Time" + time);
                             DeviceManager.getInstance().setpropertiesValue(sys_auto_off_time, time);
                             mCloseTimeTxt.setText(time);
                         }

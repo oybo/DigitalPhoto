@@ -88,7 +88,8 @@ public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
 
         // 判断是否处于上传
         ProgressPieView pieView = (ProgressPieView) holder.getView(R.id.item_child_upload_progress);
-        pieView.setTag("ProgressPieView" + item.getFilePath());
+        String tag = item.getFilePath() + "=" + position;
+        pieView.setTag("ProgressPieView" + tag);
         if (isUpload(item.getFilePath())) {
             if(imageView.getColorFilter() == null) {
                 imageView.setColorFilter(selectColor);
@@ -197,7 +198,7 @@ public class LocalMediaAdapter extends BaseRecyclerAdapter<MediaFileBean> {
 
     public void addUpload(int pos) {
         MediaFileBean bean = getItem(pos);
-        DeviceManager.getInstance().addUpload(bean.getFilePath(), bean.getFileName());
+        DeviceManager.getInstance().addUpload(pos, bean.getFilePath(), bean.getFileName());
         notifyItemChanged(pos);
     }
 

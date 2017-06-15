@@ -29,24 +29,25 @@
             android:orientation="horizontal"
             android:paddingTop="2dip">
 
-            <TextView
+            <com.xyz.digital.photo.app.view.SingleLineZoomTextView
                 android:id="@+id/main_device_bt"
                 android:layout_width="0dip"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_centerHorizontal="true"
                 android:layout_weight="1"
                 android:clickable="true"
                 android:drawableTop="@drawable/tab_device_selector"
+                android:singleLine="true"
                 android:gravity="center"
                 android:onClick="onTabClicked"
                 android:text="@string/main_tab_device_txt"
                 android:textColor="@drawable/selector_actionbar_txt"
                 android:textSize="12sp"/>
 
-            <TextView
+            <com.xyz.digital.photo.app.view.SingleLineZoomTextView
                 android:id="@+id/main_photo_bt"
                 android:layout_width="0dip"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_centerHorizontal="true"
                 android:layout_weight="1"
                 android:clickable="true"
@@ -54,33 +55,36 @@
                 android:gravity="center"
                 android:onClick="onTabClicked"
                 android:paddingBottom="3dip"
+                android:singleLine="true"
                 android:text="@string/main_tab_image_txt"
                 android:textColor="@drawable/selector_actionbar_txt"
                 android:textSize="12sp"/>
 
-            <TextView
+            <com.xyz.digital.photo.app.view.SingleLineZoomTextView
                 android:id="@+id/main_telecontrol_bt"
                 android:layout_width="0dip"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_centerHorizontal="true"
                 android:layout_weight="1"
                 android:drawableTop="@drawable/tab_remote_selector"
                 android:gravity="center"
                 android:onClick="onTabClicked"
+                android:singleLine="true"
                 android:paddingBottom="3dip"
                 android:text="@string/main_tab_yaokong_txt"
                 android:textColor="@drawable/selector_actionbar_txt"
                 android:textSize="12sp"/>
 
-            <TextView
+            <com.xyz.digital.photo.app.view.SingleLineZoomTextView
                 android:id="@+id/main_set_bt"
                 android:layout_width="0dip"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_centerHorizontal="true"
                 android:layout_weight="1"
                 android:drawableTop="@drawable/tab_set_selector"
                 android:gravity="center"
                 android:onClick="onTabClicked"
+                android:singleLine="true"
                 android:paddingBottom="3dip"
                 android:text="@string/main_tab_set_txt"
                 android:textColor="@drawable/selector_actionbar_txt"

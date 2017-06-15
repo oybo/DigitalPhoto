@@ -6,15 +6,25 @@ package com.xyz.digital.photo.app.bean;
 
 public class UploadInfo {
 
+    private int position;
     private String filePath;
     private String fileName;
     private int processed;
     private int total;
     private int state;  // 0 = 等待下载，1 = 下载中, -1 = 上传出错， 2 = 上传成功
 
-    public UploadInfo(String filePath, String fileName) {
+    public UploadInfo(int position, String filePath, String fileName) {
+        this.position = position;
         this.filePath = filePath;
         this.fileName = fileName;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
     }
 
     public String getFilePath() {
