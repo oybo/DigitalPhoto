@@ -121,20 +121,36 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/remote_browser_frag_txt_upper"
+        <LinearLayout
+            android:id="@+id/remote_browser_frag_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="6dip"
-            android:gravity="center_vertical"
-            android:padding="6dip"
-            android:textSize="13sp"/>
+            android:layout_marginLeft="4dip"
+            android:orientation="vertical"
+            android:padding="2dip">
+
+            <TextView
+                android:id="@+id/remote_browser_frag_txt_upper"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:textSize="13sp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dip"
+                android:text="@string/enter_to_cate_txt"
+                android:textColor="#B55E57"
+                android:textSize="12sp"/>
+
+        </LinearLayout>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/device_media_chart_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/remote_browser_frag_txt_upper"
+            android:layout_below="@id/remote_browser_frag_layout"
             android:background="#F2F2F2"
             android:padding="2dip"/>
 
@@ -142,7 +158,7 @@
             android:id="@+id/device_media_list_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/remote_browser_frag_txt_upper"
+            android:layout_below="@id/remote_browser_frag_layout"
             android:background="#F2F2F2"
             android:padding="2dip"/>
 

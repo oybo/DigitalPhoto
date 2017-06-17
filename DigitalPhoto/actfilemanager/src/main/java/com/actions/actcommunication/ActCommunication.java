@@ -249,7 +249,7 @@ public class ActCommunication {
                     try {
                         if (msgs.length > 2 && msgs[2].equals("reply")) {
                             String state = msgs[1];
-                            ActCommunication.this.mEventListener.ThumbnailReady(msgs[3], "ThumbnaiFailed".equals(state));
+                            ActCommunication.this.mEventListener.ThumbnailReady(msgs[3], "ThumbnailFailed".equals(state));
                             break;
                         }
                     } catch (Exception e) {

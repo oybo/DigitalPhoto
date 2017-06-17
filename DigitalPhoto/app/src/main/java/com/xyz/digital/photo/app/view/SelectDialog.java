@@ -106,7 +106,12 @@ public class SelectDialog extends Dialog implements android.view.View.OnClickLis
         public void bindData(RecyclerViewHolder holder, int position, String item) {
 
             TextView txt = (TextView) holder.getView(R.id.item_select_title_txt);
-            txt.setText(item);
+            if(mType == 20) {
+                // 语言
+                txt.setText(DeviceManager.getInstance().getLanguageStr(item));
+            } else {
+                txt.setText(item);
+            }
 
             ImageView tagView = (ImageView) holder.getView(R.id.item_select_tag_txt);
             tagView.setVisibility(View.INVISIBLE);

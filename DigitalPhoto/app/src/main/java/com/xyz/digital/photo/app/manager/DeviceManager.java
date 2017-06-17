@@ -1,6 +1,5 @@
 package com.xyz.digital.photo.app.manager;
 
-import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -20,7 +19,9 @@ import com.xyz.digital.photo.app.bean.e.MEDIA_FILE_TYPE;
 import com.xyz.digital.photo.app.bean.e.MEDIA_SHOW_TYPE;
 import com.xyz.digital.photo.app.util.Constants;
 import com.xyz.digital.photo.app.util.EnvironmentUtil;
+import com.xyz.digital.photo.app.util.PreferenceUtils;
 import com.xyz.digital.photo.app.util.PubUtils;
+import com.xyz.digital.photo.app.util.SysConfigHelper;
 import com.xyz.digital.photo.app.util.TimeUtil;
 import com.xyz.digital.photo.app.util.ToastUtil;
 
@@ -337,8 +338,9 @@ public class DeviceManager {
                 // 执行刷新命令
                 ActCommunication.getInstance().sendMsg(new String[]{"cmd", "cfgfileupdate"});
 
-                if(!TextUtils.isEmpty(mSetdateDate)) {
-                    ActCommunication.getInstance().sendMsg(new String[]{"cmd", mSetdateDate});
+                if(mSetdateDate != null) {
+                    ActCommunication.getInstance().sendMsg(mSetdateDate);
+                    mSetdateDate = null;
                 }
             }
             if(mUploadInfo != null) {
@@ -377,6 +379,17 @@ public class DeviceManager {
                     eventBase.setData("true");
                     EventBus.getDefault().post(eventBase);
                 }
+            }
+            if(mVideoBmpFileMaps.containsKey(localPath)) {
+                // 视频缩略图
+                if(mVideoBmpFileMaps.size() % 2 == 0 || tempFilesSum <= 0) {
+                    EventBase eventBase = new EventBase();
+                    eventBase.setAction(Constants.REFRESH_DEVICE_FILE);
+                    eventBase.setData("true");
+                    EventBus.getDefault().post(eventBase);
+                }
+                mVideoBmpFileMaps.remove(localPath);
+                downloadBmpFiles();
             }
             // 下载回调
             if (mDownloadInfo != null) {
@@ -450,6 +463,7 @@ public class DeviceManager {
                     }
                 }
                 if (remoteFileList != null) {
+                    mVideoBmpFileMaps.clear();
                     mDownloadTempList.clear();
                     mRemoteFileList.clear();
                     // 下载临时文件
@@ -460,7 +474,9 @@ public class DeviceManager {
                             // 属于文件，并且属于视频缩略图.thb
                             if(PubUtils.getFileType(fileName) == MEDIA_FILE_TYPE.VIDEO) {
                                 // 发送缩略图请求
-                                ActCommunication.getInstance().requestThumbnails(getRemotePath(fileName));
+                                String remotePath = DeviceManager.getInstance().getRemotePath(fileName);
+                                String localPath = PubUtils.getTempLocalPath(fileName);
+                                mVideoBmpFileMaps.put(localPath, new ImageInfo(remotePath, localPath));
                             }
                             // 属于文件，并且是图片类型就下载
                             else if(PubUtils.getFileType(fileName) == MEDIA_FILE_TYPE.IMAGE) {
@@ -478,6 +494,8 @@ public class DeviceManager {
 
                     // 下载临时文件
                     downloadTempFiles();
+                    // 下载视频缩略图
+                    downloadBmpFiles();
                 }
             }
         }
@@ -553,6 +571,20 @@ public class DeviceManager {
             downloadTempFile(imageInfo);
         }
     }
+
+    public synchronized void downloadBmpFiles() {
+        if(mVideoBmpFileMaps.size() > 0) {
+            for(Map.Entry<String, ImageInfo> entry : mVideoBmpFileMaps.entrySet()) {
+                ImageInfo info = entry.getValue();
+                if(info != null) {
+                    ActCommunication.getInstance().requestThumbnails(info.getRemotePath());
+                    return;
+                }
+            }
+        }
+    }
+
+    private Map<String, ImageInfo> mVideoBmpFileMaps = new HashMap<>();
 
     private List<ImageInfo> mDownloadTempList = new ArrayList<>();
 
@@ -694,24 +726,58 @@ public class DeviceManager {
 
         @Override
         public void ThumbnailReady(String remotePath, boolean isReplyFailed) {
-            // 下载临时文件
-            remotePath = remotePath.substring(remotePath.indexOf("/") + 1, remotePath.length());
-            remotePath = remotePath.substring(remotePath.indexOf("/") + 1, remotePath.length());
-            remotePath = remotePath.substring(remotePath.indexOf("/"), remotePath.length());
-
             if(isReplyFailed) {
+                int count = 0;
+                if(tempMapss.containsKey(remotePath)) {
+                    count = tempMapss.get(remotePath);
+                    if(count > 3) {
+                        return;
+                    }
+                    count++;
+                }
+                tempMapss.put(remotePath, count);
                 // 重新发起视频缩略图请求
-                ActCommunication.getInstance().requestThumbnails(remotePath);
+                downloadBmpFiles();
                 return;
             }
+            // 下载临时文件
+            try {
+                if(remotePath.split("/").length > 2) {
+                    remotePath = remotePath.substring(remotePath.indexOf("/") + 1, remotePath.length());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
+                if(remotePath.split("/").length > 2) {
+                    remotePath = remotePath.substring(remotePath.indexOf("/") + 1, remotePath.length());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
+                if(remotePath.split("/").length > 2) {
+                    remotePath = remotePath.substring(remotePath.indexOf("/"), remotePath.length());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-            String localPath = EnvironmentUtil.getTempFilePath() + remotePath.replace(Constants.VIDEO_BMP_NAME, "");
-
-            mDownloadTempList.add(new ImageInfo(remotePath, localPath));
-
-            downloadTempFiles();
+            String localPath = EnvironmentUtil.getTempFilePath() + File.separator + remotePath.replace(Constants.VIDEO_BMP_NAME, "");
+            if(!new File(localPath).exists()) {
+                File file = new File(localPath);
+                File parentFile = new File(file.getParent());
+                if (!parentFile.exists()) {
+                    parentFile.mkdirs();
+                }
+                downloadFile(remotePath, localPath);
+            } else {
+                mVideoBmpFileMaps.remove(localPath);
+            }
         }
     };
+
+    private Map<String, Integer> tempMapss = new HashMap<>();
 
     private List<OnCmdBackListener> mCmdListeners = new ArrayList<>();
 
@@ -804,9 +870,119 @@ public class DeviceManager {
         return propertiesMap.get(key);
     }
 
-    private String mSetdateDate;
+    /**
+     * 通过语言Code获取对应语言名称
+     * @param lanCode
+     * @return
+     */
+    public String getLanguageStr(String lanCode) {
+        boolean isChian;
+        int id = PreferenceUtils.getInstance().getInt(SysConfigHelper.mSelectLanguage_key, 0);
+        if (id == 1) {
+            // 英文
+            isChian = false;
+        } else {
+            // 中文
+            isChian = true;
+        }
 
-    public void sendSetdateDate(String data) {
+        String result = "";
+        if(lanCode.equals("zh_CN")) {
+            result = isChian ? "简体中文" : "Simplified Chinese";
+        }
+        else if(lanCode.equals("zh_TW")) {
+            result = isChian ? "繁體中文" : "traditional Chinese";
+        }
+        else if(lanCode.equals("en_GB")) {
+            result = isChian ? "英语" : "English";
+        }
+        else if(lanCode.equals("ja_JP")) {
+            result = isChian ? "日语" : "Japanese";
+        }
+        else if(lanCode.equals("ko_KP")) {
+            result = isChian ? "韩语" : "Korean";
+        }
+        else if(lanCode.equals("fr_FR")) {
+            result = isChian ? "法语" : "French";
+        }
+        else if(lanCode.equals("de_GE")) {
+            result = isChian ? "德语" : "German";
+        }
+        else if(lanCode.equals("it_IT")) {
+            result = isChian ? "意大利语" : "Italian";
+        }
+        else if(lanCode.equals("nl_NL")) {
+            result = isChian ? "荷兰语" : "Dutch";
+        }
+        else if(lanCode.equals("pt_PT")) {
+            result = isChian ? "葡萄牙语" : "Portuguese";
+        }
+        else if(lanCode.equals("es_PE")) {
+            result = isChian ? "西班牙语" : "Spanish";
+        }
+        else if(lanCode.equals("sv_SE")) {
+            result = isChian ? "瑞典语" : "Swedish";
+        }
+        else if(lanCode.equals("cs_CZ")) {
+            result = isChian ? "捷克语" : "Czech";
+        }
+        else if(lanCode.equals("da_DK")) {
+            result = isChian ? "丹麦语" : "Danish";
+        }
+        else if(lanCode.equals("pl_PL")) {
+            result = isChian ? "波兰语" : "Polish";
+        }
+        else if(lanCode.equals("ru_RU")) {
+            result = isChian ? "俄语" : "Russian";
+        }
+        else if(lanCode.equals("tr_TR")) {
+            result = isChian ? "土耳其语" : "Turkish";
+        }
+        else if(lanCode.equals("he_IL")) {
+            result = isChian ? "希伯来语" : "Hebrew";
+        }
+        else if(lanCode.equals("th_TH")) {
+            result = isChian ? "泰国语言" : "Thai Language";
+        }
+        else if(lanCode.equals("hu_HU")) {
+            result = isChian ? "匈牙利" : "Hungary";
+        }
+        else if(lanCode.equals("sk_SK")) {
+            result = isChian ? "斯洛伐克语" : "Slovakian";
+        }
+        else if(lanCode.equals("ar")) {
+            result = isChian ? "阿拉伯语" : "Arabic";
+        }
+        else if(lanCode.equals("id_ID")) {
+            result = isChian ? "印度尼西亚" : "Indonesia";
+        }
+        else if(lanCode.equals("el_EG")) {
+            result = isChian ? "希腊语" : "Greek";
+        }
+        else if(lanCode.equals("vi_VI")) {
+            result = isChian ? "越南语" : "Vietnamese";
+        }
+        else if(lanCode.equals("ms_MY")) {
+            result = isChian ? "马来语" : "Malay";
+        }
+        else if(lanCode.equals("hi_HI")) {
+            result = isChian ? "印第语" : "Hindi";
+        }
+        else if(lanCode.equals("no_NO")) {
+            result = isChian ? "挪威语" : "Norwegian";
+        }
+        else if(lanCode.equals("se_FI")) {
+            result = isChian ? "芬兰语" : "Finnish";
+        }
+        else if(lanCode.equals("ro_RO")) {
+            result = isChian ? "罗马尼亚" : "Romania";
+        }
+        return result;
+    }
+
+    private String[] mSetdateDate;
+
+    public void sendSetdateDate(String[] data) {
         mSetdateDate = data;
     }
 

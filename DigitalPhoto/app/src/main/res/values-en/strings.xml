@@ -100,6 +100,7 @@
     <string name="all_txt">All</string>
     <string name="switch_device_txt">Change device</string>
     <string name="residue_device_size_txt">Equipment for the remaining space has been inadequate:</string>
+    <string name="enter_to_cate_txt">(Click on the corresponding directory)</string>
 
     <string name="set_set_image_txt">Photo Settings</string>
     <string name="set_set_video_txt">Video Settings</string>

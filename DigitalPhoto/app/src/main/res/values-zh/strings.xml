@@ -100,6 +100,7 @@
     <string name="all_txt">全部</string>
     <string name="switch_device_txt">切换设备</string>
     <string name="residue_device_size_txt">设备剩余空间已不足</string>
+    <string name="enter_to_cate_txt">(点击可返回上一目录)</string>
 
     <string name="set_set_image_txt">图片设置</string>
     <string name="set_set_video_txt">视频设置</string>

@@ -181,7 +181,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         mListRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mListRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
 
-        mUpperView.setOnClickListener(this);
+        getView().findViewById(R.id.remote_browser_frag_layout).setOnClickListener(this);
         mModelTypeImage.setOnClickListener(this);
         fragmentSysConfigTab.setOnClickListener(this);
         fragmentPhotoImageTab.setOnClickListener(this);
@@ -355,7 +355,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 // 列表模式
                 showModel(MEDIA_SHOW_TYPE.LIST);
                 break;
-            case R.id.remote_browser_frag_txt_upper:
+            case R.id.remote_browser_frag_layout:
                 // 点击列表模式的路径
                 showLoading();
                 DeviceManager.getInstance().prevRemoteCurrentPath();
@@ -758,7 +758,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mSelectLanguageTxt.setText(language);
+                mSelectLanguageTxt.setText(DeviceManager.getInstance().getLanguageStr(language));
             }
         });
         // 音量
@@ -893,7 +893,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                     mTimePickerHelper.showDateDialog(new TimePickerHelper.OnPickerCallback() {
                         @Override
                         public void onTime(String time) {
-                            DeviceManager.getInstance().sendSetdateDate("cmd+Setdate+Date" + time);
+                            DeviceManager.getInstance().sendSetdateDate(new String[] {"cmd", "Setdate", "Date", time});
                             DeviceManager.getInstance().setpropertiesValue(calendar_date, time);
                             mCalendarDateTxt.setText(time);
                         }
@@ -904,7 +904,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                     mTimePickerHelper.showTimeDialog(new TimePickerHelper.OnPickerCallback() {
                         @Override
                         public void onTime(String time) {
-                            DeviceManager.getInstance().sendSetdateDate("cmd+Settime+Time" + time);
+                            DeviceManager.getInstance().sendSetdateDate(new String[] {"cmd", "Setdate", "Time", time});
                             DeviceManager.getInstance().setpropertiesValue(calendar_time, time);
                             mCalendarTimeTxt.setText(time);
                         }
@@ -915,7 +915,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                     mTimePickerHelper.showTimeDialog(new TimePickerHelper.OnPickerCallback() {
                         @Override
                         public void onTime(String time) {
-                            DeviceManager.getInstance().sendSetdateDate("cmd+Settime+Time" + time);
+                            DeviceManager.getInstance().sendSetdateDate(new String[] {"cmd", "Setdate", "Time", time});
                             DeviceManager.getInstance().setpropertiesValue(calendar_alarm_time, time);
                             mCalendarAlertTimeTxt.setText(time);
                         }
@@ -926,7 +926,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                     mTimePickerHelper.showTimeDialog(new TimePickerHelper.OnPickerCallback() {
                         @Override
                         public void onTime(String time) {
-                            DeviceManager.getInstance().sendSetdateDate("cmd+Settime+Time" + time);
+                            DeviceManager.getInstance().sendSetdateDate(new String[] {"cmd", "Setdate", "Time", time});
                             DeviceManager.getInstance().setpropertiesValue(sys_auto_on_time, time);
                             mOpenTimeTxt.setText(time);
                         }
@@ -937,7 +937,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                     mTimePickerHelper.showTimeDialog(new TimePickerHelper.OnPickerCallback() {
                         @Override
                         public void onTime(String time) {
-                            DeviceManager.getInstance().sendSetdateDate("cmd+Settime+Time" + time);
+                            DeviceManager.getInstance().sendSetdateDate(new String[] {"cmd", "Setdate", "Time", time});
                             DeviceManager.getInstance().setpropertiesValue(sys_auto_off_time, time);
                             mCloseTimeTxt.setText(time);
                         }

@@ -67,10 +67,6 @@ public class MainActivity extends BaseActivity {
         initFragment(savedInstanceState);
     }
 
-    public void refresh() {
-        onCreate(null);
-    }
-
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
