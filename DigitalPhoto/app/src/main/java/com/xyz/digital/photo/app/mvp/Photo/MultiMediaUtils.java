@@ -122,19 +122,14 @@ public class MultiMediaUtils {
                 String parentPath = file.getParentFile().getAbsolutePath();
                 String size = PubUtils.formatFileLen(file.length());
                 long data = file.lastModified();
-                try {
-                    data = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.DATE_MODIFIED));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                long duration = cursor.getLong(cursor.getColumnIndex(MediaStore.Video.Media.DURATION));
+                long duration = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
 
                 MediaFileBean mediaFileBean = new MediaFileBean();
                 mediaFileBean.setFilePath(path);
                 mediaFileBean.setFileName(fileName);
                 mediaFileBean.setSize(size);
-                mediaFileBean.setDuration(TimeUtil.getFormattedDateString(duration / 1000, TimeUtil.FORMAT_H_M));
-                mediaFileBean.setDate(TimeUtil.getFormattedDateString(data, TimeUtil.FORMAT_OTHER_YEAR));
+                mediaFileBean.setDuration(TimeUtil.getFormattedDateString(duration / 1000, TimeUtil.FORMAT_M_S));
+                mediaFileBean.setDate(TimeUtil.getFormattedDateString(data / 1000, TimeUtil.FORMAT_OTHER_YEAR));
                 mediaFileBean.setParentPath(parentPath);
                 mediaFileBean.setFileType(MEDIA_FILE_TYPE.AUDIO);
 
@@ -188,18 +183,13 @@ public class MultiMediaUtils {
                 String parentPath = file.getParentFile().getAbsolutePath();
                 String size = PubUtils.formatFileLen(file.length());
                 long data = file.lastModified();
-                try {
-                    data = cursor.getLong(cursor.getColumnIndex(MediaStore.Video.Media.DATE_MODIFIED));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
                 long duration = cursor.getLong(cursor.getColumnIndex(MediaStore.Video.Media.DURATION));
 
                 MediaFileBean mediaFileBean = new MediaFileBean();
                 mediaFileBean.setFilePath(path);
                 mediaFileBean.setFileName(fileName);
                 mediaFileBean.setSize(size);
-                mediaFileBean.setDuration(TimeUtil.getFormattedDateString(duration / 1000, TimeUtil.FORMAT_H_M));
+                mediaFileBean.setDuration(TimeUtil.getFormattedDateString(duration / 1000, TimeUtil.FORMAT_M_S));
                 mediaFileBean.setDate(TimeUtil.getFormattedDateString(data / 1000, TimeUtil.FORMAT_OTHER_YEAR));
                 mediaFileBean.setParentPath(parentPath);
                 mediaFileBean.setFileType(MEDIA_FILE_TYPE.VIDEO);

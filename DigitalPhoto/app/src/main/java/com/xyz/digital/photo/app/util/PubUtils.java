@@ -246,16 +246,14 @@ public class PubUtils {
             // 创建类型数组
             String[] img = null;
             if (type == MEDIA_FILE_TYPE.IMAGE) {
-                img = new String[]{"bmp", "jpg", "jpeg", "png", "tiff", "gif", "pcx", "tga", "exif", "fpx", "svg", "psd",
-                        "cdr", "pcd", "dxf", "ufo", "eps", "ai", "raw", "wmf"};
+                img = getImageTypes();
             } else if (type == MEDIA_FILE_TYPE.AUDIO) {
-                img = new String[]{"mp3", "wma", "wav", "mod", "ra", "cd", "md", "asf", "aac", "vqf", "ape", "mid", "ogg",
-                        "m4a", "vqf"};
+                img = getMusicTypes();
             } else if (type == MEDIA_FILE_TYPE.VIDEO) {
-                img = new String[]{"mp4", "avi", "mov", "wmv", "asf", "navi", "3gp", "mkv", "f4v", "rmvb", "webm"};
+                img = getVideoTypes();
             }
             for (int i = 0; i < img.length; i++) {
-                if (img[i].equals(fileType)) {
+                if (img[i].equalsIgnoreCase(fileType)) {
                     return true;
                 }
             }
@@ -269,28 +267,43 @@ public class PubUtils {
         // 获取文件后缀名并转化为写，用于后续比较
         String fileType = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length()).toLowerCase();
         // 创建类型数组
-        String[] img = new String[]{"bmp", "jpg", "jpeg", "png", "tiff", "gif", "pcx", "tga", "exif", "fpx", "svg", "psd",
-                "cdr", "pcd", "dxf", "ufo", "eps", "ai", "raw", "wmf"};
-        for (int i = 0; i < img.length; i++) {
-            if (img[i].equals(fileType)) {
+        String[] strs = getImageTypes();
+        for (int i = 0; i < strs.length; i++) {
+            if (strs[i].equalsIgnoreCase(fileType)) {
                 return MEDIA_FILE_TYPE.IMAGE;
             }
         }
-        img = new String[]{"mp3", "flac", "ram", "aif", "wma", "wav", "mod", "ra", "cd", "md", "asf", "aac", "vqf", "ape", "mid", "ogg",
-                "m4a", "vqf", "amr"};
-        for (int i = 0; i < img.length; i++) {
-            if (img[i].equals(fileType)) {
+        strs = getMusicTypes();
+        for (int i = 0; i < strs.length; i++) {
+            if (strs[i].equalsIgnoreCase(fileType)) {
                 return MEDIA_FILE_TYPE.AUDIO;
             }
         }
-        img = new String[]{"mp4", "flv", "avi", "mov", "wmv", "asf", "navi", "3gp", "3gpp", "evo",
-                "mkv", "f4v", "flv", "3g2", "divx", "m4v", "vob", "mpeg", "mpg", "rm", "rmvb", "webm"};
-        for (int i = 0; i < img.length; i++) {
-            if (img[i].equals(fileType)) {
+        strs = getVideoTypes();
+        for (int i = 0; i < strs.length; i++) {
+            if (strs[i].equalsIgnoreCase(fileType)) {
                 return MEDIA_FILE_TYPE.VIDEO;
             }
         }
         return null;
+    }
+
+    private static String[] getImageTypes() {
+        String[] strs = new String[]{"bmp", "jpg", "jpeg", "png", "tiff", "gif", "pcx", "tga", "exif", "fpx", "svg", "psd",
+                "cdr", "pcd", "dxf", "ufo", "eps", "ai", "raw", "wmf"};
+        return strs;
+    }
+
+    private static String[] getMusicTypes() {
+        String[] strs = new String[]{"mp3", "flac", "ram", "aif", "wma", "wav", "mod", "ra", "cd", "md", "asf", "aac", "vqf", "ape", "mid", "ogg",
+                "m4a", "vqf", "amr"};
+        return strs;
+    }
+
+    private static String[] getVideoTypes() {
+        String[] strs = new String[]{"mp4", "flv", "avi", "mov", "wmv", "asf", "navi", "3gp", "3gpp", "evo",
+                "mkv", "f4v", "flv", "3g2", "divx", "m4v", "vob", "mpeg", "mpg", "rm", "rmvb", "webm"};
+        return strs;
     }
 
 }

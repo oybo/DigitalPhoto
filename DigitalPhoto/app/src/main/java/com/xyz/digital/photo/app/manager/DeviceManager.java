@@ -364,6 +364,7 @@ public class DeviceManager {
 
         @Override
         public void onDownloadCompleted(String remotePath, String localPath, int result) {
+            localPath = localPath.replace("//", "/");
             if(remotePath.equals("ftp://"+Constants.HOST_IP+"/" + Constants.SYSTEM_FILE_NAME)) {
                 // 属于系统配置文件
                 downloadSysConfigFile = true;
@@ -471,15 +472,8 @@ public class DeviceManager {
                         String fileName = actFileInfo.getFileName();
                         if(actFileInfo.getFileType() == ActFileInfo.FILE_TYPE_FILE) {
                             mRemoteFileMaps.put(fileName, actFileInfo);
-                            // 属于文件，并且属于视频缩略图.thb
-                            if(PubUtils.getFileType(fileName) == MEDIA_FILE_TYPE.VIDEO) {
-                                // 发送缩略图请求
-                                String remotePath = DeviceManager.getInstance().getRemotePath(fileName);
-                                String localPath = PubUtils.getTempLocalPath(fileName);
-                                mVideoBmpFileMaps.put(localPath, new ImageInfo(remotePath, localPath));
-                            }
                             // 属于文件，并且是图片类型就下载
-                            else if(PubUtils.getFileType(fileName) == MEDIA_FILE_TYPE.IMAGE) {
+                            if(PubUtils.getFileType(fileName) == MEDIA_FILE_TYPE.IMAGE) {
                                 String remotePath = DeviceManager.getInstance().getRemotePath(fileName);
                                 String localPath = PubUtils.getTempLocalPath(fileName);
                                 mDownloadTempList.add(new ImageInfo(remotePath, localPath));
@@ -494,8 +488,6 @@ public class DeviceManager {
 
                     // 下载临时文件
                     downloadTempFiles();
-                    // 下载视频缩略图
-                    downloadBmpFiles();
                 }
             }
         }
@@ -577,11 +569,36 @@ public class DeviceManager {
             for(Map.Entry<String, ImageInfo> entry : mVideoBmpFileMaps.entrySet()) {
                 ImageInfo info = entry.getValue();
                 if(info != null) {
-                    ActCommunication.getInstance().requestThumbnails(info.getRemotePath());
+                    try {
+                        String remotePath = getThumbnailLocalPath(info.getRemotePath());
+                        String fileName = remotePath.substring(remotePath.lastIndexOf("/") + 1, remotePath.lastIndexOf(".")) + Constants.VIDEO_BMP_FILE_NAME;
+                        String localPath = EnvironmentUtil.getTempFilePath();
+                        if (mRemoteCurrentPath.equalsIgnoreCase("/")) {
+                            localPath = localPath + mRemoteCurrentPath + fileName;
+                        } else {
+                            localPath = localPath + mRemoteCurrentPath + "/" + fileName;
+                        }
+                        localPath = localPath.replace("//", "/");
+                        if(!new File(localPath).exists()) {
+                            ActCommunication.getInstance().requestThumbnails(info.getRemotePath());
+                        } else {
+                            mVideoBmpFileMaps.remove(localPath);
+                            downloadBmpFiles();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        ActCommunication.getInstance().requestThumbnails(info.getRemotePath());
+                    }
                     return;
                 }
             }
         }
+    }
+
+    public void addVideoBmpFileMaps(String fileName) {
+        String remotePath = DeviceManager.getInstance().getRemotePath(fileName);
+        String localPath = PubUtils.getTempLocalPath(fileName);
+        mVideoBmpFileMaps.put(localPath, new ImageInfo(remotePath, localPath));
     }
 
     private Map<String, ImageInfo> mVideoBmpFileMaps = new HashMap<>();
@@ -740,30 +757,10 @@ public class DeviceManager {
                 downloadBmpFiles();
                 return;
             }
-            // 下载临时文件
-            try {
-                if(remotePath.split("/").length > 2) {
-                    remotePath = remotePath.substring(remotePath.indexOf("/") + 1, remotePath.length());
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            try {
-                if(remotePath.split("/").length > 2) {
-                    remotePath = remotePath.substring(remotePath.indexOf("/") + 1, remotePath.length());
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            try {
-                if(remotePath.split("/").length > 2) {
-                    remotePath = remotePath.substring(remotePath.indexOf("/"), remotePath.length());
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
 
+            remotePath = getThumbnailLocalPath(remotePath);
             String localPath = EnvironmentUtil.getTempFilePath() + File.separator + remotePath.replace(Constants.VIDEO_BMP_NAME, "");
+            localPath = localPath.replace("//", "/");
             if(!new File(localPath).exists()) {
                 File file = new File(localPath);
                 File parentFile = new File(file.getParent());
@@ -773,9 +770,35 @@ public class DeviceManager {
                 downloadFile(remotePath, localPath);
             } else {
                 mVideoBmpFileMaps.remove(localPath);
+                downloadBmpFiles();
             }
         }
     };
+
+    private String getThumbnailLocalPath(String remotePath) {
+        try {
+            if(remotePath.split("/").length > 2) {
+                remotePath = remotePath.substring(remotePath.indexOf("/") + 1, remotePath.length());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            if(remotePath.split("/").length > 2) {
+                remotePath = remotePath.substring(remotePath.indexOf("/") + 1, remotePath.length());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            if(remotePath.split("/").length > 2) {
+                remotePath = remotePath.substring(remotePath.indexOf("/"), remotePath.length());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return remotePath;
+    }
 
     private Map<String, Integer> tempMapss = new HashMap<>();
 

@@ -20,6 +20,7 @@ public class TimeUtil {
 	public final static String FORMAT_TO_M = "yyyy-MM-dd HH:mm";
 	public final static String FORMAT_H_M_S = "HH:mm:ss";
 	public final static String FORMAT_H_M = "HH:mm";
+	public final static String FORMAT_M_S = "mm:ss";
 
 	private final static int SECOND_MILLISECONDS = 1000;
 	private final static int YEAR_BASE = 1900;
