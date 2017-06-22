@@ -19,6 +19,7 @@ public class AppContext extends Application {
         super.onCreate();
         mInstance =this;
 
+        CrashHandler.getInstance().init(this);
     }
 
     public String getSString(int stringId) {
