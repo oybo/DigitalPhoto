@@ -131,6 +131,10 @@ public class DeviceManager {
         return mRemoteFileList;
     }
 
+    private void clearRemoteFileList() {
+        mRemoteFileList.clear();
+    }
+
     public void removeFile(String fileName) {
         for(ActFileInfo actFileInfo : mRemoteFileList) {
             if(actFileInfo.getFileName().equals(fileName)) {
@@ -631,7 +635,7 @@ public class DeviceManager {
     public void disConnect() {
         isConnect = false;
         mLoginMain = false;
-        mRemoteFileMaps.clear();
+        clearRemoteFileList();
 //        ActCommunication.getInstance().disconnect();
 //        actFileManager.disconnect();
     }
@@ -647,6 +651,14 @@ public class DeviceManager {
         actFileManager.registerEventListener(actFileEventListener);
         actFileManager.connect(Constants.HOST_IP);
         actFileManager.browseFiles(mRemoteCurrentPath);
+    }
+
+    public void refreshBrowseFiles() {
+        try {
+            actFileManager.browseFiles(mRemoteCurrentPath);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private boolean isConnect;

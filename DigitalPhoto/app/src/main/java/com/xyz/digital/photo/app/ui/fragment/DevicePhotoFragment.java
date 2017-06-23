@@ -445,9 +445,18 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
         refreshAdapter(type);
     }
 
+    public void refreshData() {
+        DeviceManager.getInstance().refreshBrowseFiles();
+    }
+
+    private AsyncTask<Void, Void, List<FileInfo>> mTask;
+
     private void refreshAdapter(final MEDIA_FILE_TYPE type) {
         mUpperView.setText(PATH + mRemoteCurrentPath);
-        new AsyncTask<Void, Void, List<FileInfo>>() {
+        if(mTask != null) {
+            mTask.cancel(true);
+        }
+        mTask = new AsyncTask<Void, Void, List<FileInfo>>() {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
@@ -519,7 +528,8 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                     hideLoading();
                 }
             }
-        }.execute();
+        };
+        mTask.execute();
     }
 
     private void setSelectTab(int id) {
