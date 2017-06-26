@@ -114,12 +114,13 @@ public class WiFiDeviceFragment extends BaseFragment implements WiFiContract.Vie
             @Override
             public void onItemClick(View itemView, int pos) {
                 // 去连接登录
+                showLoading();
                 mScanResult = mAdapter.getItem(pos);
                 if (PubUtils.isConnectTheWifi(mWifiManager.getConnectionInfo(), mScanResult)) {
                     startActivity(new Intent(getActivity(), LoginActivity.class));
+                    hideLoading();
                     return;
                 }
-                showLoading();
                 if (!isConnectTheWifi(mScanResult)) {
                     DeviceManager.getInstance().disConnect();
                 }

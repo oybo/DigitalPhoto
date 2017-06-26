@@ -155,6 +155,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
      */
     private DeviceListMediaAdapter mListAdapter;
     private int mDeletePosition;
+    private boolean mSwitchDevice;
 
     private static final String PATH = AppContext.getInstance().getSString(R.string.device_the_txt);
 
@@ -339,6 +340,7 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
                 break;
             case R.id.device_photo_choose_tab:
                 // 切换设备
+                mSwitchDevice = true;
                 Intent intent = new Intent(getActivity(), MainActivity.class);
                 intent.putExtra("type", Constants.MAIN_DEVICE_LIST);
                 startActivity(intent);
@@ -446,13 +448,22 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
     }
 
     public void refreshData() {
-        DeviceManager.getInstance().refreshBrowseFiles();
+        if(mSwitchDevice) {
+            mShowMediaType = MEDIA_FILE_TYPE.IMAGE;
+            setSelectTab(1);
+
+            DeviceManager.getInstance().refreshBrowseFiles();
+        }
+        mSwitchDevice = false;
     }
 
     private AsyncTask<Void, Void, List<FileInfo>> mTask;
 
     private void refreshAdapter(final MEDIA_FILE_TYPE type) {
         mUpperView.setText(PATH + mRemoteCurrentPath);
+        if(mTask != null) {
+            mTask.cancel(true);
+        }
         mTask = new AsyncTask<Void, Void, List<FileInfo>>() {
             @Override
             protected void onPreExecute() {

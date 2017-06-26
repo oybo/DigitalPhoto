@@ -482,8 +482,6 @@ public class DeviceManager {
                         mRemoteFileList.add(actFileInfo);
                     }
 
-                    Toast.makeText(AppContext.getInstance(), mRemoteFileList.size() + "", Toast.LENGTH_SHORT).show();
-
                     // 刷新文件列表
                     EventBase eventBase = new EventBase();
                     eventBase.setAction(Constants.REFRESH_DEVICE_FILE);
@@ -655,6 +653,7 @@ public class DeviceManager {
 
     public void refreshBrowseFiles() {
         try {
+            mRemoteCurrentPath = "/";
             actFileManager.browseFiles(mRemoteCurrentPath);
         } catch (Exception e) {
             e.printStackTrace();
