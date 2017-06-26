@@ -453,9 +453,6 @@ public class DevicePhotoFragment extends BaseFragment implements View.OnClickLis
 
     private void refreshAdapter(final MEDIA_FILE_TYPE type) {
         mUpperView.setText(PATH + mRemoteCurrentPath);
-        if(mTask != null) {
-            mTask.cancel(true);
-        }
         mTask = new AsyncTask<Void, Void, List<FileInfo>>() {
             @Override
             protected void onPreExecute() {

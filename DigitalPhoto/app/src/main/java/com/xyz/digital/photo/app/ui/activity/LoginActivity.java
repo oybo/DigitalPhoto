@@ -64,9 +64,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     private void initData() {
         if(DeviceManager.getInstance().isConnect()) {
             // 如果已经连接成功，则自动到详情页面
-            if(DeviceManager.getInstance().getRemoteDeviceFiles().size() == 0) {
-                DeviceManager.getInstance().connect();
-            }
+            DeviceManager.getInstance().connect();
             goMain();
         }
     }

@@ -131,10 +131,6 @@ public class DeviceManager {
         return mRemoteFileList;
     }
 
-    private void clearRemoteFileList() {
-        mRemoteFileList.clear();
-    }
-
     public void removeFile(String fileName) {
         for(ActFileInfo actFileInfo : mRemoteFileList) {
             if(actFileInfo.getFileName().equals(fileName)) {
@@ -485,6 +481,9 @@ public class DeviceManager {
                         }
                         mRemoteFileList.add(actFileInfo);
                     }
+
+                    Toast.makeText(AppContext.getInstance(), mRemoteFileList.size() + "", Toast.LENGTH_SHORT).show();
+
                     // 刷新文件列表
                     EventBase eventBase = new EventBase();
                     eventBase.setAction(Constants.REFRESH_DEVICE_FILE);
@@ -635,7 +634,8 @@ public class DeviceManager {
     public void disConnect() {
         isConnect = false;
         mLoginMain = false;
-        clearRemoteFileList();
+        propertiesMap.clear();
+        mRemoteFileList.clear();
 //        ActCommunication.getInstance().disconnect();
 //        actFileManager.disconnect();
     }
