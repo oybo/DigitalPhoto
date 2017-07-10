@@ -8,6 +8,8 @@ import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.xyz.digital.photo.app.util.EnvironmentUtil;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
 import java.io.File;
 import java.io.FileWriter;
@@ -87,7 +89,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
 					// 保存日志文件
 					saveCrashInfo2File(ex);
 					Looper.prepare();
-					Toast.makeText(mContext, "很抱歉,程序出现异常,需要重启应用", Toast.LENGTH_SHORT);
+					Toast.makeText(mContext, "很抱歉,程序出现异常,需要重启应用", Toast.LENGTH_SHORT).show();;
 					Looper.loop();
 				}
 			}.start();
@@ -145,7 +147,6 @@ public class CrashHandler implements UncaughtExceptionHandler {
 	 * @return
 	 */
 	private String getDefaultLogFileName(Context mContext) {
-		return FilePathUtils.getInstance().getDefaultLogPath() + "/" + mContext.getPackageName() + "-"
-				+ new SimpleDateFormat("yyyyMMdd").format(new Date()) + ".txt";
+		return EnvironmentUtil.getLogPath() + "/" + new SimpleDateFormat("yyyyMMdd").format(new Date()) + ".txt";
 	}
 }

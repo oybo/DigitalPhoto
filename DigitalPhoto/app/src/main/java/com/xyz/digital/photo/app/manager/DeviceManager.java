@@ -243,8 +243,11 @@ public class DeviceManager {
         return isDownload;
     }
 
+    private Map<String, String> mediaMaps = new HashMap<>();
+
     public void addDownload(String fileName, MEDIA_FILE_TYPE type) {
         String localPath = PubUtils.getDonwloadLocalPath(fileName, type);
+        mediaMaps.put(localPath, localPath);
 
         DownloadInfo downloadInfo = new DownloadInfo(localPath, fileName);
         mDownloadInfos.put(localPath, downloadInfo);
@@ -410,15 +413,19 @@ public class DeviceManager {
                     mDownloadInfo.setFilePath(localPath);
                     sendDownloadMessage(mDownloadInfo);
                     removeDownload(mDownloadInfo.getFilePath());
-                    startDownload();
-                    ToastUtil.showToast(AppContext.getInstance(), mDownloadInfo.getFileName() + AppContext.getInstance().getSString(R.string.download_ok_txt));
+                    if(mediaMaps.containsKey(localPath)) {
+                        ToastUtil.showToast(AppContext.getInstance(), mDownloadInfo.getFileName() + AppContext.getInstance().getSString(R.string.download_ok_txt));
+                    }
                 } else {
                     mDownloadInfo.setState(-1);
                     mDownloadInfo.setFilePath(localPath);
                     sendDownloadMessage(mDownloadInfo);
                     removeDownload(mDownloadInfo.getFilePath());
-                    ToastUtil.showToast(AppContext.getInstance(), mDownloadInfo.getFileName() + AppContext.getInstance().getSString(R.string.download_error_txt));
+                    if(mediaMaps.containsKey(localPath)) {
+                        ToastUtil.showToast(AppContext.getInstance(), mDownloadInfo.getFileName() + AppContext.getInstance().getSString(R.string.download_error_txt));
+                    }
                 }
+                startDownload();
                 isDownload = false;
             }
         }
@@ -554,7 +561,7 @@ public class DeviceManager {
                     parentFile.mkdirs();
                 }
                 tempFiles.put(remotePath, localPath);
-                downloadFile(remotePath, localPath);
+                addDownloadTempFile(remotePath, localPath);
             }
         }
     }
@@ -771,8 +778,8 @@ public class DeviceManager {
                     count = tempMapss.get(remotePath);
                     if(count > 3) {
 
-                        String t_remotePath = getThumbnailLocalPath(remotePath);
-                        String t_localPath = EnvironmentUtil.getTempFilePath() + File.separator + t_remotePath.replace(Constants.VIDEO_BMP_NAME, "");
+                        String fileName = remotePath.substring(remotePath.lastIndexOf("/") + 1, remotePath.length());
+                        String t_localPath = PubUtils.getTempLocalPath(fileName);
                         t_localPath = t_localPath.replace("//", "/");
 
                         mVideoBmpFileMaps.remove(t_localPath);
@@ -797,7 +804,7 @@ public class DeviceManager {
                 if (!parentFile.exists()) {
                     parentFile.mkdirs();
                 }
-                downloadFile(remotePath, localPath);
+                addDownloadTempFile(remotePath, localPath);
             } else {
                 mVideoBmpFileMaps.remove(localPath);
                 downloadBmpFiles();
@@ -849,6 +856,17 @@ public class DeviceManager {
 
     private boolean downloadSysConfigFile;
 
+    private void addDownloadTempFile(String remotePath, String localPath) {
+
+        String fileName = remotePath.substring(remotePath.lastIndexOf("/") + 1, remotePath.length());
+        DownloadInfo downloadInfo = new DownloadInfo(localPath, fileName);
+        mDownloadInfos.put(localPath, downloadInfo);
+
+        if(!isDownloading()) {
+            startDownload();
+        }
+    }
+
     private void downloadFile(String remotePath, String localPath) {
         actFileManager.downloadFile(remotePath, localPath);
     }
@@ -860,7 +878,7 @@ public class DeviceManager {
         if(!downloadSysConfigFile) {
             try {
                 File sysFile = new File(EnvironmentUtil.getFilePath(), Constants.SYSTEM_FILE_NAME);
-                downloadFile("/" + Constants.SYSTEM_FILE_NAME, sysFile.getAbsolutePath());
+                addDownloadTempFile("/" + Constants.SYSTEM_FILE_NAME, sysFile.getAbsolutePath());
             } catch (Exception e) {
                 e.printStackTrace();
             }

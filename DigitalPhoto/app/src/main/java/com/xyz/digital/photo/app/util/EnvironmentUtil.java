@@ -13,6 +13,7 @@ public class EnvironmentUtil {
     public static final String VIDEO_STORAGE = "video";
     public static final String AUDIO_STORAGE = "audio";
     public static final String FILE_STORAGE = "file";
+    public static final String LOG_STORAGE = "log";
     public static final String TEMP_IMAGE_STORAGE = "temp";
 
     public static boolean isSdCard(Context context) {
@@ -42,6 +43,12 @@ public class EnvironmentUtil {
 
     public static String getFilePath() {
         String path = getMainFilePath() + File.separator + FILE_STORAGE;
+        mkdirs(path);
+        return path;
+    }
+
+    public static String getLogPath() {
+        String path = getMainFilePath() + File.separator + LOG_STORAGE;
         mkdirs(path);
         return path;
     }
