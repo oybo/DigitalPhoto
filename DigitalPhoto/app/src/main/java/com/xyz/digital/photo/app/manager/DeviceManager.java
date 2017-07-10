@@ -2,7 +2,6 @@ package com.xyz.digital.photo.app.manager;
 
 import android.util.Log;
 import android.widget.Toast;
-
 import com.actions.actcommunication.AcEventListener;
 import com.actions.actcommunication.ActCommunication;
 import com.actions.actfilemanager.ACTFileEventListener;
@@ -24,9 +23,7 @@ import com.xyz.digital.photo.app.util.PubUtils;
 import com.xyz.digital.photo.app.util.SysConfigHelper;
 import com.xyz.digital.photo.app.util.TimeUtil;
 import com.xyz.digital.photo.app.util.ToastUtil;
-
 import org.greenrobot.eventbus.EventBus;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -40,8 +37,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.actions.actfilemanager.ActFileManager.downloadFile;
 
 /**
  * Created by O on 2017/4/25.
@@ -79,13 +74,29 @@ public class DeviceManager {
         } else {
             requestPath = mRemoteCurrentPath + "/" + fileName;
         }
-        actFileManager.browseFiles(requestPath + "/");
+        if(isConnect()) {
+            actFileManager.browseFiles(requestPath + "/");
+        } else {
+            ToastUtil.showToast(AppContext.getInstance(), AppContext.getInstance().getSString(R.string.connect_disconnect_txt));
+            // 刷新文件列表
+            EventBase eventBase = new EventBase();
+            eventBase.setAction(Constants.REFRESH_DEVICE_FILE);
+            EventBus.getDefault().post(eventBase);
+        }
         mRemoteCurrentPath = requestPath;
 
         return requestPath;
     }
 
     public void prevRemoteCurrentPath() {
+        if(!isConnect()) {
+            ToastUtil.showToast(AppContext.getInstance(), AppContext.getInstance().getSString(R.string.connect_disconnect_txt));
+            // 刷新文件列表
+            EventBase eventBase = new EventBase();
+            eventBase.setAction(Constants.REFRESH_DEVICE_FILE);
+            EventBus.getDefault().post(eventBase);
+            return;
+        }
         if (!mRemoteCurrentPath.equalsIgnoreCase("/")) {
             int lastIndex = mRemoteCurrentPath.lastIndexOf("/");
             if (lastIndex == 0) {
@@ -759,6 +770,14 @@ public class DeviceManager {
                 if(tempMapss.containsKey(remotePath)) {
                     count = tempMapss.get(remotePath);
                     if(count > 3) {
+
+                        String t_remotePath = getThumbnailLocalPath(remotePath);
+                        String t_localPath = EnvironmentUtil.getTempFilePath() + File.separator + t_remotePath.replace(Constants.VIDEO_BMP_NAME, "");
+                        t_localPath = t_localPath.replace("//", "/");
+
+                        mVideoBmpFileMaps.remove(t_localPath);
+                        downloadBmpFiles();
+
                         return;
                     }
                     count++;
@@ -830,6 +849,10 @@ public class DeviceManager {
 
     private boolean downloadSysConfigFile;
 
+    private void downloadFile(String remotePath, String localPath) {
+        actFileManager.downloadFile(remotePath, localPath);
+    }
+
     /**
      * 下载系统配置文件
      */
@@ -837,7 +860,7 @@ public class DeviceManager {
         if(!downloadSysConfigFile) {
             try {
                 File sysFile = new File(EnvironmentUtil.getFilePath(), Constants.SYSTEM_FILE_NAME);
-                int ss = actFileManager.downloadFile("/" + Constants.SYSTEM_FILE_NAME, sysFile.getAbsolutePath());
+                downloadFile("/" + Constants.SYSTEM_FILE_NAME, sysFile.getAbsolutePath());
             } catch (Exception e) {
                 e.printStackTrace();
             }

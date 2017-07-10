@@ -12,6 +12,7 @@ import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.ui.BaseFragment;
 import com.xyz.digital.photo.app.util.PreferenceUtils;
 import com.xyz.digital.photo.app.util.PubUtils;
+import com.xyz.digital.photo.app.view.AboutWeDialog;
 import com.xyz.digital.photo.app.view.AppInfoDialog;
 import com.xyz.digital.photo.app.view.LoadingView;
 import com.xyz.digital.photo.app.view.SelectDialog;
@@ -56,6 +57,7 @@ public class SetFragment extends BaseFragment implements View.OnClickListener {
     private void initView() {
         getView().findViewById(R.id.set_language_layout).setOnClickListener(this);
         getView().findViewById(R.id.set_info_layout).setOnClickListener(this);
+        getView().findViewById(R.id.set_about_us_layout).setOnClickListener(this);
     }
 
     private void initData() {
@@ -70,6 +72,10 @@ public class SetFragment extends BaseFragment implements View.OnClickListener {
             case R.id.set_language_layout:
                 // 选择语言
                 selectLanguage();
+                return;
+            case R.id.set_about_us_layout:
+                // 关于我们
+                new AboutWeDialog(getActivity()).show();
                 return;
             case R.id.set_info_layout:
                 // 功能介绍

@@ -31,6 +31,18 @@
             android:background="@android:color/transparent"/>
     </com.chanven.lib.cptr.PtrClassicFrameLayout>
 
+    <Button
+        android:id="@+id/wifi_scanning_device_bt"
+        android:layout_width="match_parent"
+        android:layout_height="45dip"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="50dip"
+        android:background="@drawable/selector_blue_bt_layout"
+        android:text="@string/scan_txt"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:visibility="gone"/>
+
     <com.xyz.digital.photo.app.view.LoadingView
         android:id="@+id/view_loading"
         android:layout_width="match_parent"

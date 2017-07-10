@@ -16,6 +16,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.chanven.lib.cptr.PtrClassicFrameLayout;
 import com.chanven.lib.cptr.PtrDefaultHandler;
@@ -49,6 +50,7 @@ public class WiFiDeviceFragment extends BaseFragment implements WiFiContract.Vie
 
     @Bind(R.id.fragment_device_refresh_layout) PtrClassicFrameLayout fragmentDeviceRefreshLayout;
     @Bind(R.id.fragment_device_recyclerview) RecyclerView fragmentDeviceRecyclerview;
+    @Bind(R.id.wifi_scanning_device_bt) Button mScanWifiBT;
     @Bind(R.id.view_loading) LoadingView mLoadingView;
 
     private WiFiContract.Presenter mPresenter;
@@ -82,8 +84,21 @@ public class WiFiDeviceFragment extends BaseFragment implements WiFiContract.Vie
             }
         });
 
+        fragmentDeviceRecyclerview.setHasFixedSize(true);
         fragmentDeviceRecyclerview.addItemDecoration(new SimpleDividerItemDecoration(getActivity()));
         fragmentDeviceRecyclerview.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        mScanWifiBT.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fragmentDeviceRefreshLayout.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        fragmentDeviceRefreshLayout.autoRefresh();
+                    }
+                });
+            }
+        });
     }
 
     private void initWifi() {
@@ -183,6 +198,8 @@ public class WiFiDeviceFragment extends BaseFragment implements WiFiContract.Vie
             scanResults.clear();
             scanResults.addAll(temp);
         }
+
+        mScanWifiBT.setVisibility(scanResults.size() > 0 ? View.GONE : View.VISIBLE);
 
         return scanResults;
     }

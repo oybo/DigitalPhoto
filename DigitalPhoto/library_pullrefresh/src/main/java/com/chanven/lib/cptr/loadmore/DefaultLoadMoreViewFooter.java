@@ -51,28 +51,28 @@ public class DefaultLoadMoreViewFooter implements ILoadMoreViewFactory {
 
         @Override
         public void showNormal() {
-            footerTv.setText("点击加载更多");
+            footerTv.setText("点击扫描更多");
             footerBar.setVisibility(View.GONE);
             footerView.setOnClickListener(onClickRefreshListener);
         }
 
         @Override
         public void showLoading() {
-            footerTv.setText("正在加载中...");
+            footerTv.setText("正在扫描中...");
             footerBar.setVisibility(View.VISIBLE);
             footerView.setOnClickListener(null);
         }
 
         @Override
         public void showFail(Exception exception) {
-            footerTv.setText("加载失败，点击重新");
+            footerTv.setText("扫描失败，点击重新");
             footerBar.setVisibility(View.GONE);
             footerView.setOnClickListener(onClickRefreshListener);
         }
 
         @Override
         public void showNomore() {
-            footerTv.setText("已经加载完毕");
+            footerTv.setText("已经扫描完毕");
             footerBar.setVisibility(View.GONE);
             footerView.setOnClickListener(null);
         }

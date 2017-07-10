@@ -117,8 +117,15 @@
     <string name="set_system_txt">系统设置</string>
     <string name="set_kjbfms_txt">开机播放模式</string>
     <string name="set_language_txt">语言</string>
+    <string name="set_about_us_txt">关于我们</string>
     <string name="set_app_info_txt">功能介绍</string>
     <string name="set_version_txt">版本号</string>
+    <string name="set_about_we_info_txt">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;深圳市正芯烽电子科技有限公司是一家集数码产品研发、生产、销售为一体的高科技企业,专门从事数码相框、儿童学习机，播放器，广告机，智能WIFI/蓝牙等相关数码产品的开发、生产、销售。</string>
+    <string name="set_about_we_name_txt">联系人：谢先生</string>
+    <string name="set_about_we_phone_key_txt">移动电话：</string>
+    <string name="set_about_we_phone_value_txt">13316529337</string>
+    <string name="set_about_we_email_key_txt">电子邮件：</string>
+    <string name="set_about_we_email_value_txt">szoffice@zxfelec.com</string>
 
     <string name="set_dianyuan_txt">电源</string>
     <string name="set_set_txt">设置</string>

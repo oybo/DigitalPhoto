@@ -148,7 +148,7 @@ public class PtrClassicDefaultHeader extends FrameLayout implements PtrUIHandler
         hideRotateView();
         mProgressBar.setVisibility(VISIBLE);
         mTitleTextView.setVisibility(VISIBLE);
-        mTitleTextView.setText("加载中,请稍后...");
+        mTitleTextView.setText("扫描中,请稍后...");
 
         tryUpdateLastUpdateTime();
         mLastUpdateTimeUpdater.stop();
@@ -161,7 +161,7 @@ public class PtrClassicDefaultHeader extends FrameLayout implements PtrUIHandler
         mProgressBar.setVisibility(INVISIBLE);
 
         mTitleTextView.setVisibility(VISIBLE);
-        mTitleTextView.setText("更新完成.");
+        mTitleTextView.setText("扫描完成.");
 
         // update last update time
         SharedPreferences sharedPreferences = getContext().getSharedPreferences(KEY_SharedPreferences, 0);

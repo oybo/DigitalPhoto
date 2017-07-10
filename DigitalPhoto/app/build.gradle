@@ -8,8 +8,8 @@ android {
         applicationId "com.xyz.digital.photo.app"
         minSdkVersion 16
         targetSdkVersion 22
-        versionCode 19
-        versionName "1.0.20160626"
+        versionCode 1
+        versionName "1.0.20170710"
     }
 
     //签名
