@@ -772,6 +772,8 @@ public class DeviceManager {
 
         @Override
         public void ThumbnailReady(String remotePath, boolean isReplyFailed) {
+//            remotePath = getRemotePath(fileName);
+
             if(isReplyFailed) {
                 int count = 0;
                 if(tempMapss.containsKey(remotePath)) {
