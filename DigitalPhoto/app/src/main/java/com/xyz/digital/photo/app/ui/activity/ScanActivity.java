@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.xyz.digital.photo.app.AppContext;
 import com.xyz.digital.photo.app.R;
 import com.xyz.digital.photo.app.ui.BaseActivity;
 
@@ -25,7 +24,8 @@ public class ScanActivity extends BaseActivity implements View.OnClickListener {
     }
 
     private void initView() {
-        initTopBarOnlyTitle(AppContext.getInstance().getSString(R.string.no_connect_device_txt));
+        String title = getResources().getString(R.string.no_connect_device_txt);
+        initTopBarOnlyTitle(title);
 
         findViewById(R.id.login_scanning_device_bt).setOnClickListener(this);
     }

@@ -219,12 +219,16 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     protected void initTopBarOnlyTitle(String title) {
-        HeaderView headerView = (HeaderView) findViewById(R.id.actionbar_headerview);
-        if (headerView != null) {
-            headerView.setTitile(title);
-            headerView.getToolbar().setTitle("");
-            headerView.getToolbar().setNavigationIcon(R.drawable.finish_icon);
-            setSupportActionBar(headerView.getToolbar());
+        try {
+            HeaderView headerView = (HeaderView) findViewById(R.id.actionbar_headerview);
+            if (headerView != null) {
+                headerView.setTitile(title);
+                headerView.getToolbar().setTitle("");
+                headerView.getToolbar().setNavigationIcon(R.drawable.finish_icon);
+                setSupportActionBar(headerView.getToolbar());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
